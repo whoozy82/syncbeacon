@@ -1,0 +1,9 @@
+{
+  "uuid": "syncbeacon@whoozy82.github.io",
+  "name": "Syncbeacon",
+  "description": "Syncthing status in the top bar: a state icon with peer and folder counts, an info box with every device and folder, pause and resume, and quick access to the Syncthing web UI.",
+  "shell-version": ["50"],
+  "url": "https://github.com/whoozy82/syncbeacon",
+  "settings-schema": "org.gnome.shell.extensions.syncbeacon",
+  "version-name": "0.1.0"
+}

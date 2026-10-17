@@ -1,0 +1,78 @@
+/* Panel icon: three states follow the panel colour, two are coloured. */
+.syncbeacon-state-folder-issue {
+  color: #e5a50a;
+}
+
+.syncbeacon-state-error {
+  color: #e01b24;
+}
+
+.syncbeacon-counts {
+  padding-left: 4px;
+  font-feature-settings: "tnum";
+}
+
+/* Info box */
+/* No padding at the top and sides, so the action band reaches the edges;
+   the other rows get the theme's 6px back as margin. */
+.syncbeacon-infobox .popup-menu-content {
+  min-width: 22em;
+  padding: 0 0 6px 0;
+}
+
+.syncbeacon-infobox .popup-menu-item {
+  margin: 0 6px;
+}
+
+.syncbeacon-header-title {
+  font-weight: bold;
+}
+
+.syncbeacon-header-message {
+  font-size: 0.9em;
+  padding-top: 2px;
+}
+
+/* Action band: the popup background darkened by 10 %. The top corners follow
+   the popup's 20px radius inside its 1px border. */
+.syncbeacon-infobox .syncbeacon-actions {
+  spacing: 8px;
+  margin: 0 0 6px 0;
+  padding: 6px 12px;
+  border-radius: 19px 19px 0 0;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.syncbeacon-run-button {
+  border-radius: 999px;
+}
+
+.syncbeacon-action {
+  padding: 8px;
+}
+
+.syncbeacon-action StIcon {
+  icon-size: 16px;
+}
+
+.syncbeacon-row {
+  spacing: 8px;
+}
+
+.syncbeacon-row-status {
+  padding-left: 16px;
+  font-feature-settings: "tnum";
+}
+
+.syncbeacon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.syncbeacon-dot-ok { background-color: #2ec27e; }
+.syncbeacon-dot-syncing { background-color: #3584e4; }
+.syncbeacon-dot-paused { background-color: #9a9996; }
+.syncbeacon-dot-offline { background-color: #9141ac; }
+.syncbeacon-dot-warning { background-color: #e5a50a; }
+.syncbeacon-dot-error { background-color: #e01b24; }
