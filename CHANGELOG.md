@@ -5,6 +5,8 @@
 - `scripts/sync-version.sh` copies the version from `VERSION.md` into `metadata.json` (`version-name`)
   - runs automatically in `dev-install.sh` and `pack.sh`
   - the Nix package reads `VERSION.md` directly and patches `metadata.json` in its build
+  - also sets the integer `version` (MAJOR*10000 + MINOR*100 + PATCH, so 0.1.1 → 101); Extension Manager
+    only shows the version row when it exists
 - Settings window shows the version in a new "About" group
 
 ## 2026-10-17: Context menu merged into info box
