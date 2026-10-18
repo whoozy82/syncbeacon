@@ -67,10 +67,3 @@ environment.systemPackages = [ inputs.syncbeacon.packages.${pkgs.system}.default
 
 `nix flake check` runs the unit tests. `scripts/pack.sh` builds the zip for extensions.gnome.org.
 
-## Manual checks still to do
-
-These need a person at the screen:
-
-1. A double click registers while the info box opened by the first click is open (`ui/indicator.js`, `_onInfoBoxEvent`).
-2. A double click raises an already open Syncthing GNOME Web window instead of opening a second one.
-3. The acceptance checklist in IMPLEMENTATION.md §7.
