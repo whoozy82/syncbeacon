@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.3.0` created at _19.10.2026_
+- `v0.3.1` created at _19.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-19] Folder action circle — each folder line has a small ring centred in the row; hovering the ring (instead of the status) reveals Open Folder, Rescan and Edit Ignore List in its place
 - [2026-10-19] Folder actions on hover — hovering a folder's status shows Open Folder, Rescan (inactive while paused) and Edit Ignore List (opens `.stignore` in the default text editor, created if missing) on the 10 % darker background
 - [2026-10-19] Device detail layout — hover detail sized to its text and flush with the status text on the right (status was centred in its cell); rates read `↓0 B/s  ↑0 B/s` (0 before the first sample); clock icon before the last-seen date
 - [2026-10-19] Device status hover — hovering a device's status shows ↓/↑ rates (connected, sampled every 2 s while the info box is open) or the last-seen time (disconnected), on a 10 % darker background; list rows now update in place
