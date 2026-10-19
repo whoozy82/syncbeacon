@@ -18,12 +18,12 @@ Branch: `feat/device-status-hover`
 - `emptySnapshot()` gets `lastSeen: {}` and `rates: {}`.
 - `deviceRow()` adds `detail`:
   - online → `↓ 1.2 MB/s  ↑ 34 kB/s`, or `↓ –  ↑ –` until the first rate sample arrives
-  - offline/paused → `Last seen 18.10.2026 14:32`, or `Never seen` (Syncthing reports 1970 for devices it has never seen)
-- New helpers `formatRate(bytesPerSec)` and `formatLastSeen(iso)`. Formatting is pure JS and fixed to `DD.MM.YYYY HH:MM` for now; i18n is a separate backlog item.
+  - offline/paused → `18.10. 14:32`, or `Never seen` (Syncthing reports 1970 for devices it has never seen)
+- New helpers `formatRate(bytesPerSec)` and `formatLastSeen(iso)`. Formatting is pure JS and fixed to `DD.MM. HH:MM` for now; i18n is a separate backlog item.
 
 ## UI (`ui/infobox.js`, `stylesheet.css`)
 - Device rows: the status cell becomes a reactive `St.Bin` with `track_hover`, holding the status label and the detail label. On `notify::hover`, the cell swaps which label is visible.
-- `.syncbeacon-row-detail`: right-aligned, `background-color: rgba(0, 0, 0, 0.1)` (same 10 % as the action band), rounded corners, small padding.
+- `.syncbeacon-row-detail`: right-aligned, `background-color: rgba(0, 0, 0, 0.1)` (same 10 % as the action band), rounded corners, small padding, font-size 0.9em (narrower; the system font has no condensed width).
 - To avoid a stuck hover, rows are not rebuilt while a cell is hovered. On updates, the existing labels' text is changed in place.
 - Open/close of the info box starts/stops the 2 s rate timer through the controller (`extension.js`: `startRateSampling()` / `stopRateSampling()`).
 

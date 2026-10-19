@@ -86,7 +86,7 @@ export function formatRate(bytesPerSec) {
 }
 
 /**
- * When a device was last seen, in local time, e.g. "Last seen 18.10.2026 14:32".
+ * When a device was last seen, in local time, e.g. "18.10. 14:32".
  * Syncthing reports the Unix epoch for a device it has never seen.
  *
  * @param {string|undefined} iso
@@ -98,7 +98,7 @@ export function formatLastSeen(iso) {
         return 'Never seen';
     const d = new Date(t);
     const pad = n => String(n).padStart(2, '0');
-    return `Last seen ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ` +
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ` +
         `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 

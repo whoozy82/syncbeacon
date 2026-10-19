@@ -204,8 +204,8 @@ test('rate formatting', () => {
 });
 
 test('last seen formatting, in local time', () => {
-    assertEqual(formatLastSeen(new Date(2026, 9, 18, 14, 32).toISOString()), 'Last seen 18.10.2026 14:32');
-    assertEqual(formatLastSeen(new Date(2026, 0, 5, 7, 4).toISOString()), 'Last seen 05.01.2026 07:04');
+    assertEqual(formatLastSeen(new Date(2026, 9, 18, 14, 32).toISOString()), '18.10. 14:32');
+    assertEqual(formatLastSeen(new Date(2026, 0, 5, 7, 4).toISOString()), '05.01. 07:04');
     assertEqual(formatLastSeen('1970-01-01T01:00:00+01:00'), 'Never seen');
     assertEqual(formatLastSeen(undefined), 'Never seen');
     assertEqual(formatLastSeen('garbage'), 'Never seen');
@@ -219,7 +219,7 @@ test('device detail: rates when connected, last seen otherwise', () => {
     const detail = Object.fromEntries(deriveStatus(snap).devices.map(d => [d.name, d.detail]));
     assertEqual(detail.HomeNAS, '↓ 1.2 kB/s  ↑ 56 kB/s');
     assertEqual(detail.Zenfone, '↓ –  ↑ –', 'no sample yet');
-    assertEqual(detail.nauti, 'Last seen 18.10.2026 14:32');
+    assertEqual(detail.nauti, '18.10. 14:32');
     assertEqual(detail.Sony, 'Never seen');
     assertEqual(detail.trixy, 'Never seen', 'paused');
 });
