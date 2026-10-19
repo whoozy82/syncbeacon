@@ -8,7 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Move head (Hostname and status text) into the first line, centered between the buttons
 - The "pause" function shall pause folders and devices alltogether
 - folder list and device list shall switch position: folders list on top and devices list below it
 - dynamic arrangement:

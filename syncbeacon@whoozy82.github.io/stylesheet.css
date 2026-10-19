@@ -24,6 +24,11 @@
   margin: 0 6px;
 }
 
+/* Header in the action band, left aligned with some space after Open UI. */
+.syncbeacon-header {
+  padding-left: 32px;
+}
+
 .syncbeacon-header-title {
   font-weight: bold;
 }
