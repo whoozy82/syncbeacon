@@ -217,11 +217,11 @@ test('device detail: rates when connected, last seen otherwise', () => {
     snap.rates = {HOMENAS: {down: 1234, up: 56000}};
     snap.lastSeen = {NAUTI: new Date(2026, 9, 18, 14, 32).toISOString()};
     const detail = Object.fromEntries(deriveStatus(snap).devices.map(d => [d.name, d.detail]));
-    assertEqual(detail.HomeNAS, '↓ 1.2 kB/s  ↑ 56 kB/s');
-    assertEqual(detail.Zenfone, '↓ –  ↑ –', 'no sample yet');
-    assertEqual(detail.nauti, '18.10. 14:32');
-    assertEqual(detail.Sony, 'Never seen');
-    assertEqual(detail.trixy, 'Never seen', 'paused');
+    assertEqual(detail.HomeNAS, {kind: 'rates', down: '1.2 kB/s', up: '56 kB/s'});
+    assertEqual(detail.Zenfone, {kind: 'rates', down: '0 B/s', up: '0 B/s'}, 'no sample yet');
+    assertEqual(detail.nauti, {kind: 'last-seen', text: '18.10. 14:32'});
+    assertEqual(detail.Sony, {kind: 'last-seen', text: 'Never seen'});
+    assertEqual(detail.trixy, {kind: 'last-seen', text: 'Never seen'}, 'paused');
 });
 
 run();
