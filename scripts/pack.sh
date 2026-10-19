@@ -4,6 +4,7 @@ set -euo pipefail
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 uuid=syncbeacon@whoozy82.github.io
+"$root/scripts/sync-version.sh"
 mkdir -p "$root/dist"
 gnome-extensions pack "$root/$uuid" --force --out-dir="$root/dist" \
   --extra-source=lib --extra-source=ui --extra-source=icons

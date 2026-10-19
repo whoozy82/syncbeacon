@@ -81,7 +81,16 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         page.add(this._connectionGroup(window, settings));
         page.add(this._positionGroup(window, settings));
         page.add(this._hotkeyGroup(window, settings));
+        page.add(this._aboutGroup());
         window.add(page);
+    }
+
+    _aboutGroup() {
+        const group = new Adw.PreferencesGroup({title: 'About'});
+        const row = new Adw.ActionRow({title: 'Version', subtitle: this.metadata['version-name'] ?? '–'});
+        row.add_css_class('property');
+        group.add(row);
+        return group;
     }
 
     _serviceGroup(window) {

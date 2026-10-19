@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-18: Version from VERSION.md
+
+- `scripts/sync-version.sh` copies the version from `VERSION.md` into `metadata.json` (`version-name`)
+  - runs automatically in `dev-install.sh` and `pack.sh`
+  - the Nix package reads `VERSION.md` directly and patches `metadata.json` in its build
+- Settings window shows the version in a new "About" group
+
 ## 2026-10-17: Context menu merged into info box
 
 - Combine info box and context menu to one + adapt click events accordingly
