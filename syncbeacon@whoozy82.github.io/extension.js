@@ -30,6 +30,7 @@ const POSITIONS = {
 const UPDATE_DELAY_MS = 100;
 const CONFIG_RETRY_S = 30;
 const AUTH_RELOAD_MIN_S = 10;
+const RATE_INTERVAL_S = 2;
 
 export default class SyncbeaconExtension extends Extension {
     enable() {
@@ -67,11 +68,11 @@ export default class SyncbeaconExtension extends Extension {
     disable() {
         Main.wm.removeKeybinding('toggle-window');
         this._settings.disconnectObject(this);
-        for (const id of [this._updateId, this._retryId]) {
+        for (const id of [this._updateId, this._retryId, this._rateId]) {
             if (id)
                 GLib.source_remove(id);
         }
-        this._updateId = this._retryId = 0;
+        this._updateId = this._retryId = this._rateId = 0;
         this._configCancellable?.cancel();
         this._configCancellable = null;
 
@@ -130,6 +131,23 @@ export default class SyncbeaconExtension extends Extension {
         else
             this._client.refresh();
         this._conflicts.scanAll();
+    }
+
+    /** Sample the device transfer rates while the info box is open. */
+    setRateSampling(on) {
+        if (this._rateId) {
+            GLib.source_remove(this._rateId);
+            this._rateId = 0;
+        }
+        if (!on)
+            return;
+        this._rateId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, RATE_INTERVAL_S, () => {
+            this._client.sampleRates().catch(e => {
+                if (!isCancelled(e))
+                    console.debug(`Syncbeacon: rate sample failed: ${e}`);
+            });
+            return GLib.SOURCE_CONTINUE;
+        });
     }
 
     setRunning(running) {

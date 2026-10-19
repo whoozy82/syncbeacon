@@ -2,7 +2,8 @@
 // Run: gjs -m tests/test_state.js
 
 import {assert, assertEqual, run, test} from './harness.js';
-import {Row, State, countsText, deriveStatus, emptySnapshot, isConflictPath} from
+import {Row, State, countsText, deriveStatus, emptySnapshot, formatLastSeen, formatRate,
+    isConflictPath} from
     '../syncbeacon@whoozy82.github.io/lib/state.js';
 
 // Shaped like this machine: 5 remote devices, 5 folders, 2 devices online.
@@ -191,6 +192,36 @@ test('conflict file names', () => {
     assert(isConflictPath('dir/photo.sync-conflict-20250101-120000-Z7ABCDE.jpg'));
     assert(!isConflictPath('notes.sync-conflict.txt'));
     assert(!isConflictPath('plain.txt'));
+});
+
+test('rate formatting', () => {
+    assertEqual(formatRate(0), '0 B/s');
+    assertEqual(formatRate(340.4), '340 B/s');
+    assertEqual(formatRate(1234), '1.2 kB/s');
+    assertEqual(formatRate(56000), '56 kB/s');
+    assertEqual(formatRate(999700), '1.0 MB/s');
+    assertEqual(formatRate(12.3e9), '12 GB/s');
+});
+
+test('last seen formatting, in local time', () => {
+    assertEqual(formatLastSeen(new Date(2026, 9, 18, 14, 32).toISOString()), 'Last seen 18.10.2026 14:32');
+    assertEqual(formatLastSeen(new Date(2026, 0, 5, 7, 4).toISOString()), 'Last seen 05.01.2026 07:04');
+    assertEqual(formatLastSeen('1970-01-01T01:00:00+01:00'), 'Never seen');
+    assertEqual(formatLastSeen(undefined), 'Never seen');
+    assertEqual(formatLastSeen('garbage'), 'Never seen');
+});
+
+test('device detail: rates when connected, last seen otherwise', () => {
+    const snap = snapshot();
+    snap.devices.find(d => d.name === 'trixy').paused = true;
+    snap.rates = {HOMENAS: {down: 1234, up: 56000}};
+    snap.lastSeen = {NAUTI: new Date(2026, 9, 18, 14, 32).toISOString()};
+    const detail = Object.fromEntries(deriveStatus(snap).devices.map(d => [d.name, d.detail]));
+    assertEqual(detail.HomeNAS, '↓ 1.2 kB/s  ↑ 56 kB/s');
+    assertEqual(detail.Zenfone, '↓ –  ↑ –', 'no sample yet');
+    assertEqual(detail.nauti, 'Last seen 18.10.2026 14:32');
+    assertEqual(detail.Sony, 'Never seen');
+    assertEqual(detail.trixy, 'Never seen', 'paused');
 });
 
 run();
