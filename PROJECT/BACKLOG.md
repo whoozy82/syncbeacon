@@ -7,13 +7,14 @@
 
 <!-- Planced features, changes, fixes -->
 
+- Icon update:
+  - Remove Button 'refresh'
+  - Replace the toggle with a round button (as the others) The as either "Paused" or "Run" (depending on the current state)
 - folder list and device list shall switch position: folders list on top and devices list below it
-- horizontal arrangement:
-  - folders-list on the left side
-  - device-list on the right side 
-- Icon rearrangement:
-  - Left: tbd
-  - Right: tbd
+- dynamic arrangement:
+  - is the count of devices and folders together below 10 > vertical arrangement as it is now 
+  - is the count of devices and folder together 10 or more > horizontal arragement:
+    - folders list to the left and devices list to the right 
 - i18n: Multilingual UI
   - In settings window: language selection: System, English, German
 - device list and folders shall hold a maximum of 9 entries. if there exist more, visualize at the bottom with a common symbol
