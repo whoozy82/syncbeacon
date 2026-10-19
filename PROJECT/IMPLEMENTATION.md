@@ -115,14 +115,13 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
 - **Info box:** a `PopupMenu.PopupMenu` attached to the button, with its own `PopupMenuManager`. Shell positioning, click-outside, Esc and keyboard focus come for free, so no custom popup code is needed. Contents:
   - a bar of controls at the top, on a band 10 % darker than the popup (`rgba(0, 0, 0, 0.1)`) that reaches the popup's edges:
     - Open UI, on the left: a round `icon-button` with the Syncthing logo (`icons/syncbeacon-syncthing-symbolic.svg`). It closes the info box and opens the Syncthing window.
-    - Run/Pause, right-aligned like the rest: a `PopupMenu.Switch` without a label inside an `St.Button`. It is on unless the state is Paused, and switching it calls Run or Pause (§3.2) and refreshes the status once the request succeeds. It is greyed out when no devices are configured or Syncthing is unreachable.
-    - Refresh: a round `icon-button` (`view-refresh-symbolic`). The info box stays open. It restarts the REST snapshot (aborts the running long-poll or skips the reconnect backoff), re-reads config.xml if that had failed, and rescans for conflict files.
+    - Run/Pause, right-aligned like the rest: a round `icon-button` whose icon shows the current state, `media-playback-start-symbolic` while running and `media-playback-pause-symbolic` while Paused. A click calls Run or Pause (§3.2) and refreshes the status once the request succeeds. It is greyed out when no devices are configured or Syncthing is unreachable.
     - Settings: a round `icon-button` with a gear. It closes the info box and opens the settings window (`openPreferences()`).
   - a header with the state and message
   - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
   - one row per folder: name, Up to date / Syncing x % / Scanning / Paused / n failed items / n conflicts
 
-  Opening it triggers the same refresh as the Refresh button. It updates live while open. Only the device and folder rows are rebuilt, so the controls keep their focus and hover state.
+  Opening it restarts the REST snapshot (aborts the running long-poll or skips the reconnect backoff), re-reads config.xml if that had failed, and rescans for conflict files. It updates live while open. Only the device and folder rows are rebuilt, so the controls keep their focus and hover state.
 - **Hotkey:** `Main.wm.addKeybinding('toggle-window', settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, …)`. If the Syncthing window is focused it is minimised. Otherwise it is opened or raised.
 
 ### 3.6 Syncthing window: `lib/webapp.js`
@@ -263,7 +262,7 @@ Rough total: 5–6 working days.
 | # | Criterion (PROJECT.md) | How to verify |
 |---|---|---|
 | 1 | UI element is visible on taskbar on this machine | After installation and enabling, the icon and `x/5 · 5` appear in the top bar. Each of the five positions in the prefs moves it live. |
-| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Run/Pause switch, the Open UI button (Syncthing icon) and the Settings button (gear icon) below its header. Switching Run/Pause off pauses all devices: within 2 s the icon shows Paused and the web UI shows every device, online or offline, as paused. Switching it on resumes all of them. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
+| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Run/Pause button, the Open UI button (Syncthing icon) and the Settings button (gear icon) below its header. Clicking Run/Pause (▶) pauses all devices: within 2 s the icon shows Paused and the web UI shows every device, online or offline, as paused. Clicking it again (⏸) resumes all of them. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
 | 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 devices and 5 folders with their current status. A click outside, Esc, or another click on the button closes it. |
 | 4 | Syncthing UI pops up when double clicking the taskbar element | A double click opens or raises the "Syncthing" GNOME Web app at `https://localhost:8384`, and the info box is closed. |
 | — | States and colours | Force each of the 5 states (see Phase 1). Folder issue is yellow and Syncthing error is red. The other three match the other top-bar icons in light and dark style. |

@@ -1,4 +1,4 @@
-// Info box: a popup with the actions (Open UI, Run/Pause, Refresh, Settings) on
+// Info box: a popup with the actions (Open UI, Run/Pause, Settings) on
 // top, then the state and every peer and folder with its status.
 
 import Clutter from 'gi://Clutter';
@@ -229,10 +229,10 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this.actor.add_style_class_name('panel-menu');
         this.actor.add_style_class_name('syncbeacon-infobox');
         this._controller = controller;
-        this._updatingSwitch = false;
+        this._running = true;
 
-        // Top bar, on a darker band: Open UI on the left; Run/Pause switch,
-        // Refresh and Settings on the right.
+        // Top bar, on a darker band: Open UI on the left; Run/Pause and
+        // Settings on the right.
         const actions = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
             style_class: 'syncbeacon-actions'});
 
@@ -245,31 +245,12 @@ export class InfoBox extends PopupMenu.PopupMenu {
         actions.add_child(openButton);
         actions.add_child(new St.Widget({x_expand: true}));
 
-        // The switch is not reactive itself, so clicks (and drags on its
-        // handle) reach the surrounding button and toggle it in one place.
-        this._switch = new PopupMenu.Switch(true);
-        this._switch.reactive = false;
-        this._runButton = new St.Button({
-            style_class: 'syncbeacon-run-button',
-            can_focus: true,
-            child: this._switch,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        this._runButton.connect('clicked', () => {
-            this._switch.toggle();
-            this._syncRunAccessible();
-        });
-        this._switch.connect('notify::state', () => {
-            if (!this._updatingSwitch)
-                this._controller.setRunning(this._switch.state);
-        });
+        // Run/Pause: the icon shows the current state, play while running and
+        // pause while paused; a click toggles it. update() sets the icon.
+        this._runButton = iconButton(null, 'Pause all devices');
+        this._syncRunIcon();
+        this._runButton.connect('clicked', () => this._controller.setRunning(!this._running));
         actions.add_child(this._runButton);
-
-        // Stays open so the refreshed status shows up in place.
-        const refreshButton = iconButton(new Gio.ThemedIcon({name: 'view-refresh-symbolic'}),
-            'Refresh status');
-        refreshButton.connect('clicked', () => this._controller.refresh());
-        actions.add_child(refreshButton);
 
         const settingsButton = iconButton(new Gio.ThemedIcon({name: 'emblem-system-symbolic'}),
             'Settings');
@@ -313,8 +294,11 @@ export class InfoBox extends PopupMenu.PopupMenu {
         });
     }
 
-    _syncRunAccessible() {
-        this._runButton.accessible_name = this._switch.state ? 'Pause all devices' : 'Resume all devices';
+    _syncRunIcon() {
+        this._runButton.child.gicon = new Gio.ThemedIcon({
+            name: this._running ? 'media-playback-start-symbolic' : 'media-playback-pause-symbolic',
+        });
+        this._runButton.accessible_name = this._running ? 'Pause all devices' : 'Resume all devices';
     }
 
     /**
@@ -327,10 +311,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._message.text = status?.message ?? '';
         this._message.visible = !!status?.message;
 
-        this._updatingSwitch = true;
-        this._switch.state = state !== State.PAUSED;
-        this._updatingSwitch = false;
-        this._syncRunAccessible();
+        this._running = state !== State.PAUSED;
+        this._syncRunIcon();
         const canToggle = !!status && status.peersTotal > 0 &&
             !(state === State.ERROR && !status.reachable);
         this._runButton.reactive = canToggle;
