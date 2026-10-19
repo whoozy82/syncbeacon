@@ -32,12 +32,13 @@ This is the common workflow that we will use for changes on nix configuration fi
 6. **Implement**  Implement the change or fix
 7. **Test** Test the new configuration via test scripts under @scripts/
 8. **Iterate** Iterate if test fails for maximum 3 times, then stop and explain
-9. **Version Bump** Increase the version via `scripts/bump-version.sh major|minor|patch` (updates metadata.json, README badge, HISTORY.md)
-10. **Document** Update project documentation (History and Backlog) and update main README.md if necessary
-11. **Commit** Stage files, commit change with short commit message
-12. **Push** Push to origin
-13. **Merge** Merge to main, remove CHANGE.md there, tag via `scripts/bump-version.sh --tag` and delete old branch
-14. **Build** Ask if the externsion shall be build on this client via click prompt
+9. **User Test** Spin up Mutter Development Kit and wait for approval
+10. **Version Bump** Increase the version via `scripts/bump-version.sh major|minor|patch` (updates metadata.json, README badge, HISTORY.md)
+11. **Document** Update project documentation (History and Backlog) and update main README.md if necessary
+12. **Commit** Stage files, commit change with short commit message
+13. **Push** Push to origin
+14. **Merge** Merge to main, remove CHANGE.md there, tag via `scripts/bump-version.sh --tag` and delete old branch
+15. **Build** Ask if the externsion shall be build on this client via click prompt
 
 ### README Changes
 Changes on main README.md follow these steps:
