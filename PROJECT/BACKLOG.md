@@ -1,12 +1,13 @@
 # Plan
 
-## Currently working on
+## In progress
 
+<!-- List unfinished tasks that are staged and commited -->
+- ...
 
 ## Backlog
 
-<!-- Planced features, changes, fixes -->
-
+<!-- Refined features, changes, fixes -->
 - Icon update:
   - Remove Button 'refresh'
   - Replace the toggle with a round button (as the others) The as either "Paused" or "Run" (depending on the current state)
@@ -23,6 +24,7 @@
 
 ## To refine
 
+<!-- list of features that are not fully refined -->
 - ...
 
 *Maybe parallel to this project*
