@@ -106,16 +106,23 @@
    detail. */
 .syncbeacon-folder-actions {
   padding: 0 4px;
-  spacing: 4px;
+  spacing: 8px;
 }
 
+/* Square buttons, so hover and press show a circle. */
 .syncbeacon-folder-action {
-  padding: 0 4px;
-  border-radius: 4px;
+  padding: 2px;
+  border-radius: 999px;
 }
 
 .syncbeacon-folder-action:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* While pressed: a circle in the GNOME accent colour. */
+.syncbeacon-folder-action:active {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
 }
 
 .syncbeacon-folder-action StIcon {

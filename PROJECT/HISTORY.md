@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.4.1` created at _20.10.2026_
+- `v0.4.2` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Folder action press feedback — the action buttons are round; while one is pressed it shows a circle in the GNOME accent colour (`-st-accent-color`)
 - [2026-10-20] Folder actions polish — the row no longer grows when the actions show (the cell fills the row, no vertical padding); a dimmed ⋯ replaces the ring; Edit Ignore List gets its own icon (page with a no-entry badge, `syncbeacon-ignore-symbolic.svg`); a little more space between the buttons
 - [2026-10-19] Folder last scan on hover — hovering a folder's status shows a clock icon and the last scan time (`DD.MM. HH:MM`, "Never scanned" otherwise), styled like the device last-seen detail; taken from `/rest/stats/folder` and updated when a scan finishes
 - [2026-10-19] Folder action circle — each folder line has a small ring centred in the row; hovering the ring (instead of the status) reveals Open Folder, Rescan and Edit Ignore List in its place
