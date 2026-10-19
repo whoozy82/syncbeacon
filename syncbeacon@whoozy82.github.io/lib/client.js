@@ -93,10 +93,14 @@ export class Api {
         this._session = new Soup.Session({timeout, user_agent: 'Syncbeacon'});
     }
 
-    async request(method, path, cancellable = null) {
+    async request(method, path, cancellable = null, body = null) {
         const msg = Soup.Message.new(method, `${this.uri}${path}`);
         if (!msg)
             throw new Error(`Invalid GUI URI: ${this.uri}`);
+        if (body !== null) {
+            msg.set_request_body_from_bytes('application/json',
+                new GLib.Bytes(new TextEncoder().encode(JSON.stringify(body))));
+        }
         if (this._apiKey)
             msg.request_headers.append('X-API-Key', this._apiKey);
         // Trust exactly the Syncthing GUI certificate, nothing else.
@@ -119,6 +123,10 @@ export class Api {
 
     post(path, cancellable = null) {
         return this.request('POST', path, cancellable);
+    }
+
+    patch(path, body, cancellable = null) {
+        return this.request('PATCH', path, cancellable, body);
     }
 
     abort() {
@@ -248,12 +256,21 @@ export class SyncthingClient {
         this._rateSample = {time: now, totals};
     }
 
+    /** Pause every device and every folder. */
     async pauseAll() {
-        await this._requireApi().post('/rest/system/pause');
+        const api = this._requireApi();
+        await Promise.all([api.post('/rest/system/pause'), this._setFoldersPaused(api, true)]);
     }
 
+    /** Resume every device and every folder, also those paused one by one. */
     async resumeAll() {
-        await this._requireApi().post('/rest/system/resume');
+        const api = this._requireApi();
+        await Promise.all([api.post('/rest/system/resume'), this._setFoldersPaused(api, false)]);
+    }
+
+    _setFoldersPaused(api, paused) {
+        return Promise.all(this.data.folders.filter(f => f.paused !== paused).map(f =>
+            api.patch(`/rest/config/folders/${encodeURIComponent(f.id)}`, {paused})));
     }
 
     async rescan(folderId) {

@@ -64,10 +64,10 @@ systemd (D-Bus) ◄───►│ systemd.js (unit state, start/stop)          
   - Failed items come from `pullErrors` in `/rest/db/status` and `FolderSummary`. A separate `/rest/folder/errors` call is not needed.
 - **Live updates:** long-poll `/rest/events?since=N&timeout=60&events=StateChanged,FolderSummary,FolderCompletion,FolderErrors,DeviceConnected,DeviceDisconnected,DevicePaused,DeviceResumed,ConfigSaved,ItemFinished`. On `ConfigSaved`, or if the event ID goes backwards (Syncthing restarted), take a fresh snapshot.
 - **Reconnect:** backoff of 1, 2, 5, 10 and 30 s while unreachable.
-- **Actions (Run / Pause):** these cover all devices, online and offline, the same as the web UI's "Pause All" and "Resume All".
-  - **Pause** sends `POST /rest/system/pause`.
-  - **Run** sends `POST /rest/system/resume`, which also resumes devices that were paused individually in the web UI.
-  - Syncthing saves the pause in its config, so it survives restarts. An offline device that comes back stays paused.
+- **Actions (Run / Pause):** these cover all devices, online and offline, the same as the web UI's "Pause All" and "Resume All", and all folders.
+  - **Pause** sends `POST /rest/system/pause` and `PATCH /rest/config/folders/{id}` with `{"paused": true}` for every folder not yet paused, in parallel.
+  - **Run** sends `POST /rest/system/resume` and `{"paused": false}` for every paused folder. This also resumes devices and folders that were paused individually in the web UI.
+  - Syncthing saves the pause in its config, so it survives restarts. An offline device that comes back stays paused. The Paused state still follows the devices only (§3.3), so Run/Pause stays greyed out without remote devices.
 - **Lifetime:** everything is async with a `Gio.Cancellable`. `disable()` cancels it and aborts the session, so nothing outlives the extension.
 
 ### 3.3 State: `lib/state.js`
