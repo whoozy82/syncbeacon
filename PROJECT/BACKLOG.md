@@ -6,7 +6,12 @@
 ## Backlog
 
 <!-- Planced features, changes, fixes -->
-- horizontal arrangement of device-list and folders-list
+
+- Display device name of Syncthing's 'This device' at the place of sync status head (In Sync).
+- folder list and device list shall switch position: folders list on top and devices list below it
+- horizontal arrangement:
+  - folders-list on the left side
+  - device-list on the right side 
 - Icon rearrangement:
   - Left: tbd
   - Right: tbd
