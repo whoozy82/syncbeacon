@@ -6,10 +6,6 @@
 ## Backlog
 
 <!-- Planced features, changes, fixes -->
-- In infobox > folders list > when hovering over status of a folder it reveals 3 buttons with appripriate icons:
-  - Open Folder
-  - Rescan
-  - Edit Ignore List
 - horizontal arrangement of device-list and folders-list
 - Icon rearrangement:
   - Left: tbd

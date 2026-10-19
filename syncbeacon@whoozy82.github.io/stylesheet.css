@@ -86,6 +86,25 @@
   icon-size: 12px;
 }
 
+/* Folder actions on hover, in the same darker box as the device detail. */
+.syncbeacon-folder-actions {
+  padding: 0 4px;
+  spacing: 2px;
+}
+
+.syncbeacon-folder-action {
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.syncbeacon-folder-action:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.syncbeacon-folder-action StIcon {
+  icon-size: 14px;
+}
+
 .syncbeacon-dot {
   width: 8px;
   height: 8px;

@@ -45,7 +45,57 @@ function deviceDetail() {
             seenLabel.text = detail?.text ?? '';
         }
     };
-    return {actor, set};
+    return {actor, set, setActive: () => {}};
+}
+
+/**
+ * The folder actions shown on hover: Open Folder, Rescan and Edit Ignore
+ * List. The buttons only take clicks while shown.
+ *
+ * @param {InfoBox} infoBox
+ * @returns {{actor: St.BoxLayout, set: Function, setActive: Function}}
+ */
+function folderActions(infoBox) {
+    const actor = new St.BoxLayout({style_class: 'syncbeacon-row-detail syncbeacon-folder-actions',
+        x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
+    let folder = null;
+    let active = false;
+
+    const button = (iconName, accessibleName, onClick) => {
+        const b = new St.Button({style_class: 'syncbeacon-folder-action', reactive: false,
+            accessible_name: accessibleName, child: new St.Icon({icon_name: iconName}),
+            y_align: Clutter.ActorAlign.CENTER});
+        b.connect('clicked', () => folder && onClick(folder));
+        actor.add_child(b);
+        return b;
+    };
+    const controller = infoBox._controller;
+    const open = button('folder-open-symbolic', 'Open folder', f => {
+        infoBox.close();
+        controller.openFolder(f.path);
+    });
+    // Stays open so the scan state shows up in place.
+    const rescan = button('view-refresh-symbolic', 'Rescan folder',
+        f => controller.rescanFolder(f.id));
+    const ignores = button('document-edit-symbolic', 'Edit ignore list', f => {
+        infoBox.close();
+        controller.editIgnores(f.path);
+    });
+
+    const sync = () => {
+        open.reactive = ignores.reactive = active;
+        rescan.reactive = active && !folder?.paused;
+        rescan.opacity = folder?.paused ? 128 : 255;
+    };
+    const set = value => {
+        folder = value;
+        sync();
+    };
+    const setActive = on => {
+        active = on;
+        sync();
+    };
+    return {actor, set, setActive};
 }
 
 /** Wrap actor in a box that fills its parent and keeps actor at the right. */
@@ -58,12 +108,15 @@ function alignEnd(actor) {
 }
 
 /**
- * A row with a coloured dot, a name and a status. With withDetail, hovering
- * the status swaps it for the device detail on a darker background.
+ * A row with a coloured dot, a name and a status. With makeDetail, hovering
+ * the status swaps it for the detail it builds (device detail or folder
+ * actions) on a darker background.
  *
+ * @param {Function|null} makeDetail - returns {actor, set, setActive}
  * @returns {{item: PopupMenu.PopupBaseMenuItem, set: Function}}
  */
-function statusRow(withDetail = false) {
+function statusRow(makeDetail = null) {
+    const withDetail = !!makeDetail;
     const item = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
         style_class: 'syncbeacon-row'});
     const dot = new St.Widget({y_align: Clutter.ActorAlign.CENTER});
@@ -80,7 +133,7 @@ function statusRow(withDetail = false) {
         // cell keeps its width and hover state while they swap. BinLayout
         // centres children that do not fill it, so each fills the cell in a
         // box whose spacer pushes it to the right edge.
-        detail = deviceDetail();
+        detail = makeDetail();
         detail.actor.opacity = 0;
         const cell = new St.Widget({
             layout_manager: new Clutter.BinLayout(),
@@ -95,6 +148,7 @@ function statusRow(withDetail = false) {
         cell.connect('notify::hover', () => {
             status.opacity = cell.hover ? 0 : 255;
             detail.actor.opacity = cell.hover ? 255 : 0;
+            detail.setActive(cell.hover);
         });
         item.add_child(cell);
     } else {
@@ -124,7 +178,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
     /**
      * @param {Clutter.Actor} sourceActor - the panel button
      * @param {object} controller - the extension; provides path, openWindow(),
-     *   setRunning(bool), refresh(), setRateSampling(bool) and openPreferences()
+     *   setRunning(bool), refresh(), setRateSampling(bool), openPreferences(),
+     *   openFolder(path), rescanFolder(id) and editIgnores(path)
      */
     constructor(sourceActor, controller) {
         super(sourceActor, 0.5, St.Side.TOP);
@@ -256,7 +311,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         status.devices.forEach((dev, i) =>
             this._deviceRows[i].set(dev.name, dev.text, dev.status, dev.detail));
         status.folders.forEach((folder, i) =>
-            this._folderRows[i].set(folder.label, folder.text, folder.status));
+            this._folderRows[i].set(folder.label, folder.text, folder.status, folder));
     }
 
     _buildLists(status) {
@@ -265,22 +320,22 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._lists.addMenuItem(this._devicesHeading);
         if (status.devices.length === 0)
             this._addPlaceholder('No remote devices');
-        this._deviceRows = status.devices.map(() => this._addRow(true));
+        this._deviceRows = status.devices.map(() => this._addRow(deviceDetail));
 
         this._foldersHeading = new PopupMenu.PopupSeparatorMenuItem('');
         this._lists.addMenuItem(this._foldersHeading);
         if (status.folders.length === 0)
             this._addPlaceholder('No folders');
-        this._folderRows = status.folders.map(() => this._addRow(false));
+        this._folderRows = status.folders.map(() => this._addRow(() => folderActions(this)));
     }
 
-    _addRow(withDetail) {
-        const row = statusRow(withDetail);
+    _addRow(makeDetail = null) {
+        const row = statusRow(makeDetail);
         this._lists.addMenuItem(row.item);
         return row;
     }
 
     _addPlaceholder(text) {
-        this._addRow(false).set(text, '', 'offline');
+        this._addRow().set(text, '', 'offline');
     }
 }

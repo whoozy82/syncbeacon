@@ -150,6 +150,44 @@ export default class SyncbeaconExtension extends Extension {
         });
     }
 
+    openFolder(path) {
+        try {
+            Gio.AppInfo.launch_default_for_uri(Gio.File.new_for_path(path).get_uri(),
+                global.create_app_launch_context(0, -1));
+        } catch (e) {
+            Main.notifyError('Syncbeacon', `Cannot open ${path}: ${e.message}`);
+        }
+    }
+
+    rescanFolder(folderId) {
+        // The new folder state arrives through the events.
+        this._client.rescan(folderId).catch(e =>
+            Main.notifyError('Syncbeacon', `Rescan failed: ${e.message}`));
+    }
+
+    /**
+     * Open the folder's .stignore in the default text editor, creating it if
+     * needed. The content type is fixed, because an empty or extension-less
+     * file would not resolve to an editor. Syncthing reads it on the next scan.
+     */
+    editIgnores(path) {
+        const file = Gio.File.new_for_path(GLib.build_filenamev([path, '.stignore']));
+        try {
+            try {
+                file.create(Gio.FileCreateFlags.NONE, null).close(null);
+            } catch (e) {
+                if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.EXISTS))
+                    throw e;
+            }
+            const app = Gio.AppInfo.get_default_for_type('text/plain', false);
+            if (!app)
+                throw new Error('no default text editor');
+            app.launch([file], global.create_app_launch_context(0, -1));
+        } catch (e) {
+            Main.notifyError('Syncbeacon', `Cannot edit ${file.get_path()}: ${e.message}`);
+        }
+    }
+
     setRunning(running) {
         const action = running ? this._client.resumeAll() : this._client.pauseAll();
         action.then(() => {

@@ -256,6 +256,10 @@ export class SyncthingClient {
         await this._requireApi().post('/rest/system/resume');
     }
 
+    async rescan(folderId) {
+        await this._requireApi().post(`/rest/db/scan?folder=${encodeURIComponent(folderId)}`);
+    }
+
     _requireApi() {
         if (!this._api || !this.data.reachable)
             throw new Error('Syncthing is not reachable');
