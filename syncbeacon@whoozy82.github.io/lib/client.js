@@ -340,6 +340,7 @@ export class SyncthingClient {
 
         const data = emptySnapshot();
         data.myID = status.myID;
+        data.myName = (config.devices ?? []).find(d => d.deviceID === status.myID)?.name ?? '';
         data.devices = (config.devices ?? [])
             .filter(d => d.deviceID !== status.myID)
             .map(d => ({id: d.deviceID, name: d.name, paused: !!d.paused}));

@@ -322,7 +322,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
      */
     update(status) {
         const state = status?.state ?? State.ERROR;
-        this._title.text = status ? STATE_LABELS[state] : 'Connecting…';
+        this._title.text = status ? status.myName || STATE_LABELS[state] : 'Connecting…';
         this._title.style_class = `syncbeacon-header-title syncbeacon-state-${state}`;
         this._message.text = status?.message ?? '';
         this._message.visible = !!status?.message;

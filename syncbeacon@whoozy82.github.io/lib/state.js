@@ -50,6 +50,7 @@ export function emptySnapshot() {
         connError: '',
         unitActive: null, // null: unknown or no unit found
         myID: '',
+        myName: '', // name of the local device
         devices: [], // [{id, name, paused}] without the local device
         folders: [], // [{id, label, path, paused}]
         connections: {}, // id -> {connected, paused}
@@ -223,6 +224,7 @@ export function deriveStatus(snap) {
     const peersConnected = devices.filter(d => d.online).length;
     const base = {
         reachable: snap.reachable,
+        myName: snap.myName,
         peersConnected,
         peersTotal: devices.length,
         foldersTotal: folders.length,

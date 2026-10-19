@@ -47,6 +47,11 @@ test('in sync: all online devices at 100 %, offline devices ignored', () => {
     assertEqual(countsText(s), '2/5 · 5');
 });
 
+test('local device name is passed through', () => {
+    assertEqual(deriveStatus(snapshot({myName: 'laptop'})).myName, 'laptop');
+    assertEqual(deriveStatus(emptySnapshot()).myName, '', 'unknown before the first snapshot');
+});
+
 test('in sync with no device online', () => {
     const snap = snapshot();
     for (const id of Object.keys(snap.connections))
