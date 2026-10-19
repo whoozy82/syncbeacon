@@ -21,6 +21,10 @@
 - Extend to scope to non NixOS Gnome systems (maybe publish to extensions.gnome.org)
   - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
 
+## To refine
+
+- ...
+
 *Maybe parallel to this project*
 - icon overlays in nautilus w syncthing status (maybe incl hover to show more info)
 - Syncthing actions in context menu in nautilus
