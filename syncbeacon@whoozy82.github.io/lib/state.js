@@ -56,6 +56,7 @@ export function emptySnapshot() {
         completion: {}, // device id -> overall completion in %
         rates: {}, // device id -> {down, up} in bytes/s, while the info box samples them
         lastSeen: {}, // device id -> ISO time of the last connection
+        lastScan: {}, // folder id -> ISO time of the last completed scan
         folderStatus: {}, // folder id -> /rest/db/status object
         systemErrors: [], // [string]
         conflicts: {}, // folder id -> count, or null if the check is unavailable
@@ -86,16 +87,18 @@ export function formatRate(bytesPerSec) {
 }
 
 /**
- * When a device was last seen, in local time, e.g. "18.10. 14:32".
- * Syncthing reports the Unix epoch for a device it has never seen.
+ * A time in local time without the year, e.g. "18.10. 14:32". Syncthing
+ * reports the Unix epoch for a device it has never seen or a folder it has
+ * never scanned, which yields the fallback.
  *
  * @param {string|undefined} iso
+ * @param {string} fallback
  * @returns {string}
  */
-export function formatLastSeen(iso) {
+export function formatTime(iso, fallback) {
     const t = Date.parse(iso ?? '');
     if (!Number.isFinite(t) || t < 24 * 3600 * 1000)
-        return 'Never seen';
+        return fallback;
     const d = new Date(t);
     const pad = n => String(n).padStart(2, '0');
     return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ` +
@@ -138,7 +141,7 @@ function deviceRow(dev, snap) {
     // Shown on hover: the rates while connected, otherwise when it was last seen.
     const detail = online
         ? rateDetail(snap.rates?.[dev.id])
-        : {kind: 'last-seen', text: formatLastSeen(snap.lastSeen?.[dev.id])};
+        : {kind: 'last-seen', text: formatTime(snap.lastSeen?.[dev.id], 'Never seen')};
     return {id: dev.id, name: dev.name || dev.id.slice(0, 7), status, text, detail,
         online, paused: !!paused, completion};
 }
@@ -184,8 +187,10 @@ function folderRow(folder, snap) {
         text += ' · conflict check unavailable';
 
     const hasIssue = st.state === 'error' || !!st.error || pullErrors > 0 || conflicts > 0;
+    // Shown on hover: when the folder was last scanned.
+    const detail = {kind: 'last-scan', text: formatTime(snap.lastScan?.[folder.id], 'Never scanned')};
     return {id: folder.id, label: folder.label || folder.id, path: folder.path,
-        paused: folder.paused, status, text, hasIssue, downloading: !folder.paused && DOWNLOADING_STATES.has(st.state),
+        paused: folder.paused, status, text, detail, hasIssue, downloading: !folder.paused && DOWNLOADING_STATES.has(st.state),
         issueSummary: issues.length ? `${folder.label || folder.id}: ${issues.join(', ')}` : null};
 }
 

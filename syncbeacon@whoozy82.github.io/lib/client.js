@@ -324,16 +324,18 @@ export class SyncthingClient {
 
     async _snapshot(gen, cancellable) {
         const api = this._api;
-        const [status, config, connections, sysErrors, deviceStats] = await Promise.all([
+        const optional = path => api.get(path, cancellable).catch(e => {
+            if (isCancelled(e) || e instanceof AuthError)
+                throw e;
+            return {};
+        });
+        const [status, config, connections, sysErrors, deviceStats, folderStats] = await Promise.all([
             api.get('/rest/system/status', cancellable),
             api.get('/rest/config', cancellable),
             api.get('/rest/system/connections', cancellable),
             api.get('/rest/system/error', cancellable),
-            api.get('/rest/stats/device', cancellable).catch(e => {
-                if (isCancelled(e) || e instanceof AuthError)
-                    throw e;
-                return {};
-            }),
+            optional('/rest/stats/device'),
+            optional('/rest/stats/folder'),
         ]);
 
         const data = emptySnapshot();
@@ -347,6 +349,8 @@ export class SyncthingClient {
         data.connections = connections.connections ?? {};
         for (const [id, st] of Object.entries(deviceStats ?? {}))
             data.lastSeen[id] = st.lastSeen;
+        for (const [id, st] of Object.entries(folderStats ?? {}))
+            data.lastScan[id] = st.lastScan;
         data.systemErrors = (sysErrors.errors ?? []).map(e => e.message ?? String(e));
 
         const folderResults = await Promise.all(data.folders.map(f =>
@@ -412,6 +416,8 @@ export class SyncthingClient {
             throw new ResetSignal();
         case 'StateChanged':
             data.folderStatus[d.folder] = {...data.folderStatus[d.folder], state: d.to, error: d.error ?? ''};
+            if (d.from === 'scanning')
+                data.lastScan[d.folder] = new Date().toISOString();
             if (d.to === 'idle' || d.to === 'error')
                 this._queue(gen, `folder:${d.folder}`, () => this._refetchFolder(d.folder));
             return true;

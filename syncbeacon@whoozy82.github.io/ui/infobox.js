@@ -11,12 +11,13 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {State, STATE_LABELS} from '../lib/state.js';
 
 /**
- * The device detail shown on hover: ↓/↑ rates while connected, otherwise a
- * clock icon and when the device was last seen.
+ * The row detail shown on hover: a device's ↓/↑ rates while connected,
+ * otherwise a clock icon and when the device was last seen or the folder was
+ * last scanned.
  *
  * @returns {{actor: St.BoxLayout, set: Function}}
  */
-function deviceDetail() {
+function rowDetail() {
     const actor = new St.BoxLayout({style_class: 'syncbeacon-row-detail',
         x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
 
@@ -37,7 +38,7 @@ function deviceDetail() {
 
     const set = detail => {
         rates.visible = detail?.kind === 'rates';
-        seen.visible = detail?.kind === 'last-seen';
+        seen.visible = detail?.kind === 'last-seen' || detail?.kind === 'last-scan';
         if (rates.visible) {
             down.text = `↓${detail.down}`;
             up.text = `↑${detail.up}`;
@@ -126,7 +127,7 @@ function alignEnd(actor) {
 
 /**
  * A row with a coloured dot, a name and a status. With makeDetail, hovering
- * the status swaps it for the device detail on a darker background. With
+ * the status swaps it for the row detail on a darker background. With
  * makeActions, a ring centred in the row reveals the folder actions on hover.
  *
  * @param {Function|null} makeDetail - returns {actor, set}
@@ -184,12 +185,12 @@ function statusRow(makeDetail = null, makeActions = null) {
         line.add_child(status);
     }
 
-    const set = (name, text, kind, detailValue = null) => {
+    const set = (name, text, kind, detailValue = null, actionsValue = null) => {
         dot.style_class = `syncbeacon-dot syncbeacon-dot-${kind}`;
         nameLabel.text = name;
         status.text = text;
         detail?.set(detailValue);
-        actions?.set(detailValue);
+        actions?.set(actionsValue);
     };
     return {item, set};
 }
@@ -341,7 +342,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         status.devices.forEach((dev, i) =>
             this._deviceRows[i].set(dev.name, dev.text, dev.status, dev.detail));
         status.folders.forEach((folder, i) =>
-            this._folderRows[i].set(folder.label, folder.text, folder.status, folder));
+            this._folderRows[i].set(folder.label, folder.text, folder.status, folder.detail, folder));
     }
 
     _buildLists(status) {
@@ -350,13 +351,13 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._lists.addMenuItem(this._devicesHeading);
         if (status.devices.length === 0)
             this._addPlaceholder('No remote devices');
-        this._deviceRows = status.devices.map(() => this._addRow(deviceDetail));
+        this._deviceRows = status.devices.map(() => this._addRow(rowDetail));
 
         this._foldersHeading = new PopupMenu.PopupSeparatorMenuItem('');
         this._lists.addMenuItem(this._foldersHeading);
         if (status.folders.length === 0)
             this._addPlaceholder('No folders');
-        this._folderRows = status.folders.map(() => this._addRow(null, () => folderActions(this)));
+        this._folderRows = status.folders.map(() => this._addRow(rowDetail, () => folderActions(this)));
     }
 
     _addRow(makeDetail = null, makeActions = null) {
