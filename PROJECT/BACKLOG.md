@@ -8,9 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Icon update:
-  - Remove Button 'refresh'
-  - Replace the toggle with a round button (as the others) The as either "Paused" or "Run" (depending on the current state)
 - folder list and device list shall switch position: folders list on top and devices list below it
 - dynamic arrangement:
   - is the count of devices and folders together below 10 > vertical arrangement as it is now 
