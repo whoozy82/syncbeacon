@@ -21,6 +21,8 @@ const EVENTS = [
 const BACKOFF_MS = [1000, 2000, 5000, 10000, 30000];
 const LONG_POLL_S = 60;
 const FULL_REFRESH_MS = 5 * 60 * 1000;
+// A rate sample older than this is not used as the base for a new rate.
+const RATE_MAX_AGE_S = 10;
 
 export class AuthError extends Error {
     constructor() {
@@ -161,6 +163,7 @@ export class SyncthingClient {
         this._cycle = null;
         this._inflight = new Set();
         this._pending = new Set();
+        this._rateSample = null;
         this.data = emptySnapshot();
     }
 
@@ -173,6 +176,7 @@ export class SyncthingClient {
     configure(conn, error = '') {
         this.stop();
         this.data = emptySnapshot();
+        this._rateSample = null;
         if (!conn) {
             this.data.connError = error;
             this._emit();
@@ -205,6 +209,43 @@ export class SyncthingClient {
     refresh() {
         this._wakeup?.cancel();
         this._cycle?.cancel();
+    }
+
+    /** Fetch the byte counters once and update the per-device rates. */
+    async sampleRates() {
+        if (!this._api || !this.data.reachable)
+            return;
+        const data = this.data;
+        const res = await this._api.get('/rest/system/connections', this._cancellable);
+        this._applyRates(data, res.connections ?? {});
+        this._emit();
+    }
+
+    /**
+     * Rates from the byte totals against the previous sample. Syncthing
+     * reports only totals, so the first sample yields no rates.
+     */
+    _applyRates(data, connections) {
+        const now = GLib.get_monotonic_time();
+        const prev = this._rateSample;
+        const dt = prev ? (now - prev.time) / 1e6 : 0;
+        if (dt > 0 && dt <= RATE_MAX_AGE_S) {
+            for (const [id, c] of Object.entries(connections)) {
+                const p = prev.totals[id];
+                if (p && c.connected) {
+                    data.rates[id] = {
+                        down: Math.max(0, ((c.inBytesTotal ?? 0) - p.in) / dt),
+                        up: Math.max(0, ((c.outBytesTotal ?? 0) - p.out) / dt),
+                    };
+                } else {
+                    delete data.rates[id];
+                }
+            }
+        }
+        const totals = {};
+        for (const [id, c] of Object.entries(connections))
+            totals[id] = {in: c.inBytesTotal ?? 0, out: c.outBytesTotal ?? 0};
+        this._rateSample = {time: now, totals};
     }
 
     async pauseAll() {
@@ -279,11 +320,16 @@ export class SyncthingClient {
 
     async _snapshot(gen, cancellable) {
         const api = this._api;
-        const [status, config, connections, sysErrors] = await Promise.all([
+        const [status, config, connections, sysErrors, deviceStats] = await Promise.all([
             api.get('/rest/system/status', cancellable),
             api.get('/rest/config', cancellable),
             api.get('/rest/system/connections', cancellable),
             api.get('/rest/system/error', cancellable),
+            api.get('/rest/stats/device', cancellable).catch(e => {
+                if (isCancelled(e) || e instanceof AuthError)
+                    throw e;
+                return {};
+            }),
         ]);
 
         const data = emptySnapshot();
@@ -295,6 +341,8 @@ export class SyncthingClient {
             id: f.id, label: f.label, path: expandHome(f.path), paused: !!f.paused,
         }));
         data.connections = connections.connections ?? {};
+        for (const [id, st] of Object.entries(deviceStats ?? {}))
+            data.lastSeen[id] = st.lastSeen;
         data.systemErrors = (sysErrors.errors ?? []).map(e => e.message ?? String(e));
 
         const folderResults = await Promise.all(data.folders.map(f =>
@@ -318,6 +366,7 @@ export class SyncthingClient {
 
         if (gen !== this._gen)
             return;
+        this._applyRates(data, data.connections);
         data.reachable = true;
         this.data = data;
         this._emit();
@@ -389,6 +438,8 @@ export class SyncthingClient {
         case 'DeviceDisconnected':
             data.connections[d.id] = {...data.connections[d.id], connected: false};
             delete data.completion[d.id];
+            delete data.rates[d.id];
+            data.lastSeen[d.id] = new Date().toISOString();
             return true;
         case 'DevicePaused':
         case 'DeviceResumed': {

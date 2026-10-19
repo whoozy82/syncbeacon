@@ -64,6 +64,16 @@
   font-feature-settings: "tnum";
 }
 
+/* Device detail on hover (rates or last seen), on the same 10 % darker
+   background as the action band. */
+.syncbeacon-row-detail {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.1);
+  font-size: 0.9em;
+  font-feature-settings: "tnum";
+}
+
 .syncbeacon-dot {
   width: 8px;
   height: 8px;

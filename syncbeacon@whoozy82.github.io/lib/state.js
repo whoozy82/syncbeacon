@@ -54,6 +54,8 @@ export function emptySnapshot() {
         folders: [], // [{id, label, path, paused}]
         connections: {}, // id -> {connected, paused}
         completion: {}, // device id -> overall completion in %
+        rates: {}, // device id -> {down, up} in bytes/s, while the info box samples them
+        lastSeen: {}, // device id -> ISO time of the last connection
         folderStatus: {}, // folder id -> /rest/db/status object
         systemErrors: [], // [string]
         conflicts: {}, // folder id -> count, or null if the check is unavailable
@@ -62,6 +64,48 @@ export function emptySnapshot() {
 
 function percent(value) {
     return `${Math.floor(value)} %`;
+}
+
+/**
+ * A transfer rate, e.g. "340 B/s", "1.2 MB/s", "56 kB/s".
+ *
+ * @param {number} bytesPerSec
+ * @returns {string}
+ */
+export function formatRate(bytesPerSec) {
+    if (bytesPerSec < 999.5)
+        return `${Math.round(bytesPerSec)} B/s`;
+    const units = ['kB/s', 'MB/s', 'GB/s'];
+    let value = bytesPerSec / 1000;
+    let i = 0;
+    while (value >= 999.5 && i < units.length - 1) {
+        value /= 1000;
+        i++;
+    }
+    return `${value < 9.95 ? value.toFixed(1) : Math.round(value)} ${units[i]}`;
+}
+
+/**
+ * When a device was last seen, in local time, e.g. "18.10. 14:32".
+ * Syncthing reports the Unix epoch for a device it has never seen.
+ *
+ * @param {string|undefined} iso
+ * @returns {string}
+ */
+export function formatLastSeen(iso) {
+    const t = Date.parse(iso ?? '');
+    if (!Number.isFinite(t) || t < 24 * 3600 * 1000)
+        return 'Never seen';
+    const d = new Date(t);
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ` +
+        `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function rateText(rate) {
+    if (!rate)
+        return '↓ –  ↑ –';
+    return `↓ ${formatRate(rate.down)}  ↑ ${formatRate(rate.up)}`;
 }
 
 function folderPercent(st) {
@@ -88,8 +132,11 @@ function deviceRow(dev, snap) {
         status = Row.OK;
         text = 'Connected';
     }
-    return {id: dev.id, name: dev.name || dev.id.slice(0, 7), status, text,
-        online: !paused && !!conn.connected, paused: !!paused, completion};
+    const online = !paused && !!conn.connected;
+    // Shown on hover: the rates while connected, otherwise when it was last seen.
+    const detail = online ? rateText(snap.rates?.[dev.id]) : formatLastSeen(snap.lastSeen?.[dev.id]);
+    return {id: dev.id, name: dev.name || dev.id.slice(0, 7), status, text, detail,
+        online, paused: !!paused, completion};
 }
 
 function folderRow(folder, snap) {
