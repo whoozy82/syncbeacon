@@ -5,6 +5,6 @@
   "shell-version": ["50"],
   "url": "https://github.com/whoozy82/syncbeacon",
   "settings-schema": "org.gnome.shell.extensions.syncbeacon",
-  "version": 600,
-  "version-name": "0.6.0"
+  "version": 700,
+  "version-name": "0.7.0"
 }

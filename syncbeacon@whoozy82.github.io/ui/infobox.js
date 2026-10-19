@@ -1,5 +1,5 @@
-// Info box: a popup with the actions (Open UI, Run/Pause, Settings) on
-// top, then the state and every peer and folder with its status.
+// Info box: a popup with the actions (Open UI, Run/Pause, Settings) and the
+// state on top, then every peer and folder with its status.
 
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -231,7 +231,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._controller = controller;
         this._running = true;
 
-        // Top bar, on a darker band: Open UI on the left; Run/Pause and
+        // Top bar, on a darker band: Open UI on the left, then the header
+        // (local device name and short state); Run/Pause and
         // Settings on the right.
         const actions = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
             style_class: 'syncbeacon-actions'});
@@ -243,7 +244,17 @@ export class InfoBox extends PopupMenu.PopupMenu {
             this._controller.openWindow();
         });
         actions.add_child(openButton);
-        actions.add_child(new St.Widget({x_expand: true}));
+
+        // Header: name and short state, wrapped when long. It takes the free
+        // space, so the buttons after it stay on the right.
+        const header = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL,
+            style_class: 'syncbeacon-header', x_expand: true, y_align: Clutter.ActorAlign.CENTER});
+        this._title = new St.Label({style_class: 'syncbeacon-header-title'});
+        this._message = new St.Label({style_class: 'syncbeacon-header-message'});
+        this._message.clutter_text.line_wrap = true;
+        header.add_child(this._title);
+        header.add_child(this._message);
+        actions.add_child(header);
 
         // Run/Pause: the icon shows the current state, play while running and
         // pause while paused; a click toggles it. update() sets the icon.
@@ -260,18 +271,6 @@ export class InfoBox extends PopupMenu.PopupMenu {
         });
         actions.add_child(settingsButton);
         this.addMenuItem(actions);
-
-        // Header: state and message.
-        const header = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
-            style_class: 'syncbeacon-header'});
-        const box = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, x_expand: true});
-        this._title = new St.Label({style_class: 'syncbeacon-header-title'});
-        this._message = new St.Label({style_class: 'syncbeacon-header-message'});
-        this._message.clutter_text.line_wrap = true;
-        box.add_child(this._title);
-        box.add_child(this._message);
-        header.add_child(box);
-        this.addMenuItem(header);
 
         // Devices and folders, rebuilt when the set of devices or folders
         // changes and updated in place otherwise, so a hovered row stays.
@@ -308,8 +307,9 @@ export class InfoBox extends PopupMenu.PopupMenu {
         const state = status?.state ?? State.ERROR;
         this._title.text = status ? status.myName || STATE_LABELS[state] : 'Connecting…';
         this._title.style_class = `syncbeacon-header-title syncbeacon-state-${state}`;
-        this._message.text = status?.message ?? '';
-        this._message.visible = !!status?.message;
+        // The short state under the name; not repeated when it is the title.
+        this._message.text = STATE_LABELS[state];
+        this._message.visible = !!status?.myName;
 
         this._running = state !== State.PAUSED;
         this._syncRunIcon();

@@ -80,7 +80,7 @@ A pure function, `snapshot → Status`. It imports nothing from `gi://`, so it c
   2. **Folder sync error or conflicts** (`folder-issue`, yellow): any folder in state `error`, folder pull errors, or at least one conflict file. The rows say which folder and why, e.g. "Tech: 2 conflicts" or "Musik: 3 failed items".
   3. **Paused** (`paused`): all online devices are paused. Syncthing disconnects a device when it is paused, so a literal "online and paused" never happens. The rule is therefore: at least one device is paused, and no unpaused device is connected. Offline, unpaused devices do not prevent Paused. Paused folders alone do not count. This rule comes before Synchronising, so the icon shows Paused straight after Pause, even while a transfer is still winding down.
   4. **Synchronising…** (`syncing`): at least one device is actively syncing. That is either a connected, unpaused device with completion below 100 %, or a local folder in `sync-preparing` or `syncing` (downloading from a device). Local `scanning`, `scan-waiting` and `sync-waiting` do not count, because no device is transferring. The info box still shows them in the folder rows.
-  5. **In Sync** (`in-sync`): all online (connected) devices are at 100 % and nothing is downloading. Offline devices are ignored. If no device is online, the state is In Sync and the info box header says "No devices online".
+  5. **In Sync** (`in-sync`): all online (connected) devices are at 100 % and nothing is downloading. Offline devices are ignored. If no device is online, the state is In Sync with the message "No devices online" (the info box shows only the short state label).
 
 ### 3.4 Conflicts: `lib/conflicts.js`
 
@@ -115,9 +115,9 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
 - **Info box:** a `PopupMenu.PopupMenu` attached to the button, with its own `PopupMenuManager`. Shell positioning, click-outside, Esc and keyboard focus come for free, so no custom popup code is needed. Contents:
   - a bar of controls at the top, on a band 10 % darker than the popup (`rgba(0, 0, 0, 0.1)`) that reaches the popup's edges:
     - Open UI, on the left: a round `icon-button` with the Syncthing logo (`icons/syncbeacon-syncthing-symbolic.svg`). It closes the info box and opens the Syncthing window.
+    - the header, left-aligned after Open UI (40 px gap): this device's name, coloured by state, with the short state label ("In Sync", "Paused", …) below it; the state label is the title while the name is unknown
     - Run/Pause, right-aligned like the rest: a round `icon-button` whose icon shows the current state, `media-playback-start-symbolic` while running and `media-playback-pause-symbolic` while Paused. A click calls Run or Pause (§3.2) and refreshes the status once the request succeeds. It is greyed out when no devices are configured or Syncthing is unreachable.
     - Settings: a round `icon-button` with a gear. It closes the info box and opens the settings window (`openPreferences()`).
-  - a header with the state and message
   - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
   - one row per folder: name, Up to date / Syncing x % / Scanning / Paused / n failed items / n conflicts
 
@@ -262,7 +262,7 @@ Rough total: 5–6 working days.
 | # | Criterion (PROJECT.md) | How to verify |
 |---|---|---|
 | 1 | UI element is visible on taskbar on this machine | After installation and enabling, the icon and `x/5 · 5` appear in the top bar. Each of the five positions in the prefs moves it live. |
-| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Run/Pause button, the Open UI button (Syncthing icon) and the Settings button (gear icon) below its header. Clicking Run/Pause (▶) pauses all devices: within 2 s the icon shows Paused and the web UI shows every device, online or offline, as paused. Clicking it again (⏸) resumes all of them. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
+| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Open UI button (Syncthing icon), the header, the Run/Pause button and the Settings button (gear icon) in its top bar. Clicking Run/Pause (▶) pauses all devices: within 2 s the icon shows Paused and the web UI shows every device, online or offline, as paused. Clicking it again (⏸) resumes all of them. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
 | 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 devices and 5 folders with their current status. A click outside, Esc, or another click on the button closes it. |
 | 4 | Syncthing UI pops up when double clicking the taskbar element | A double click opens or raises the "Syncthing" GNOME Web app at `https://localhost:8384`, and the info box is closed. |
 | — | States and colours | Force each of the 5 states (see Phase 1). Folder issue is yellow and Syncthing error is red. The other three match the other top-bar icons in light and dark style. |
@@ -276,7 +276,7 @@ Resolved:
 - In Sync and Paused consider online devices only. A paused device counts as "online and paused" (§3.3).
 - GNOME only. Hyprland, Noctalia and the auto-run setting are dropped.
 - No hover action. A left click shows the info box and a double click opens the window. The acceptance criteria now say the same.
-- No separate context menu and no right-click action. Run/Pause, Open UI and Settings sit in the info box below the header (PLAN.md, 2026-10-17).
+- No separate context menu and no right-click action. Run/Pause, Open UI and Settings sit in the info box's top bar (PLAN.md, 2026-10-17; header moved into the bar 2026-10-20).
 - Systemd settings: show the name and enabled state, with Start and Stop only.
 - Panel position: five presets (§3.5).
 - Five icons. Folder issues are yellow and Syncthing errors red.
