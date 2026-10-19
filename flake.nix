@@ -9,9 +9,8 @@
       forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
       uuid = "syncbeacon@whoozy82.github.io";
       inherit (nixpkgs) lib;
-      version = lib.trim (builtins.readFile ./VERSION.md);
-      # Same integer as scripts/bump-version.sh: MAJOR*10000 + MINOR*100 + PATCH.
-      versionCode = lib.foldl (acc: n: acc * 100 + lib.toInt n) 0 (lib.splitString "." version);
+      # scripts/bump-version.sh keeps metadata.json current.
+      version = (lib.importJSON (./. + "/${uuid}/metadata.json")).version-name;
     in
     {
       packages = forAll (pkgs: rec {
@@ -24,10 +23,6 @@
           buildPhase = ''
             runHook preBuild
             glib-compile-schemas schemas
-            sed -i -E \
-              -e 's/("version-name"[[:space:]]*:[[:space:]]*)"[^"]*"/\1"${version}"/' \
-              -e 's/("version"[[:space:]]*:[[:space:]]*)[0-9]+/\1${toString versionCode}/' \
-              metadata.json
             runHook postBuild
           '';
           installPhase = ''
