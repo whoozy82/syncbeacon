@@ -224,4 +224,12 @@ test('device detail: rates when connected, last seen otherwise', () => {
     assertEqual(detail.trixy, {kind: 'last-seen', text: 'Never seen'}, 'paused');
 });
 
+test('folder rows carry path and paused for the folder actions', () => {
+    const snap = snapshot();
+    snap.folders.find(f => f.label === 'Musik').paused = true;
+    const rows = Object.fromEntries(deriveStatus(snap).folders.map(f => [f.label, f]));
+    assertEqual([rows.Bilder.path, rows.Bilder.paused], ['/home/u/Bilder', false]);
+    assertEqual([rows.Musik.path, rows.Musik.paused], ['/home/u/Musik', true]);
+});
+
 run();

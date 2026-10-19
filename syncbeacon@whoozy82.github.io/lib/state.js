@@ -184,8 +184,8 @@ function folderRow(folder, snap) {
         text += ' · conflict check unavailable';
 
     const hasIssue = st.state === 'error' || !!st.error || pullErrors > 0 || conflicts > 0;
-    return {id: folder.id, label: folder.label || folder.id, status, text,
-        hasIssue, downloading: !folder.paused && DOWNLOADING_STATES.has(st.state),
+    return {id: folder.id, label: folder.label || folder.id, path: folder.path,
+        paused: folder.paused, status, text, hasIssue, downloading: !folder.paused && DOWNLOADING_STATES.has(st.state),
         issueSummary: issues.length ? `${folder.label || folder.id}: ${issues.join(', ')}` : null};
 }
 
