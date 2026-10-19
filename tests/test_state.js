@@ -2,7 +2,7 @@
 // Run: gjs -m tests/test_state.js
 
 import {assert, assertEqual, run, test} from './harness.js';
-import {Row, State, countsText, deriveStatus, emptySnapshot, formatLastSeen, formatRate,
+import {Row, State, countsText, deriveStatus, emptySnapshot, formatRate, formatTime,
     isConflictPath} from
     '../syncbeacon@whoozy82.github.io/lib/state.js';
 
@@ -203,12 +203,12 @@ test('rate formatting', () => {
     assertEqual(formatRate(12.3e9), '12 GB/s');
 });
 
-test('last seen formatting, in local time', () => {
-    assertEqual(formatLastSeen(new Date(2026, 9, 18, 14, 32).toISOString()), '18.10. 14:32');
-    assertEqual(formatLastSeen(new Date(2026, 0, 5, 7, 4).toISOString()), '05.01. 07:04');
-    assertEqual(formatLastSeen('1970-01-01T01:00:00+01:00'), 'Never seen');
-    assertEqual(formatLastSeen(undefined), 'Never seen');
-    assertEqual(formatLastSeen('garbage'), 'Never seen');
+test('time formatting, in local time without the year', () => {
+    assertEqual(formatTime(new Date(2026, 9, 18, 14, 32).toISOString(), '-'), '18.10. 14:32');
+    assertEqual(formatTime(new Date(2026, 0, 5, 7, 4).toISOString(), '-'), '05.01. 07:04');
+    assertEqual(formatTime('1970-01-01T01:00:00+01:00', 'Never seen'), 'Never seen');
+    assertEqual(formatTime(undefined, 'Never seen'), 'Never seen');
+    assertEqual(formatTime('garbage', 'Never scanned'), 'Never scanned');
 });
 
 test('device detail: rates when connected, last seen otherwise', () => {
@@ -230,6 +230,16 @@ test('folder rows carry path and paused for the folder actions', () => {
     const rows = Object.fromEntries(deriveStatus(snap).folders.map(f => [f.label, f]));
     assertEqual([rows.Bilder.path, rows.Bilder.paused], ['/home/u/Bilder', false]);
     assertEqual([rows.Musik.path, rows.Musik.paused], ['/home/u/Musik', true]);
+});
+
+test('folder detail: last scan', () => {
+    const snap = snapshot();
+    snap.lastScan = {bilder: new Date(2026, 9, 19, 9, 5).toISOString(),
+        musik: '1970-01-01T01:00:00+01:00'};
+    const detail = Object.fromEntries(deriveStatus(snap).folders.map(f => [f.label, f.detail]));
+    assertEqual(detail.Bilder, {kind: 'last-scan', text: '19.10. 09:05'});
+    assertEqual(detail.Musik, {kind: 'last-scan', text: 'Never scanned'});
+    assertEqual(detail.Tech, {kind: 'last-scan', text: 'Never scanned'}, 'no stats');
 });
 
 run();
