@@ -11,8 +11,55 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {State, STATE_LABELS} from '../lib/state.js';
 
 /**
+ * The device detail shown on hover: ↓/↑ rates while connected, otherwise a
+ * clock icon and when the device was last seen.
+ *
+ * @returns {{actor: St.BoxLayout, set: Function}}
+ */
+function deviceDetail() {
+    const actor = new St.BoxLayout({style_class: 'syncbeacon-row-detail',
+        x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
+
+    const down = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+    const up = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+    const rates = new St.BoxLayout({style_class: 'syncbeacon-detail-rates'});
+    rates.add_child(down);
+    rates.add_child(up);
+
+    const seenLabel = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+    const seen = new St.BoxLayout({style_class: 'syncbeacon-detail-part'});
+    seen.add_child(new St.Icon({icon_name: 'document-open-recent-symbolic',
+        style_class: 'syncbeacon-detail-icon', y_align: Clutter.ActorAlign.CENTER}));
+    seen.add_child(seenLabel);
+
+    actor.add_child(rates);
+    actor.add_child(seen);
+
+    const set = detail => {
+        rates.visible = detail?.kind === 'rates';
+        seen.visible = detail?.kind === 'last-seen';
+        if (rates.visible) {
+            down.text = `↓${detail.down}`;
+            up.text = `↑${detail.up}`;
+        } else {
+            seenLabel.text = detail?.text ?? '';
+        }
+    };
+    return {actor, set};
+}
+
+/** Wrap actor in a box that fills its parent and keeps actor at the right. */
+function alignEnd(actor) {
+    const box = new St.BoxLayout({x_expand: true, x_align: Clutter.ActorAlign.FILL,
+        y_align: Clutter.ActorAlign.CENTER});
+    box.add_child(new St.Widget({x_expand: true}));
+    box.add_child(actor);
+    return box;
+}
+
+/**
  * A row with a coloured dot, a name and a status. With withDetail, hovering
- * the status swaps it for a detail text on a darker background.
+ * the status swaps it for the device detail on a darker background.
  *
  * @returns {{item: PopupMenu.PopupBaseMenuItem, set: Function}}
  */
@@ -23,16 +70,18 @@ function statusRow(withDetail = false) {
     const nameLabel = new St.Label({style_class: 'syncbeacon-row-name',
         y_align: Clutter.ActorAlign.CENTER});
     const status = new St.Label({style_class: 'syncbeacon-row-status',
-        x_expand: true, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
+        x_expand: !withDetail, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
     item.add_child(dot);
     item.add_child(nameLabel);
 
     let detail = null;
     if (withDetail) {
-        // Both labels stay in the layout (hidden by opacity), so the cell
-        // keeps its width and hover state while the texts swap.
-        detail = new St.Label({style_class: 'syncbeacon-row-detail', opacity: 0,
-            x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
+        // Status and detail stay in the layout (hidden by opacity), so the
+        // cell keeps its width and hover state while they swap. BinLayout
+        // centres children that do not fill it, so each fills the cell in a
+        // box whose spacer pushes it to the right edge.
+        detail = deviceDetail();
+        detail.actor.opacity = 0;
         const cell = new St.Widget({
             layout_manager: new Clutter.BinLayout(),
             reactive: true,
@@ -41,23 +90,22 @@ function statusRow(withDetail = false) {
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
         });
-        cell.add_child(status);
-        cell.add_child(detail);
+        cell.add_child(alignEnd(status));
+        cell.add_child(alignEnd(detail.actor));
         cell.connect('notify::hover', () => {
             status.opacity = cell.hover ? 0 : 255;
-            detail.opacity = cell.hover ? 255 : 0;
+            detail.actor.opacity = cell.hover ? 255 : 0;
         });
         item.add_child(cell);
     } else {
         item.add_child(status);
     }
 
-    const set = (name, text, kind, detailText = '') => {
+    const set = (name, text, kind, detailValue = null) => {
         dot.style_class = `syncbeacon-dot syncbeacon-dot-${kind}`;
         nameLabel.text = name;
         status.text = text;
-        if (detail)
-            detail.text = detailText;
+        detail?.set(detailValue);
     };
     return {item, set};
 }

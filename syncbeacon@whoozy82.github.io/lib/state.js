@@ -102,10 +102,12 @@ export function formatLastSeen(iso) {
         `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function rateText(rate) {
-    if (!rate)
-        return '↓ –  ↑ –';
-    return `↓ ${formatRate(rate.down)}  ↑ ${formatRate(rate.up)}`;
+function rateDetail(rate) {
+    return {
+        kind: 'rates',
+        down: formatRate(rate?.down ?? 0),
+        up: formatRate(rate?.up ?? 0),
+    };
 }
 
 function folderPercent(st) {
@@ -134,7 +136,9 @@ function deviceRow(dev, snap) {
     }
     const online = !paused && !!conn.connected;
     // Shown on hover: the rates while connected, otherwise when it was last seen.
-    const detail = online ? rateText(snap.rates?.[dev.id]) : formatLastSeen(snap.lastSeen?.[dev.id]);
+    const detail = online
+        ? rateDetail(snap.rates?.[dev.id])
+        : {kind: 'last-seen', text: formatLastSeen(snap.lastSeen?.[dev.id])};
     return {id: dev.id, name: dev.name || dev.id.slice(0, 7), status, text, detail,
         online, paused: !!paused, completion};
 }

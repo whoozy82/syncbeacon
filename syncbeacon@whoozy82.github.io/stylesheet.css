@@ -74,6 +74,18 @@
   font-feature-settings: "tnum";
 }
 
+.syncbeacon-detail-part {
+  spacing: 4px;
+}
+
+.syncbeacon-detail-rates {
+  spacing: 8px;
+}
+
+.syncbeacon-detail-icon {
+  icon-size: 12px;
+}
+
 .syncbeacon-dot {
   width: 8px;
   height: 8px;
