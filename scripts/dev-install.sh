@@ -7,7 +7,7 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 uuid=syncbeacon@whoozy82.github.io
 dest="${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/$uuid"
 
-"$root/scripts/sync-version.sh"
+"$root/scripts/bump-version.sh"
 glib-compile-schemas "$root/$uuid/schemas"
 mkdir -p "$(dirname "$dest")"
 ln -sfn "$root/$uuid" "$dest"

@@ -10,7 +10,7 @@
       uuid = "syncbeacon@whoozy82.github.io";
       inherit (nixpkgs) lib;
       version = lib.trim (builtins.readFile ./VERSION.md);
-      # Same integer as scripts/sync-version.sh: MAJOR*10000 + MINOR*100 + PATCH.
+      # Same integer as scripts/bump-version.sh: MAJOR*10000 + MINOR*100 + PATCH.
       versionCode = lib.foldl (acc: n: acc * 100 + lib.toInt n) 0 (lib.splitString "." version);
     in
     {
@@ -49,6 +49,10 @@
 
       devShells = forAll (pkgs: {
         default = pkgs.mkShell {
+          # gobject-introspection's setup hook sets GI_TYPELIB_PATH from these
+          # packages, replacing the session's own value: typelibs from another
+          # glib build make gjs abort on `import Gio`.
+          nativeBuildInputs = [ pkgs.gobject-introspection ];
           packages = with pkgs; [ gjs glib libsoup_3 gtk4 libadwaita ];
         };
       });

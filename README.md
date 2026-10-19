@@ -24,8 +24,8 @@ The implementation foots on agentic coding.
 - **Left double click** opens the Syncthing window: by default the Syncthing web UI in its GNOME Web app window.
 - **Settings:** systemd unit info with Start / Stop, Syncthing config directory, how the Syncthing window opens (a command, by default the GNOME Web app, or the GUI URI and port in the default browser), position in the top bar (far left … far right), and a hotkey.
 
-Design and decisions: [IMPLEMENTATION.md](project/IMPLEMENTATION.md)
-Change log: [CHANGELOG.md](project/CHANGELOG.md)
+Design and decisions: [IMPLEMENTATION.md](PROJECT/IMPLEMENTATION.md)
+Change log: [HISTORY.md](PROJECT/HISTORY.md)
 
 ## Screenshot
 
