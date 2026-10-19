@@ -50,7 +50,7 @@ function rowDetail() {
 }
 
 /**
- * The folder actions shown when hovering the folder's circle: Open Folder,
+ * The folder actions shown when hovering the folder's ⋯ hint: Open Folder,
  * Rescan and Edit Ignore List.
  *
  * @param {InfoBox} infoBox
@@ -61,23 +61,23 @@ function folderActions(infoBox) {
         x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
     let folder = null;
 
-    const button = (iconName, accessibleName, onClick) => {
+    const button = (icon, accessibleName, onClick) => {
         const b = new St.Button({style_class: 'syncbeacon-folder-action',
-            accessible_name: accessibleName, child: new St.Icon({icon_name: iconName}),
+            accessible_name: accessibleName, child: new St.Icon(icon),
             y_align: Clutter.ActorAlign.CENTER});
         b.connect('clicked', () => folder && onClick(folder));
         actor.add_child(b);
         return b;
     };
     const controller = infoBox._controller;
-    button('folder-open-symbolic', 'Open folder', f => {
+    button({icon_name: 'folder-open-symbolic'}, 'Open folder', f => {
         infoBox.close();
         controller.openFolder(f.path);
     });
     // Stays open so the scan state shows up in place.
-    const rescan = button('view-refresh-symbolic', 'Rescan folder',
+    const rescan = button({icon_name: 'view-refresh-symbolic'}, 'Rescan folder',
         f => controller.rescanFolder(f.id));
-    button('document-edit-symbolic', 'Edit ignore list', f => {
+    button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, 'Edit ignore list', f => {
         infoBox.close();
         controller.editIgnores(f.path);
     });
@@ -91,12 +91,14 @@ function folderActions(infoBox) {
 }
 
 /**
- * A small ring that turns into the folder actions while hovered. The actions
- * are hidden otherwise, so they take no clicks and the hover zone is the ring;
- * once shown, the cell spans them and moving onto them keeps the hover.
+ * A small ⋯ hint that turns into the folder actions while hovered. The actions
+ * are hidden otherwise, so they take no clicks and the hover zone is the hint;
+ * once shown, the cell spans them and moving onto them keeps the hover. The
+ * cell fills the row height, so the row does not grow when they show.
  */
 function actionsCell(actions) {
-    const ring = new St.Widget({style_class: 'syncbeacon-action-ring',
+    const hint = new St.Icon({style_class: 'syncbeacon-action-hint',
+        icon_name: 'view-more-horizontal-symbolic',
         x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
     actions.actor.visible = false;
     const cell = new St.Widget({
@@ -105,12 +107,12 @@ function actionsCell(actions) {
         reactive: true,
         track_hover: true,
         x_align: Clutter.ActorAlign.CENTER,
-        y_align: Clutter.ActorAlign.CENTER,
+        y_align: Clutter.ActorAlign.FILL,
     });
-    cell.add_child(ring);
+    cell.add_child(hint);
     cell.add_child(actions.actor);
     cell.connect('notify::hover', () => {
-        ring.visible = !cell.hover;
+        hint.visible = !cell.hover;
         actions.actor.visible = cell.hover;
     });
     return cell;
@@ -128,7 +130,7 @@ function alignEnd(actor) {
 /**
  * A row with a coloured dot, a name and a status. With makeDetail, hovering
  * the status swaps it for the row detail on a darker background. With
- * makeActions, a ring centred in the row reveals the folder actions on hover.
+ * makeActions, a ⋯ hint centred in the row reveals the folder actions on hover.
  *
  * @param {Function|null} makeDetail - returns {actor, set}
  * @param {Function|null} makeActions - returns {actor, set}
@@ -138,7 +140,7 @@ function statusRow(makeDetail = null, makeActions = null) {
     const withDetail = !!makeDetail;
     const item = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
         style_class: 'syncbeacon-row'});
-    // With actions, the line sits under the ring in an overlay, so every ring
+    // With actions, the line sits under the hint in an overlay, so every hint
     // is centred in the row whatever the name and status widths.
     const actions = makeActions?.();
     const line = actions
