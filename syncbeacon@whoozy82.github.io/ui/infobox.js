@@ -176,8 +176,18 @@ function statusRow(makeDetail = null, makeActions = null) {
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
         });
-        cell.add_child(alignEnd(status));
+        // The detail text ends where the status text ends: the cell is drawn
+        // (and hovered) shifted right by the detail's padding, the status
+        // shifted back. Translation leaves the layout alone; negative margins
+        // break the popup's size.
+        const statusBox = alignEnd(status);
+        cell.add_child(statusBox);
         cell.add_child(alignEnd(detail.actor));
+        detail.actor.connect('style-changed', () => {
+            const shift = detail.actor.get_theme_node().get_padding(St.Side.RIGHT);
+            cell.translation_x = shift;
+            statusBox.translation_x = -shift;
+        });
         cell.connect('notify::hover', () => {
             status.opacity = cell.hover ? 0 : 255;
             detail.actor.opacity = cell.hover ? 255 : 0;
