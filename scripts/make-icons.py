@@ -128,6 +128,14 @@ def with_badge(glyph):
     return union(bitten, difference(circle(BADGE_CENTER, BADGE_RADIUS), glyph))
 
 
+def ignore_list():
+    """A page with text lines, the bite, and a no-entry badge (a bar in the disc)."""
+    page = difference(rect(2, 0.5, 11, 15), rect(3, 1.5, 9, 13))
+    lines = union(rect(5, 4, 5, 1), rect(5, 7, 5, 1), rect(5, 10, 3, 1))
+    bitten = difference(union(page, lines), circle(BADGE_CENTER, BITE_RADIUS))
+    return union(bitten, difference(circle(BADGE_CENTER, BADGE_RADIUS), rect(9.25, 11, 4.5, 1)))
+
+
 def fmt(n):
     s = f'{n:.3f}'.rstrip('0').rstrip('.')
     return '0' if s == '-0' else s
@@ -168,6 +176,7 @@ def main():
     write('in-sync', logo())
     for state, glyph in GLYPHS.items():
         write(state, with_badge(glyph()))
+    write('ignore', ignore_list())
 
 
 if __name__ == '__main__':

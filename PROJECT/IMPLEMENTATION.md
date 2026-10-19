@@ -175,6 +175,7 @@ The setting `window-mode` picks one of two ways to open the window:
   | `error` | badge with ✕ | none, drawn in the same weight |
 
 - `syncbeacon-syncthing-symbolic.svg`: the plain logo for the Open UI button in the info box.
+- `syncbeacon-ignore-symbolic.svg`: a page with a no-entry badge for the Edit Ignore List folder action, drawn in the same style.
 - The shell recolours symbolic icons by forcing `fill`, so upstream's masks and strokes would break. `scripts/make-icons.py` flattens the upstream geometry into one filled path per icon with boolean operations (skia-pathops); the lines of the logo are cut out of the disc. Rerun it after a change, the command is in its header.
 - They are loaded with `Gio.FileIcon` from the extension directory. Being symbolic, they take the panel colour, or the CSS colour for the two coloured states.
 - Optional: animate the arrows in `syncing` by swapping frames.
@@ -190,7 +191,7 @@ Syncthing_UX/
     │   ├── metadata.json  extension.js  prefs.js  stylesheet.css
     │   ├── lib/      config.js  client.js  state.js  conflicts.js  systemd.js  webapp.js
     │   ├── ui/       indicator.js  infobox.js
-    │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing}-symbolic.svg
+    │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing,ignore}-symbolic.svg
     │   └── schemas/  org.gnome.shell.extensions.syncbeacon.gschema.xml
     ├── tests/        harness.js  test_state.js  test_config.js   # run with `gjs -m`
     └── scripts/      dev-install.sh  devkit.sh  pack.sh  status.js  make-icons.py
