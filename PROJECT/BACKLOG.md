@@ -2,13 +2,11 @@
 
 ## Currently working on
 
-- Remove VERSION.md and adapt @scripts/bump-version.sh so it updates README.md (Badge), HISTORY.md and @syncbeacon@whoozy82.github.io/metadata.json
-  Also a git tag with the new version shall be set
 
 ## Backlog
 
 <!-- Planced features, changes, fixes -->
-- Versioning and Abount correction (extensions in extensions app)  maybe drop VERISON.md and move info somewhere else
+- Versioning and Abount correction (extensions in extensions app)
 - Reference to original Syncthing project (Readme)
 - In infobox > device list > when hovering over status of device:
   - For connected devices > displays the download and upload rate. Text is aligned to the right and has background 10% darker than infobox's bg
