@@ -10,10 +10,13 @@
   - Open Folder
   - Rescan
   - Edit Ignore List
-- device list and folder hold a maximum of 8 entries: if there are more, (....tbd...)
 - horizontal arrangement of device-list and folders-list
+- Icon rearrangement:
+  - Left: tbd
+  - Right: tbd
 - i18n: Multilingual UI
   - In settings window: language selection: System, English, German
+- device list and folders shall hold a maximum of 9 entries. if there exist more, visualize at the bottom with a common symbol
 - Extend to scope to non NixOS Gnome systems (maybe publish to extensions.gnome.org)
   - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
 
