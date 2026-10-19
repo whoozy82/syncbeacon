@@ -6,7 +6,6 @@
 ## Backlog
 
 <!-- Planced features, changes, fixes -->
-- Reference to original Syncthing project (Readme)
 - In infobox > device list > when hovering over status of device:
   - For connected devices > displays the download and upload rate. Text is aligned to the right and has background 10% darker than infobox's bg
   - For disconnected deviced > displays the last online date and time, aligned to the right and with background 10% darker than infobox's bg
