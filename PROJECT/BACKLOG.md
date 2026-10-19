@@ -6,9 +6,11 @@
 ## Backlog
 
 <!-- Planced features, changes, fixes -->
-- Folders Action Buttons redesign ... tbd
-  + fix line hight issue
-  + new symbol instead of circle
+- Folders Action Buttons update:
+  + fix line hight issue (reference @syncbeacon/PROJECT/resources/line-height-issue) > line hight shall not change with hover
+  + new symbol instead of circle: icon that symbolizes 'actions the user can do'
+  - change 'open ignore list' icon: shall look like "document with blocked elements"
+  - extend the spacing between the icons slightly
 - horizontal arrangement of device-list and folders-list
 - Icon rearrangement:
   - Left: tbd
