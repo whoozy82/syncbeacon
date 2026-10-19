@@ -9,6 +9,8 @@
 - In folders list: hovering over the status shall display the last scan date and time. Remove year from date. place a appropriate symbol to the left of the text.
   Design shall be as in devices list.
 - Folders Action Buttons redesign ... tbd
+  + fix line hight issue
+  + new symbol instead of circle
 - horizontal arrangement of device-list and folders-list
 - Icon rearrangement:
   - Left: tbd
