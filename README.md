@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/yellow)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v0.8.0/green) 
+![version](https://badgen.net/badge/version/v0.8.1/green) 
 
 ```
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
@@ -20,7 +20,7 @@ The implementation foots on agentic coding.
 ## Functional Description
 
 - A state icon with counts, e.g. `2/5 · 5` (online/total peers · folders). There are five states: In Sync, Synchronising…, Folder sync error or conflicts (yellow), Paused, Error with Syncthing (red).
-- **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left; Run / Pause button for all devices and folders — ▶ while running, ⏸ while paused — and Settings on the right), with this device's name (coloured by state) and the short state between them, then every peer and folder. Hovering a device's status shows its transfer rates or, if disconnected, when it was last seen; hovering a folder's status shows when it was last scanned. Hovering the ⋯ in the middle of a folder line shows buttons to open the folder, rescan it and edit its ignore list (`.stignore`).
+- **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left; Run / Pause button for all devices and folders — ▶ while running, ⏸ while paused — and Settings on the right), with this device's name (coloured by state) and the short state between them, then every folder and, below them, every peer. Hovering a device's status shows its transfer rates or, if disconnected, when it was last seen; hovering a folder's status shows when it was last scanned. Hovering the ⋯ in the middle of a folder line shows buttons to open the folder, rescan it and edit its ignore list (`.stignore`).
 - **Left double click** opens the Syncthing window: by default the Syncthing web UI in its GNOME Web app window.
 - **Settings:** systemd unit info with Start / Stop, Syncthing config directory, how the Syncthing window opens (a command, by default the GNOME Web app, or the GUI URI and port in the default browser), position in the top bar (far left … far right), and a hotkey.
 

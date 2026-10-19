@@ -118,8 +118,8 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
     - the header, left-aligned after Open UI (40 px gap): this device's name, coloured by state, with the short state label ("In Sync", "Paused", …) below it; the state label is the title while the name is unknown
     - Run/Pause, right-aligned like the rest: a round `icon-button` whose icon shows the current state, `media-playback-start-symbolic` while running and `media-playback-pause-symbolic` while Paused. A click calls Run or Pause (§3.2) and refreshes the status once the request succeeds. It is greyed out when no devices are configured or Syncthing is unreachable.
     - Settings: a round `icon-button` with a gear. It closes the info box and opens the settings window (`openPreferences()`).
-  - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
   - one row per folder: name, Up to date / Syncing x % / Scanning / Paused / n failed items / n conflicts
+  - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
 
   Opening it restarts the REST snapshot (aborts the running long-poll or skips the reconnect backoff), re-reads config.xml if that had failed, and rescans for conflict files. It updates live while open. Only the device and folder rows are rebuilt, so the controls keep their focus and hover state.
 - **Hotkey:** `Main.wm.addKeybinding('toggle-window', settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, …)`. If the Syncthing window is focused it is minimised. Otherwise it is opened or raised.
@@ -263,7 +263,7 @@ Rough total: 5–6 working days.
 |---|---|---|
 | 1 | UI element is visible on taskbar on this machine | After installation and enabling, the icon and `x/5 · 5` appear in the top bar. Each of the five positions in the prefs moves it live. |
 | 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Open UI button (Syncthing icon), the header, the Run/Pause button and the Settings button (gear icon) in its top bar. Clicking Run/Pause (▶) pauses all devices: within 2 s the icon shows Paused and the web UI shows every device, online or offline, as paused. Clicking it again (⏸) resumes all of them. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
-| 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 devices and 5 folders with their current status. A click outside, Esc, or another click on the button closes it. |
+| 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 folders and, below them, 5 devices with their current status. A click outside, Esc, or another click on the button closes it. |
 | 4 | Syncthing UI pops up when double clicking the taskbar element | A double click opens or raises the "Syncthing" GNOME Web app at `https://localhost:8384`, and the info box is closed. |
 | — | States and colours | Force each of the 5 states (see Phase 1). Folder issue is yellow and Syncthing error is red. The other three match the other top-bar icons in light and dark style. |
 
