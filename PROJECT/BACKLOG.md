@@ -8,7 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- folder list and device list shall switch position: folders list on top and devices list below it
 - dynamic arrangement:
   - is the count of devices and folders together below 10 > vertical arrangement as it is now 
   - is the count of devices and folder together 10 or more > horizontal arragement:
