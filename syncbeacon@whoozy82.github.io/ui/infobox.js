@@ -45,24 +45,23 @@ function deviceDetail() {
             seenLabel.text = detail?.text ?? '';
         }
     };
-    return {actor, set, setActive: () => {}};
+    return {actor, set};
 }
 
 /**
- * The folder actions shown on hover: Open Folder, Rescan and Edit Ignore
- * List. The buttons only take clicks while shown.
+ * The folder actions shown when hovering the folder's circle: Open Folder,
+ * Rescan and Edit Ignore List.
  *
  * @param {InfoBox} infoBox
- * @returns {{actor: St.BoxLayout, set: Function, setActive: Function}}
+ * @returns {{actor: St.BoxLayout, set: Function}}
  */
 function folderActions(infoBox) {
     const actor = new St.BoxLayout({style_class: 'syncbeacon-row-detail syncbeacon-folder-actions',
-        x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
+        x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
     let folder = null;
-    let active = false;
 
     const button = (iconName, accessibleName, onClick) => {
-        const b = new St.Button({style_class: 'syncbeacon-folder-action', reactive: false,
+        const b = new St.Button({style_class: 'syncbeacon-folder-action',
             accessible_name: accessibleName, child: new St.Icon({icon_name: iconName}),
             y_align: Clutter.ActorAlign.CENTER});
         b.connect('clicked', () => folder && onClick(folder));
@@ -70,32 +69,50 @@ function folderActions(infoBox) {
         return b;
     };
     const controller = infoBox._controller;
-    const open = button('folder-open-symbolic', 'Open folder', f => {
+    button('folder-open-symbolic', 'Open folder', f => {
         infoBox.close();
         controller.openFolder(f.path);
     });
     // Stays open so the scan state shows up in place.
     const rescan = button('view-refresh-symbolic', 'Rescan folder',
         f => controller.rescanFolder(f.id));
-    const ignores = button('document-edit-symbolic', 'Edit ignore list', f => {
+    button('document-edit-symbolic', 'Edit ignore list', f => {
         infoBox.close();
         controller.editIgnores(f.path);
     });
 
-    const sync = () => {
-        open.reactive = ignores.reactive = active;
-        rescan.reactive = active && !folder?.paused;
-        rescan.opacity = folder?.paused ? 128 : 255;
-    };
     const set = value => {
         folder = value;
-        sync();
+        rescan.reactive = !folder?.paused;
+        rescan.opacity = folder?.paused ? 128 : 255;
     };
-    const setActive = on => {
-        active = on;
-        sync();
-    };
-    return {actor, set, setActive};
+    return {actor, set};
+}
+
+/**
+ * A small ring that turns into the folder actions while hovered. The actions
+ * are hidden otherwise, so they take no clicks and the hover zone is the ring;
+ * once shown, the cell spans them and moving onto them keeps the hover.
+ */
+function actionsCell(actions) {
+    const ring = new St.Widget({style_class: 'syncbeacon-action-ring',
+        x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
+    actions.actor.visible = false;
+    const cell = new St.Widget({
+        style_class: 'syncbeacon-action-cell',
+        layout_manager: new Clutter.BinLayout(),
+        reactive: true,
+        track_hover: true,
+        x_align: Clutter.ActorAlign.CENTER,
+        y_align: Clutter.ActorAlign.CENTER,
+    });
+    cell.add_child(ring);
+    cell.add_child(actions.actor);
+    cell.connect('notify::hover', () => {
+        ring.visible = !cell.hover;
+        actions.actor.visible = cell.hover;
+    });
+    return cell;
 }
 
 /** Wrap actor in a box that fills its parent and keeps actor at the right. */
@@ -109,23 +126,36 @@ function alignEnd(actor) {
 
 /**
  * A row with a coloured dot, a name and a status. With makeDetail, hovering
- * the status swaps it for the detail it builds (device detail or folder
- * actions) on a darker background.
+ * the status swaps it for the device detail on a darker background. With
+ * makeActions, a ring centred in the row reveals the folder actions on hover.
  *
- * @param {Function|null} makeDetail - returns {actor, set, setActive}
+ * @param {Function|null} makeDetail - returns {actor, set}
+ * @param {Function|null} makeActions - returns {actor, set}
  * @returns {{item: PopupMenu.PopupBaseMenuItem, set: Function}}
  */
-function statusRow(makeDetail = null) {
+function statusRow(makeDetail = null, makeActions = null) {
     const withDetail = !!makeDetail;
     const item = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
         style_class: 'syncbeacon-row'});
+    // With actions, the line sits under the ring in an overlay, so every ring
+    // is centred in the row whatever the name and status widths.
+    const actions = makeActions?.();
+    const line = actions
+        ? new St.BoxLayout({style_class: 'syncbeacon-row-line', x_expand: true})
+        : item;
+    if (actions) {
+        const overlay = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true});
+        overlay.add_child(line);
+        overlay.add_child(actionsCell(actions));
+        item.add_child(overlay);
+    }
     const dot = new St.Widget({y_align: Clutter.ActorAlign.CENTER});
     const nameLabel = new St.Label({style_class: 'syncbeacon-row-name',
         y_align: Clutter.ActorAlign.CENTER});
     const status = new St.Label({style_class: 'syncbeacon-row-status',
         x_expand: !withDetail, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
-    item.add_child(dot);
-    item.add_child(nameLabel);
+    line.add_child(dot);
+    line.add_child(nameLabel);
 
     let detail = null;
     if (withDetail) {
@@ -148,11 +178,10 @@ function statusRow(makeDetail = null) {
         cell.connect('notify::hover', () => {
             status.opacity = cell.hover ? 0 : 255;
             detail.actor.opacity = cell.hover ? 255 : 0;
-            detail.setActive(cell.hover);
         });
-        item.add_child(cell);
+        line.add_child(cell);
     } else {
-        item.add_child(status);
+        line.add_child(status);
     }
 
     const set = (name, text, kind, detailValue = null) => {
@@ -160,6 +189,7 @@ function statusRow(makeDetail = null) {
         nameLabel.text = name;
         status.text = text;
         detail?.set(detailValue);
+        actions?.set(detailValue);
     };
     return {item, set};
 }
@@ -326,11 +356,11 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._lists.addMenuItem(this._foldersHeading);
         if (status.folders.length === 0)
             this._addPlaceholder('No folders');
-        this._folderRows = status.folders.map(() => this._addRow(() => folderActions(this)));
+        this._folderRows = status.folders.map(() => this._addRow(null, () => folderActions(this)));
     }
 
-    _addRow(makeDetail = null) {
-        const row = statusRow(makeDetail);
+    _addRow(makeDetail = null, makeActions = null) {
+        const row = statusRow(makeDetail, makeActions);
         this._lists.addMenuItem(row.item);
         return row;
     }

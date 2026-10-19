@@ -86,7 +86,25 @@
   icon-size: 12px;
 }
 
-/* Folder actions on hover, in the same darker box as the device detail. */
+/* Folder rows: the line under the centred ring, spaced like a plain row. */
+.syncbeacon-row-line {
+  spacing: 8px;
+}
+
+/* Padding enlarges the hover zone around the ring. */
+.syncbeacon-action-cell {
+  padding: 4px;
+}
+
+.syncbeacon-action-ring {
+  width: 8px;
+  height: 8px;
+  border-radius: 5px;
+  border: 1px solid #9a9996;
+}
+
+/* Folder actions in place of the ring, in the same darker box as the device
+   detail. */
 .syncbeacon-folder-actions {
   padding: 0 4px;
   spacing: 2px;
