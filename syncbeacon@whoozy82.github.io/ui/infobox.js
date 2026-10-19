@@ -1,5 +1,5 @@
 // Info box: a popup with the actions (Open UI, Run/Pause, Settings) and the
-// state on top, then every peer and folder with its status.
+// state on top, then every folder and peer with its status.
 
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -272,7 +272,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         actions.add_child(settingsButton);
         this.addMenuItem(actions);
 
-        // Devices and folders, rebuilt when the set of devices or folders
+        // Folders, then devices, rebuilt when the set of devices or folders
         // changes and updated in place otherwise, so a hovered row stays.
         this._lists = new PopupMenu.PopupMenuSection();
         this._listKey = null;
@@ -341,17 +341,17 @@ export class InfoBox extends PopupMenu.PopupMenu {
 
     _buildLists(status) {
         this._lists.removeAll();
-        this._devicesHeading = new PopupMenu.PopupSeparatorMenuItem('');
-        this._lists.addMenuItem(this._devicesHeading);
-        if (status.devices.length === 0)
-            this._addPlaceholder('No remote devices');
-        this._deviceRows = status.devices.map(() => this._addRow(rowDetail));
-
         this._foldersHeading = new PopupMenu.PopupSeparatorMenuItem('');
         this._lists.addMenuItem(this._foldersHeading);
         if (status.folders.length === 0)
             this._addPlaceholder('No folders');
         this._folderRows = status.folders.map(() => this._addRow(rowDetail, () => folderActions(this)));
+
+        this._devicesHeading = new PopupMenu.PopupSeparatorMenuItem('');
+        this._lists.addMenuItem(this._devicesHeading);
+        if (status.devices.length === 0)
+            this._addPlaceholder('No remote devices');
+        this._deviceRows = status.devices.map(() => this._addRow(rowDetail));
     }
 
     _addRow(makeDetail = null, makeActions = null) {
