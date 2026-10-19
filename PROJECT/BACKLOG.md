@@ -2,7 +2,8 @@
 
 ## Currently working on
 
-- Remove VERSION.md, HISTORY.md and @syncbeacon@whoozy82.github.io/metadata.json hold the version information + a git tag will be set
+- Remove VERSION.md and adapt @scripts/bump-version.sh so it updates README.md (Badge), HISTORY.md and @syncbeacon@whoozy82.github.io/metadata.json
+  Also a git tag with the new version shall be set
 
 ## Backlog
 

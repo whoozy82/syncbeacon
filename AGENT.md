@@ -32,7 +32,7 @@ This is the common workflow that we will use for changes on nix configuration fi
 6. **Implement**  Implement the change or fix
 7. **Test** Test the new configuration via test scripts under @scripts/
 8. **Iterate** Iterate if test fails for maximum 3 times, then stop and explain
-9. **Version Bump** Increase the version in HISTORY.md and @syncbeacon@whoozy82.github.io/metadata.json with appropriate jump.
+9. **Version Bump** Increase the version via @scripts/bump-version.sh
 10. **Document** Update project documentation (History and Backlog) and update main README.md if necessary
 11. **Commit** Stage files, commit change with short commit message
 12. **Push** Push to origin
