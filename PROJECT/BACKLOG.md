@@ -6,7 +6,6 @@
 ## Backlog
 
 <!-- Planced features, changes, fixes -->
-- Versioning and Abount correction (extensions in extensions app)
 - Reference to original Syncthing project (Readme)
 - In infobox > device list > when hovering over status of device:
   - For connected devices > displays the download and upload rate. Text is aligned to the right and has background 10% darker than infobox's bg
@@ -20,6 +19,7 @@
 - i18n: Multilingual UI
   - In settings window: language selection: System, English, German
 - Extend to scope to non NixOS Gnome systems (maybe publish to extensions.gnome.org)
+  - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
 
 *Maybe parallel to this project*
 - icon overlays in nautilus w syncthing status (maybe incl hover to show more info)
