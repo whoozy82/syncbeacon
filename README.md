@@ -1,8 +1,23 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
+![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/yellow)   &nbsp;&nbsp;
+![version](https://badgen.net/badge/version/v0.1/green) 
 
-Shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app. Inspired by the *Syncthing Indicator* extension. Targets GNOME Shell 50.
+```
+Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
+```
 
-## Description
+_**This extenion is NOT part of the official Syncthing project! It requires a running Syncthing instance though. To get Syncthing, check out the offical site at [https://syncthing.net](https://syncthing.net).**_
+
+## Goal
+
+This little project aims to publish this extension to the official Gnome Shell Extension Site as quickly as possible.
+Currently the implementation is in its infancy.
+
+## AI
+
+The implementation foots on agentic coding.
+
+## Functional Description
 
 - A state icon with counts, e.g. `2/5 · 5` (online/total peers · folders). There are five states: In Sync, Synchronising…, Folder sync error or conflicts (yellow), Paused, Error with Syncthing (red).
 - **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left; Run / Pause switch for all devices, Refresh, Settings on the right), then the state and every peer and folder.
@@ -15,6 +30,10 @@ Change log: [CHANGELOG.md](project/CHANGELOG.md)
 ## Screenshot
 
 ![syncbeacon](screenshots/syncbeacon.png)
+
+## Gnome Shell Target Versions
+
+- GNOME Shell 50 (developed on)
 
 ## Layout
 

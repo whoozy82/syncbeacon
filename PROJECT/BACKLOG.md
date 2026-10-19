@@ -1,12 +1,12 @@
 # Plan
 
-## Next change
+## Currently working on
 
-- 
+- Remove VERSION.md, HISTORY.md and @syncbeacon@whoozy82.github.io/metadata.json hold the version information + a git tag will be set
 
 ## Backlog
 
-- Build up AI dev ruling
+<!-- Planced features, changes, fixes -->
 - Versioning and Abount correction (extensions in extensions app)  maybe drop VERISON.md and move info somewhere else
 - Reference to original Syncthing project (Readme)
 - In infobox > device list > when hovering over status of device:
@@ -22,7 +22,7 @@
   - In settings window: language selection: System, English, German
 - Extend to scope to non NixOS Gnome systems (maybe publish to extensions.gnome.org)
 
-*Maybe parallel to this ignore list*
+*Maybe parallel to this project*
 - icon overlays in nautilus w syncthing status (maybe incl hover to show more info)
 - Syncthing actions in context menu in nautilus
 - easy managing ignore list in nautilus (?????????)

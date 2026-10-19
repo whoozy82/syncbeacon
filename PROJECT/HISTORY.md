@@ -1,5 +1,15 @@
-# Changelog
+# History
 
+## Current version
+
+<!--  -->
+v0.1
+
+
+## Changelog
+
+
+<!-- Each change adds a entry with data and short headline -->
 ## 2026-10-18: Version from VERSION.md
 
 - `scripts/sync-version.sh` copies the version from `VERSION.md` into `metadata.json` (`version-name`)

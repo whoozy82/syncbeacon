@@ -1,11 +1,13 @@
 # AGENT.md
 
-This file provides guidance any AI agent when working with code in this repository.
+This file provides guidance to any AI agent when working with code in this repository.
 
 # References
 
 @README.md
-@PROJECT.md
+@IMPLEMENTATION.md
+@HISTORY.md
+@BACKLOG.md
 
 # Interaction Guidelines
 
@@ -22,20 +24,20 @@ This file provides guidance any AI agent when working with code in this reposito
 
 ### Nix Configuration Update
 This is the common workflow that we will use for changes on nix configuration files:
-1. **Pick** Pick the first item from @PROJECT.md under `Upcoming features, fixes and tasks`
-2. **Draft** Draft an action plan for implementation, print out to prompt and to CHANGE.md
+1. **Pick** Pick from @PROJECT/BACKLOG.md `Currently working on` and if cleared, first entry under `Backlog`
+2. **Draft** Draft an action plan for implementation, print out to prompt and to @PROJECT/CHANGE.md
 3. **Approval** Ask for approval via click prompt
 4. **Synchronize** Before every change, synchronize with origin and resolve conflicts when necessary
 5. **Branch** Create new branch
 6. **Implement**  Implement the change or fix
-7. **Test** Test the new configuration via nix eval
-8. **Iterate** Iterate if test fails for maximum 3 times, stop and explain if not successful after 3 iterations!
-9. **Document** Update project documentation (History and Planned Changes) and update main README.md if necessary
-10. **Commit** Stage files, commit change with short commit message
-11. **Push** Push to origin
-12. **Build** Ask if nixos rebuild switch has to run via click prompt
+7. **Test** Test the new configuration via test scripts under @scripts/
+8. **Iterate** Iterate if test fails for maximum 3 times, then stop and explain
+9. **Version Bump** Increase the version in HISTORY.md and @syncbeacon@whoozy82.github.io/metadata.json with appropriate jump.
+10. **Document** Update project documentation (History and Backlog) and update main README.md if necessary
+11. **Commit** Stage files, commit change with short commit message
+12. **Push** Push to origin
 13. **Merge** Merge to main, remove CHANGE.md there and delete old branch
-14. **Next** Ask to proceed with the next upcoming feature / fix / task, if yes, pick it up
+14. **Build** Ask if the externsion shall be build on this client via click prompt
 
 ### README Changes
 Changes on main README.md follow these steps:
@@ -43,26 +45,11 @@ Changes on main README.md follow these steps:
 2. **Update** Update the README.md file
 3. **Staging** Add README.md to stage (git)
 
-### Nix Evaluation
-When the task is to evaluate the configuration:
-1. **Evaluate** Evaluate with nix eval
-2. **Provide the result** Provide the output of nix eval
-3. **Propose fixes** Propose fixes if there are findings
-4. **Update Documentation** Update Evaluation status in @PROJECT.md
-
-### Flake.lock Sanity Check
-In case of a flake.lock sanity check:
-1. **Evaluate** with nix run github:DeterminateSystems/flake-checker
-2. **Provide the result** in shell
-3. **Propose fixes**
-
 ### Research
 When asked to research on a certain topic:
 1. Collect relevant information
 2. Prepare, structure the information
 3. Report the information
-
-**Only read through the nix files where needed**
 
 ## Branching
 
@@ -77,7 +64,7 @@ Delete the branch local and remote once merged.
 
 ## When Stuck
 
-- If something isn't working after 2-3 attempts, stop and explain the issue
+- If something isn't working after 3 attempts, stop and explain the issue
 - Don't keep trying random fixes
 - Ask for clarification if requirements are unclear
 
