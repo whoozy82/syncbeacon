@@ -1,6 +1,6 @@
 # Syncbeacon: Implementation Plan
 
-Status: v5, 2026-10-17. Implemented in [syncbeacon/](syncbeacon/), see §5 for what is verified.
+Status: v1.0, 2026-10-20. Implemented in [syncbeacon/](syncbeacon/), see §5 for what is verified.
 Source: [PROJECT.md](PROJECT.md), [ui-mockup.png](ui-mockup.png)
 
 This version replaces the earlier plan (a Python backend with separate panel frontends for GNOME and Noctalia). With GNOME as the only target, a single GNOME Shell extension plus the existing GNOME Web app covers every feature, in about half the time.
@@ -201,7 +201,7 @@ Syncthing_UX/
     │   ├── lib/      config.js  client.js  state.js  conflicts.js  systemd.js  webapp.js  i18n.js  locale.js
     │   ├── ui/       indicator.js  infobox.js
     │   ├── locale/   de.po
-    │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing,ignore}-symbolic.svg
+    │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing,ignore,magic}-symbolic.svg  syncbeacon-syncthing.svg
     │   └── schemas/  org.gnome.shell.extensions.syncbeacon.gschema.xml
     ├── tests/        harness.js  test_state.js  test_config.js  test_webapp.js  test_i18n.js   # run with `gjs -m`
     └── scripts/      dev-install.sh  devkit.sh  pack.sh  status.js  i18n-check.js  make-icons.py
@@ -213,15 +213,16 @@ Syncthing_UX/
 
 Each phase ends with something that runs and can be checked.
 
-**Progress (2026-10-17):** the code for all phases is written.
+**Progress (2026-10-20, v1.0):** all phases are done.
 
 Verified automatically:
-- 28 unit tests pass (`nix flake check`).
+- 44 unit tests pass (`nix flake check`).
 - `scripts/status.js` shows the correct live state of the local instance: 2/5 peers, 5 folders, unit `syncthing.service` active and enabled, web app detected.
 - The conflict scanner finds conflict files and skips `.stversions`.
 - In an isolated headless GNOME Shell 50, the extension reaches state ACTIVE and the prefs open, both without JS errors.
+- The release zip from `scripts/pack.sh` installs with `gnome-extensions install` into an isolated headless GNOME Shell 50 and survives 10 enable/disable cycles with no JS errors or criticals and no leftover `find` processes (§6).
 
-Still open, because they need a person at the screen:
+Verified at the screen (devkit session, 2026-10-20):
 - the Phase 0 spikes (double click while the info box is open, raising the web app)
 - the acceptance checklist in §7
 
@@ -273,10 +274,11 @@ Rough total: 5–6 working days.
 | # | Criterion (PROJECT.md) | How to verify |
 |---|---|---|
 | 1 | UI element is visible on taskbar on this machine | After installation and enabling, the icon and `x/5 · 5` appear in the top bar. Each of the five positions in the prefs moves it live. |
-| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Open UI button (Syncthing icon), the header and the Settings button (gear icon) in its top bar. Clicking the "Devices" headline pauses all devices: within 2 s the icon shows Paused, the counts show `0/5⏸` and the web UI shows every device, online or offline, as paused. Clicking it again resumes all of them. The "Folders" headline does the same for the folders. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
-| 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 folders and, below them, 5 devices with their current status. A click outside, Esc, or another click on the button closes it. |
+| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Open UI button (Syncthing icon), the header and the Settings button (gear icon) in its top bar. With the hover functions switched on (wand in the bottom right corner), hovering the "Devices" headline shows a ⏸ button; clicking it pauses all devices: within 2 s the icon shows Paused, the counts show `0/5⏸` and the web UI shows every device, online or offline, as paused. The ▶ button then resumes all of them. The "Folders" headline does the same for the folders. Hovering a folder's name shows Open Folder, Rescan and Edit Ignore List, and each works. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
+| 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 folders and 5 devices with their current status, side by side (Auto, 10 entries) or stacked (Vertical). A click outside, Esc, or another click on the button closes it. |
 | 4 | Syncthing UI pops up when double clicking the taskbar element | A double click opens or raises the "Syncthing" GNOME Web app at `https://localhost:8384`, and the info box is closed. |
 | — | States and colours | Force each of the 5 states (see Phase 1). Folder issue is yellow and Syncthing error is red. The other three match the other top-bar icons in light and dark style. |
+| — | Settings | Language (System / English / Deutsch) switches the info box and the settings window at once. Layout › Orientation switches the info box live. Start / Stop of the unit works after the polkit prompt. The hotkey opens or raises the window. |
 
 ## 8. Open questions
 
