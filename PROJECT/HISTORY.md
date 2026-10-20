@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.15.0` created at _20.10.2026_
+- `v0.16.0` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Multilingual UI — new setting General › Language: System (default; the first system language with a translation, else English), English or Deutsch; switching applies at once to the info box, the notifications and the settings window; translations are gettext `.po` files in `locale/`, read at runtime by our own loader (GNOME's gettext cannot pick a language per extension); German translation of all texts; `scripts/i18n-check.js` lists missing and unused texts and adds stubs with `--update`; the description under "Syncthing service" is removed
 - [2026-10-20] Pause button on the list headlines — hovering "Folders (x)" or "Devices (x/y online)" swaps the text for a round ⏸ (running) or ▶ (paused) button, centred and framed like the folder actions; clicking it pauses or resumes that area; the "[Click to pause]" hint and the underline are gone
 - [2026-10-20] Info box layouts — new setting Layout › Orientation: Vertical (folders above devices, as before), Horizontal (folders left, devices right, equally wide, a dim line between them) or Auto (default; side by side with 10 or more folders and devices together)
 - [2026-10-20] GUI URI from config.xml — the GUI URI setting is empty by default again, so the settings window and the extension use the address from Syncthing's `config.xml`; `http://localhost:8384` is only the fallback when `config.xml` cannot be read; applying the shown address unchanged does not pin it; the "GUI URI and port" mode and field are renamed "URL+Port", and the settings texts say "URL" instead of "GUI URI"

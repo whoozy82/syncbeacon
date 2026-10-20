@@ -29,7 +29,7 @@
             runHook preInstall
             dest=$out/share/gnome-shell/extensions/${uuid}
             mkdir -p $dest
-            cp -r metadata.json extension.js prefs.js stylesheet.css lib ui icons schemas $dest/
+            cp -r metadata.json extension.js prefs.js stylesheet.css lib ui icons locale schemas $dest/
             runHook postInstall
           '';
           passthru.extensionUuid = uuid;
@@ -58,6 +58,8 @@
           gjs -m tests/test_state.js
           gjs -m tests/test_config.js
           gjs -m tests/test_webapp.js
+          gjs -m tests/test_i18n.js
+          gjs -m scripts/i18n-check.js
           touch $out
         '';
       });

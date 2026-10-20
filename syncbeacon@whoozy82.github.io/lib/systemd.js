@@ -4,6 +4,8 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
+import {_} from './i18n.js';
+
 Gio._promisify(Gio.DBusConnection.prototype, 'call');
 
 const SYSTEMD = 'org.freedesktop.systemd1';
@@ -123,7 +125,7 @@ export class SyncthingUnit {
 
     async _action(method) {
         if (!this.found)
-            throw new Error('No Syncthing unit found');
+            throw new Error(_('No Syncthing unit found'));
         await this._bus.call(SYSTEMD, MANAGER_PATH, MANAGER_IFACE, method,
             new GLib.Variant('(ss)', [this.name, 'replace']), new GLib.VariantType('(o)'),
             Gio.DBusCallFlags.ALLOW_INTERACTIVE_AUTHORIZATION, ACTION_TIMEOUT_MS, this._cancellable);

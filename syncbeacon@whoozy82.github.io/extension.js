@@ -8,6 +8,8 @@ import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import {_, N_} from './lib/i18n.js';
+import {loadLanguage} from './lib/locale.js';
 import {SyncthingClient, isCancelled} from './lib/client.js';
 import {DEFAULT_GUI_URI, resolveConnection} from './lib/config.js';
 import {ConflictScanner} from './lib/conflicts.js';
@@ -44,6 +46,7 @@ export default class SyncbeaconExtension extends Extension {
         this._folderKey = '';
         this._webAppCreatedFor = null;
         this._migrateSettings();
+        loadLanguage(this.path, this._settings.get_string('language'));
 
         this._client = new SyncthingClient({
             onUpdate: () => this._scheduleUpdate(),
@@ -59,6 +62,7 @@ export default class SyncbeaconExtension extends Extension {
             'changed::gui-uri', () => this._reconfigure(),
             'changed::position', () => this._placeIndicator(),
             'changed::window-mode', () => this._ensureWebApp(),
+            'changed::language', () => this._onLanguageChanged(),
             this);
 
         this._placeIndicator();
@@ -112,13 +116,13 @@ export default class SyncbeaconExtension extends Extension {
         // command: the default browser.
         const uri = this._uri;
         if (!uri) {
-            Main.notifyError('Syncbeacon', 'The Syncthing GUI address is unknown.');
+            Main.notifyError('Syncbeacon', _('The Syncthing GUI address is unknown.'));
             return;
         }
         try {
             Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1));
         } catch (e) {
-            Main.notifyError('Syncbeacon', `Cannot open ${uri}: ${e.message}`);
+            Main.notifyError('Syncbeacon', _('Cannot open {target}: {error}', {target: uri, error: e.message}));
         }
     }
 
@@ -151,14 +155,14 @@ export default class SyncbeaconExtension extends Extension {
             Gio.AppInfo.launch_default_for_uri(Gio.File.new_for_path(path).get_uri(),
                 global.create_app_launch_context(0, -1));
         } catch (e) {
-            Main.notifyError('Syncbeacon', `Cannot open ${path}: ${e.message}`);
+            Main.notifyError('Syncbeacon', _('Cannot open {target}: {error}', {target: path, error: e.message}));
         }
     }
 
     rescanFolder(folderId) {
         // The new folder state arrives through the events.
         this._client.rescan(folderId).catch(e =>
-            Main.notifyError('Syncbeacon', `Rescan failed: ${e.message}`));
+            Main.notifyError('Syncbeacon', _('Rescan failed: {error}', {error: e.message})));
     }
 
     /**
@@ -177,10 +181,10 @@ export default class SyncbeaconExtension extends Extension {
             }
             const app = Gio.AppInfo.get_default_for_type('text/plain', false);
             if (!app)
-                throw new Error('no default text editor');
+                throw new Error(_('no default text editor'));
             app.launch([file], global.create_app_launch_context(0, -1));
         } catch (e) {
-            Main.notifyError('Syncbeacon', `Cannot edit ${file.get_path()}: ${e.message}`);
+            Main.notifyError('Syncbeacon', _('Cannot edit {path}: {error}', {path: file.get_path(), error: e.message}));
         }
     }
 
@@ -196,7 +200,10 @@ export default class SyncbeaconExtension extends Extension {
             if (this._client)
                 this.refresh();
         }, e => {
-            Main.notifyError('Syncbeacon', `${paused ? 'Pause' : 'Resume'} ${area} failed: ${e.message}`);
+            const failed = area === 'devices'
+                ? paused ? N_('Pause devices failed: {error}') : N_('Resume devices failed: {error}')
+                : paused ? N_('Pause folders failed: {error}') : N_('Resume folders failed: {error}');
+            Main.notifyError('Syncbeacon', _(failed, {error: e.message}));
             this._scheduleUpdate();
         });
     }
@@ -229,7 +236,7 @@ export default class SyncbeaconExtension extends Extension {
         try {
             proc = Gio.Subprocess.new(['/bin/sh', '-c', command], Gio.SubprocessFlags.NONE);
         } catch (e) {
-            Main.notifyError('Syncbeacon', `Cannot run ${command}: ${e.message}`);
+            Main.notifyError('Syncbeacon', _('Cannot run {command}: {error}', {command, error: e.message}));
             return;
         }
         proc.wait_async(null, (_proc, result) => {
@@ -239,7 +246,7 @@ export default class SyncbeaconExtension extends Extension {
                 return;
             }
             if (proc.get_if_exited() && proc.get_exit_status() !== 0)
-                Main.notifyError('Syncbeacon', `${command} exited with status ${proc.get_exit_status()}`);
+                Main.notifyError('Syncbeacon', _('{command} exited with status {status}', {command, status: proc.get_exit_status()}));
         });
     }
 
@@ -262,6 +269,14 @@ export default class SyncbeaconExtension extends Extension {
         Main.panel.addToStatusArea(this.uuid, this._indicator, index, box);
         if (this._status)
             this._indicator.setStatus(this._status);
+    }
+
+    // New texts everywhere: the indicator and the info box are built again,
+    // and the status is derived again for the row texts.
+    _onLanguageChanged() {
+        loadLanguage(this.path, this._settings.get_string('language'));
+        this._placeIndicator();
+        this._scheduleUpdate();
     }
 
     async _reconfigure() {
