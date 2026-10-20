@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/yellow)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v0.14.0/green) 
+![version](https://badgen.net/badge/version/v0.15.0/green) 
 
 ```
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
@@ -20,7 +20,7 @@ The implementation foots on agentic coding.
 ## Functional Description
 
 - A state icon with counts, e.g. `2/5 · 5` (online/total peers · folders); a ⏸ after a count means all devices or all folders are paused. There are five states: In Sync, Synchronising…, Folder sync error or conflicts (yellow), Paused, Error with Syncthing (red).
-- **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left, Settings on the right), with this device's name (coloured by state) and the short state between them, then every folder and every peer, stacked or side by side (see Layout in the settings). Clicking the "Folders" or "Devices" headline pauses or resumes all folders or all devices. Hovering a device's status shows its transfer rates or, if disconnected, when it was last seen; hovering a folder's status shows when it was last scanned. Hovering a folder's name shows buttons in its place to open the folder, rescan it and edit its ignore list (`.stignore`).
+- **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left, Settings on the right), with this device's name (coloured by state) and the short state between them, then every folder and every peer, stacked or side by side (see Layout in the settings). Hovering the "Folders" or "Devices" headline shows a Pause/Resume button in its place that pauses or resumes all folders or all devices. Hovering a device's status shows its transfer rates or, if disconnected, when it was last seen; hovering a folder's status shows when it was last scanned. Hovering a folder's name shows buttons in its place to open the folder, rescan it and edit its ignore list (`.stignore`).
 - **Left double click** opens the Syncthing window: by default the Syncthing web UI in its GNOME Web app window (created automatically if GNOME Web is installed).
 - **Settings:** systemd unit info with Start / Stop, Syncthing config directory, how the Syncthing window opens (the Epiphany web app, a command, or URL+Port in the default browser; the GUI URI defaults to the address in Syncthing's `config.xml`, or `http://localhost:8384` if that cannot be read), position in the top bar (far left … far right), layout of the info box (Auto, Vertical, Horizontal; Auto puts folders and devices side by side from 10 entries on), and a hotkey.
 

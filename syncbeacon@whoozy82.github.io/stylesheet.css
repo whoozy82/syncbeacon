@@ -87,8 +87,9 @@
   icon-size: 12px;
 }
 
-/* Folder actions in place of the name, in the same darker box as the device
-   detail, framed in the GNOME accent colour. */
+/* Folder actions in place of the name, and the Pause/Resume button in place
+   of a list headline: the same darker box as the device detail, framed in
+   the GNOME accent colour. */
 .syncbeacon-folder-actions {
   padding: 0 4px;
   spacing: 12px;
@@ -127,13 +128,6 @@
 .syncbeacon-dot-offline { background-color: #9141ac; }
 .syncbeacon-dot-warning { background-color: #e5a50a; }
 .syncbeacon-dot-error { background-color: #e01b24; }
-
-/* List headlines: pause or resume their area. Hover underlines them; the
-   "[Click to …]" hint is added to the text. */
-.syncbeacon-headline:hover,
-.syncbeacon-headline:focus {
-  text-decoration: underline;
-}
 
 /* Folders and devices side by side, equally wide, with a vertical line
    between them; the gap is 7px on each side of the line. */

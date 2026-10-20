@@ -1,6 +1,6 @@
 // Info box: a popup with the actions (Open UI, Settings) and the
 // state on top, then every folder and peer with its status, stacked or side
-// by side; the list headlines pause and resume their area.
+// by side; hovering a list headline shows its Pause/Resume button.
 
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -206,36 +206,58 @@ function statusRow(makeDetail = null, makeActions = null) {
 }
 
 /**
- * A list headline that pauses or resumes its area when clicked. Hovering it
- * underlines it and appends what a click does.
+ * A list headline. Hovering its text swaps it for a button that pauses or
+ * resumes the area, the same way as a folder name and its actions.
  *
+ * @param {string} area - the area's name for the button, e.g. 'folders'
  * @param {Function} onClick - called with the paused value to set
  * @returns {{item: PopupMenu.PopupSeparatorMenuItem, set: Function}}
  */
-function headline(onClick) {
+function headline(area, onClick) {
     const item = new PopupMenu.PopupSeparatorMenuItem('');
-    // The label moves into a button, so only the text takes clicks; the item
-    // stays non-reactive and the box stays open.
+    // The label moves into a cell with the button, so only the text takes
+    // hover and clicks; the item stays non-reactive and the box stays open.
     const label = item.label;
     item.remove_child(label);
-    const button = new St.Button({style_class: 'syncbeacon-headline', can_focus: true,
-        child: label, y_align: Clutter.ActorAlign.CENTER});
-    item.insert_child_at_index(button, 0);
 
-    let text = '';
-    let paused = false;
-    const sync = () => {
-        const hint = paused ? 'Click to resume' : 'Click to pause';
-        label.text = button.hover && button.reactive ? `${text} [${hint}]` : text;
-        button.accessible_name = `${text}, ${hint.toLowerCase()}`;
-    };
-    button.connect('notify::hover', sync);
+    const icon = new St.Icon();
+    const button = new St.Button({style_class: 'syncbeacon-folder-action',
+        can_focus: true, child: icon, y_align: Clutter.ActorAlign.CENTER});
     button.connect('clicked', () => onClick(!paused));
+    const actions = new St.BoxLayout({style_class: 'syncbeacon-row-detail syncbeacon-folder-actions',
+        x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
+    actions.add_child(button);
 
-    const set = (value, isPaused, enabled) => {
-        text = value;
+    // As in nameCell, but the button is centred over the text (BinLayout
+    // centres it); expanding is set explicitly, so the filling box of the
+    // label does not take the space of the separator line.
+    const cell = new St.Widget({
+        layout_manager: new Clutter.BinLayout(),
+        reactive: true,
+        track_hover: true,
+        x_expand: false,
+        y_align: Clutter.ActorAlign.CENTER,
+    });
+    cell.add_child(alignStart(label));
+    cell.add_child(actions);
+    item.insert_child_at_index(cell, 0);
+
+    let paused = false;
+    let enabled = false;
+    const sync = () => {
+        const shown = cell.hover && enabled;
+        label.opacity = shown ? 0 : 255;
+        actions.opacity = shown ? 255 : 0;
+        button.reactive = shown;
+    };
+    cell.connect('notify::hover', sync);
+
+    const set = (value, isPaused, isEnabled) => {
+        label.text = value;
         paused = isPaused;
-        button.reactive = enabled;
+        enabled = isEnabled;
+        icon.icon_name = paused ? 'media-playback-start-symbolic' : 'media-playback-pause-symbolic';
+        button.accessible_name = `${paused ? 'Resume' : 'Pause'} ${area}`;
         button.can_focus = enabled;
         sync();
     };
@@ -397,7 +419,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
     _buildLists(status) {
         this._clearLists();
         const folders = this._foldersColumn;
-        this._foldersHeading = headline(paused => this._controller.setPaused('folders', paused));
+        this._foldersHeading = headline('folders', paused => this._controller.setPaused('folders', paused));
         folders.add_child(this._foldersHeading.item);
         if (status.folders.length === 0)
             this._addPlaceholder(folders, 'No folders');
@@ -405,7 +427,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
             this._addRow(folders, rowDetail, () => folderActions(this)));
 
         const devices = this._devicesColumn;
-        this._devicesHeading = headline(paused => this._controller.setPaused('devices', paused));
+        this._devicesHeading = headline('devices', paused => this._controller.setPaused('devices', paused));
         devices.add_child(this._devicesHeading.item);
         if (status.devices.length === 0)
             this._addPlaceholder(devices, 'No remote devices');
