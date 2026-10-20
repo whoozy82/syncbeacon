@@ -24,9 +24,9 @@
   margin: 0 6px;
 }
 
-/* Header in the action band, left aligned with some space after Open UI. */
+/* Header in the action band, centred between Open UI and Settings. */
 .syncbeacon-header {
-  padding-left: 32px;
+  padding: 0 8px;
 }
 
 .syncbeacon-header-title {
