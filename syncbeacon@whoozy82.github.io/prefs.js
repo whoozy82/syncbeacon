@@ -120,7 +120,6 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         page.add(this._languageGroup(settings));
         page.add(this._serviceGroup(window));
         page.add(this._connectionGroup(window, settings));
-        page.add(this._positionGroup(settings));
         page.add(this._layoutGroup(settings));
         page.add(this._hotkeyGroup(window, settings));
         page.add(this._aboutGroup());
@@ -155,6 +154,15 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         const row = new Adw.ActionRow({title: _('Version'), subtitle: this.metadata['version-name'] ?? '–'});
         row.add_css_class('property');
         group.add(row);
+        group.add(new Adw.PreferencesRow({activatable: false, child: new Gtk.Label({
+            label: [
+                _('This extension is not part of the official Syncthing project!'),
+                _('But Syncthing is essential for this extension to work.'),
+                _('Recommended is Epiphany (GNOME Web) for Web App feature.'),
+            ].join('\n'),
+            wrap: true, xalign: 0, css_classes: ['dim-label'],
+            margin_top: 12, margin_bottom: 12, margin_start: 12, margin_end: 12,
+        })}));
         return group;
     }
 
@@ -375,8 +383,7 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         return group;
     }
 
-    _positionGroup(settings) {
-        const group = new Adw.PreferencesGroup({title: _('Top bar')});
+    _positionRow(settings) {
         const model = Gtk.StringList.new(POSITIONS.map(([, label]) => _(label)));
         const row = new Adw.ComboRow({title: _('Position'), model});
         const sync = () => {
@@ -389,12 +396,12 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         });
         watch(settings, 'position', sync);
         sync();
-        group.add(row);
-        return group;
+        return row;
     }
 
     _layoutGroup(settings) {
         const group = new Adw.PreferencesGroup({title: _('Layout')});
+        group.add(this._positionRow(settings));
         const model = Gtk.StringList.new(ORIENTATIONS.map(([, label]) => _(label)));
         const row = new Adw.ComboRow({title: _('Orientation'), model,
             subtitle: _('Auto: side by side with 10 or more folders and devices')});

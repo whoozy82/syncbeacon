@@ -286,6 +286,18 @@ msgid "Version"
 msgstr "Version"
 
 #: prefs.js
+msgid "This extension is not part of the official Syncthing project!"
+msgstr "Diese Erweiterung ist kein Teil des offiziellen Syncthing-Projekts!"
+
+#: prefs.js
+msgid "But Syncthing is essential for this extension to work."
+msgstr "Syncthing ist jedoch Voraussetzung, damit diese Erweiterung funktioniert."
+
+#: prefs.js
+msgid "Recommended is Epiphany (GNOME Web) for Web App feature."
+msgstr "Für die Web-App-Funktion wird Epiphany (GNOME Web) empfohlen."
+
+#: prefs.js
 msgid "Syncthing service"
 msgstr "Syncthing-Dienst"
 
@@ -404,10 +416,6 @@ msgstr "Bitte einen Befehl eingeben. Bis dahin wird der Standardbrowser verwende
 #: prefs.js
 msgid "Runs the command in a shell"
 msgstr "Führt den Befehl in einer Shell aus"
-
-#: prefs.js
-msgid "Top bar"
-msgstr "Obere Leiste"
 
 #: prefs.js
 msgid "Position"
