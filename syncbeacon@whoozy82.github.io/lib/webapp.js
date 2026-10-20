@@ -64,34 +64,26 @@ export function findWebApp(uri) {
 }
 
 /**
- * The command that opens the Syncthing window: the one from the settings, or
- * else the matching web app's Exec line.
+ * The command from the settings that opens the Syncthing window in command mode.
  *
  * @param {Gio.Settings} settings
- * @param {string|null} uri - effective GUI URI
  * @returns {string|null}
  */
-export function windowCommand(settings, uri) {
-    return settings.get_string('window-command').trim() ||
-        (uri ? findWebApp(uri)?.command : null) || null;
+export function windowCommand(settings) {
+    return settings.get_string('window-command').trim() || null;
 }
 
 /**
- * Store the matching web app's Exec line as the window command, so the
- * setting holds a real command instead of staying empty.
+ * Whether a command is a GNOME Web app's Exec line, as earlier versions
+ * stored it in window-command.
  *
- * @param {Gio.Settings} settings
- * @param {string|null} uri - effective GUI URI
- * @param {boolean} force - replace a command that is already set
- * @returns {string|null} the stored command, or null if no web app matches
+ * @param {string} command
+ * @returns {boolean}
  */
-export function storeWebAppCommand(settings, uri, force = false) {
-    if (!force && settings.get_string('window-command').trim())
-        return null;
-    const command = uri ? findWebApp(uri)?.command : null;
-    if (command && command !== settings.get_string('window-command'))
-        settings.set_string('window-command', command);
-    return command ?? null;
+export function isWebAppCommand(command) {
+    const argv = commandArgv(command);
+    return !!argv && GLib.path_get_basename(argv[0]) === 'epiphany' &&
+        argv.includes('--application-mode');
 }
 
 /**

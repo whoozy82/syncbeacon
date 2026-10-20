@@ -128,26 +128,30 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
 
 ### 3.6 Syncthing window: `lib/webapp.js`
 
-The setting `window-mode` picks one of two ways to open the window:
+The setting `window-mode` picks one of three ways to open the window:
 
-- **Command** (default): run `window-command`.
-  - **Default command:** while `window-command` is empty, the extension (after reading `config.xml`) and the settings window (when shown) store the `Exec` line of the GNOME Web app (`org.gnome.Epiphany.WebApp_*.desktop`) whose URL matches the GUI URI. The setting therefore holds the real command. The reset button in the settings, or applying an empty field, stores the detected command again.
-  - **Known app:** if the command is the `Exec` line of an installed app (compared as parsed arguments, without field codes like `%U`), `Shell.AppSystem.lookup_app(<desktop ID>).activate()` is used instead. It starts the app or raises its existing window, and the hotkey can minimise it. With the default command this is always the case.
+- **Epiphany Web App** (`webapp`, default): the GNOME Web app (`org.gnome.Epiphany.WebApp_*.desktop`) whose URL matches the GUI URI (`sameGui()`), looked up each time and never stored. `Shell.AppSystem.lookup_app(<desktop ID>).activate()` starts it or raises its existing window, and the hotkey can minimise it.
+  - **No such web app:** with GNOME Web installed, one is created as soon as the GUI URI is known (and when the mode is switched to `webapp`); see below. At most once per GUI URI per session, so a failed attempt or a deleted app is not recreated in a loop.
+  - **No web app and no GNOME Web:** open the GUI URI in the default browser.
+- **Command** (`command`): run `window-command`. It is empty by default and only holds what the user enters.
+  - **Known app:** if the command is the `Exec` line of an installed app (compared as parsed arguments, without field codes like `%U`), `Shell.AppSystem.lookup_app(<desktop ID>).activate()` is used instead, as for the web app.
   - **Any other command:** run with `/bin/sh -c`. A non-zero exit status is reported as a notification. The hotkey cannot find this window, so it only opens it.
-  - **No command and no web app:** open the GUI URI in the default browser. The prefs explain how to create a web app (GNOME Web → ⋮ → "Install Site as Web App…").
-- **GUI URI and port:** open the GUI URI in the default browser.
+  - **No command:** open the GUI URI in the default browser.
+- **GUI URI and port** (`uri`): open the GUI URI in the default browser.
 
-**First run** (`first-run-done` is false; runs once the GUI URI is known from `config.xml`):
+The GUI URI (`gui-uri`) defaults to `http://localhost:8384`; set to empty, the address from `config.xml` is used.
 
-- **GNOME Web installed** (`epiphany` in `PATH`): if no web app matches the GUI URI, one named "Syncthing" is created (`createWebApp()` in `lib/webapp.js`), and `window-command` is set to its command. The files are laid out as GNOME Web's own "Install Site as Web App…" leaves them through the DynamicLauncher portal, so GNOME Web lists and manages the app like its own:
+**Migration** (`settings-version` 0 → 1): earlier versions stored the web app's `Exec` line in `window-command`. Such a command (`epiphany --application-mode …`, `isWebAppCommand()`) is cleared once, and `window-mode` `command` is reset to the default.
+
+**Creating the web app** (`createWebApp()` in `lib/webapp.js`), when GNOME Web is installed (`epiphany` in `PATH`) and no web app matches the GUI URI: one named "Syncthing" is created. The files are laid out as GNOME Web's own "Install Site as Web App…" leaves them through the DynamicLauncher portal, so GNOME Web lists and manages the app like its own:
   - ID `org.gnome.Epiphany.WebApp_<SHA-1 of the name>`, as in GNOME Web. If that ID is taken, "Syncthing GUI" or "Syncthing (Syncbeacon)" is used instead.
   - profile `~/.local/share/<id>/` with an empty `.app` marker; GNOME Web fills in the rest on first start
   - desktop file `~/.local/share/xdg-desktop-portal/applications/<id>.desktop`, symlinked from `~/.local/share/applications/`
   - icon: Syncthing's `hicolor` app icon, copied to `~/.local/share/xdg-desktop-portal/icons/192x192/`
   
   The portal itself is not used: it only accepts desktop file IDs prefixed with the caller's app ID, and it asks for confirmation in a dialog. A Flatpak GNOME Web counts as not installed, because it keeps its web apps elsewhere.
-- **GNOME Web not installed:** `window-mode` is set to `uri` and `gui-uri` to the address from `config.xml`.
-- Keys the user has already set are left alone.
+
+**First run** (`first-run-done` is false; runs once the GUI URI is known): without GNOME Web, `window-mode` is set to `uri`, unless the user has already set it.
 
 ### 3.7 Settings window: `prefs.js`
 
@@ -156,7 +160,7 @@ The setting `window-mode` picks one of two ways to open the window:
 | Page / group | Settings | Implementation |
 |---|---|---|
 | Service (systemd) | **Info:** unit name and enabled state (e.g. `syncthing.service`, system, enabled), plus the live active state. **Controls:** Start, Stop. | `lib/systemd.js`: `org.freedesktop.systemd1` over the system bus, falling back to the session bus for a user unit. The unit is auto-detected from `syncthing.service`, `syncthing@$USER.service` or a user `syncthing.service`. It reads `Id`, `UnitFileState` and `ActiveState`, and calls `StartUnit` / `StopUnit` with `ALLOW_INTERACTIVE_AUTHORIZATION` so GNOME shows the polkit prompt. Info and buttons update live from `PropertiesChanged`. The enabled state is display-only, so no NixOS special case is needed. |
-| Connection | In this order: Syncthing config directory (file chooser + auto-detect). "Syncthing window": Command or GUI URI and port (§3.6). The third row depends on that choice: the command (default from the GNOME Web app, with a reset button) or the GUI URI including port (default from `config.xml`). "Test connection" button. | The "Syncthing window" row's subtitle says what will happen: which app is opened or raised, that the command runs in a shell, or the "no web app" note from §3.6. The GUI URI is also used for the REST connection; while the Command mode hides its row, the address from `config.xml` (or an earlier override) still applies. Test: `GET /rest/noauth/health`, then an authenticated `/rest/system/version`, showing the result inline. |
+| Connection | In this order: Syncthing config directory (file chooser + auto-detect). "Syncthing window": Epiphany Web App, Command or GUI URI and port (§3.6). The third row depends on that choice: the web app identifier (read-only desktop ID, updated through `Gio.AppInfoMonitor`), the command (empty by default) or the GUI URI including port (default `http://localhost:8384`, reset button for the address from `config.xml`). "Test connection" button. | The "Syncthing window" row's subtitle says what will happen: which app is opened or raised, that the command runs in a shell, or that the web app is missing (created by the extension) or GNOME Web is not installed. The GUI URI is also used for the REST connection; while the other modes hide its row, the stored GUI URI still applies. Test: `GET /rest/noauth/health`, then an authenticated `/rest/system/version`, showing the result inline. |
 | Position | Far left / Left / Middle / Right / Far right (`Adw.ComboRow`) | Stored as an enum in GSettings and applied live by the extension (§3.5) |
 | Hotkey | Shortcut to open or raise the Syncthing window | A small shortcut-recorder dialog (`Gtk.EventControllerKey` → `Gtk.accelerator_name`), stored as `as` in GSettings. libadwaita has no ready-made shortcut widget. |
 
@@ -194,7 +198,7 @@ Syncthing_UX/
     │   ├── ui/       indicator.js  infobox.js
     │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing,ignore}-symbolic.svg
     │   └── schemas/  org.gnome.shell.extensions.syncbeacon.gschema.xml
-    ├── tests/        harness.js  test_state.js  test_config.js   # run with `gjs -m`
+    ├── tests/        harness.js  test_state.js  test_config.js  test_webapp.js   # run with `gjs -m`
     └── scripts/      dev-install.sh  devkit.sh  pack.sh  status.js  make-icons.py
 ```
 

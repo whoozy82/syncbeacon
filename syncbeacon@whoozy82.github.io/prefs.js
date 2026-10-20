@@ -10,7 +10,7 @@ import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/ex
 import {isCancelled, testConnection} from './lib/client.js';
 import {detectConfigDir, loadConfig, normalizeUri, resolveConnection} from './lib/config.js';
 import {SyncthingUnit} from './lib/systemd.js';
-import {commandArgv, findAppByCommand, storeWebAppCommand, windowCommand} from './lib/webapp.js';
+import {commandArgv, epiphanyAvailable, findAppByCommand, findWebApp, windowCommand} from './lib/webapp.js';
 
 Gio._promisify(Gtk.FileDialog.prototype, 'select_folder');
 
@@ -23,6 +23,7 @@ const POSITIONS = [
 ];
 
 const WINDOW_MODES = [
+    ['webapp', 'Epiphany Web App'],
     ['command', 'Command'],
     ['uri', 'GUI URI and port'],
 ];
@@ -178,8 +179,8 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         dirRow.add_suffix(detectDir);
         group.add(dirRow);
 
-        // Syncthing window: how it is opened. The row below shows the command
-        // or the GUI URI, depending on the choice.
+        // Syncthing window: how it is opened. The row below shows the web app,
+        // the command or the GUI URI, depending on the choice.
         const modeRow = new Adw.ComboRow({title: 'Syncthing window',
             model: Gtk.StringList.new(WINDOW_MODES.map(([, label]) => label))});
         modeRow.connect('notify::selected', () => {
@@ -189,26 +190,21 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         });
         group.add(modeRow);
 
+        // Web app: the one found for the GUI URI, read-only.
+        const webAppRow = new Adw.ActionRow({title: 'Web app identifier', subtitle: '–'});
+        webAppRow.add_css_class('property');
+        group.add(webAppRow);
+
         // Command
         const commandRow = new Adw.EntryRow({title: 'Command', show_apply_button: true});
-        commandRow.connect('apply', async () => {
+        commandRow.connect('apply', () => {
             const text = commandRow.text.trim();
-            // An emptied field goes back to the web app's command.
-            if (!text && storeWebAppCommand(settings, await effectiveUri(settings), true))
-                return;
             if (text && !commandArgv(text)) {
                 toast(window, `Invalid command: ${text}`);
                 return;
             }
             settings.set_string('window-command', text);
         });
-        const detectCommand = suffixButton({icon_name: 'edit-undo-symbolic',
-            tooltip_text: 'Use the GNOME Web app for the GUI URI', css_classes: ['flat']});
-        detectCommand.connect('clicked', async () => {
-            if (!storeWebAppCommand(settings, await effectiveUri(settings), true))
-                toast(window, 'No GNOME Web app for the GUI URI');
-        });
-        commandRow.add_suffix(detectCommand);
         group.add(commandRow);
 
         // GUI URI
@@ -263,20 +259,32 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         const showWindow = async () => {
             const mode = settings.get_string('window-mode');
             modeRow.selected = Math.max(0, WINDOW_MODES.findIndex(([v]) => v === mode));
+            webAppRow.visible = mode === 'webapp';
             commandRow.visible = mode === 'command';
             uriRow.visible = mode === 'uri';
-            if (mode !== 'command') {
+            if (mode === 'uri') {
                 modeRow.subtitle = 'Opens the GUI URI in the default browser';
                 return;
             }
-            const uri = await effectiveUri(settings);
-            storeWebAppCommand(settings, uri);
-            const command = windowCommand(settings, uri);
+            if (mode === 'webapp') {
+                const uri = await effectiveUri(settings);
+                const webApp = uri ? findWebApp(uri) : null;
+                webAppRow.subtitle = webApp?.id ?? '–';
+                if (webApp) {
+                    modeRow.subtitle = `Opens or raises ${webApp.name}`;
+                } else if (!epiphanyAvailable()) {
+                    modeRow.subtitle = 'GNOME Web is not installed. Until it is, the default browser is used.';
+                } else {
+                    modeRow.subtitle = 'No GNOME Web app for the GUI URI yet. It is created as soon as ' +
+                        'the extension knows the GUI URI; until then the default browser is used.';
+                }
+                return;
+            }
+            const command = windowCommand(settings);
             commandRow.text = command ?? '';
             const app = command ? findAppByCommand(command) : null;
             if (!command) {
-                modeRow.subtitle = 'No GNOME Web app for the GUI URI. Create one in GNOME Web: ⋮ → ' +
-                    '"Install Site as Web App…", or enter a command. Until then the default browser is used.';
+                modeRow.subtitle = 'Enter a command. Until then the default browser is used.';
             } else if (app) {
                 modeRow.subtitle = `Opens or raises ${app.get_display_name()}`;
             } else {
@@ -292,6 +300,13 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         };
         for (const key of ['config-dir', 'gui-uri', 'window-mode', 'window-command'])
             watch(window, settings, key, refresh);
+        // A web app created or removed meanwhile, e.g. by the extension.
+        const appMonitor = Gio.AppInfoMonitor.get();
+        const appMonitorId = appMonitor.connect('changed', () => showWindow());
+        window.connect('close-request', () => {
+            appMonitor.disconnect(appMonitorId);
+            return false;
+        });
         refresh();
         return group;
     }

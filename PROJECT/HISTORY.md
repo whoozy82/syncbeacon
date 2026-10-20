@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.12.0` created at _20.10.2026_
+- `v0.13.0` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Epiphany Web App window mode — new default "Syncthing window" mode that opens or raises the GNOME Web app matching the GUI URI (looked up each time, created if GNOME Web is installed and it is missing); the settings show its identifier read-only; Command mode is no longer pre-filled, and a stored web app command from earlier versions is cleared once; the GUI URI defaults to `http://localhost:8384`
 - [2026-10-20] Folder actions on the name — hovering a folder's name swaps it for the Open Folder, Rescan and Edit Ignore List buttons (the ⋯ hint is gone); the box is framed in the GNOME accent colour and the buttons are 50 % further apart
 - [2026-10-20] Centred header — the device name and the short state sit centred in the info box's top bar, between Open UI and Settings
 - [2026-10-20] Timed status refresh — besides the live events, the statuses are polled every 10 s while the info box is closed and every 1 s while it is open (rates included, replacing the 2 s rate sampling); the expensive folder status (`/rest/db/status`) at most every 15 s

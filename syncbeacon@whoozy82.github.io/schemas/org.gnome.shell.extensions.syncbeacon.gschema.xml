@@ -7,9 +7,9 @@
       <description>Directory containing config.xml. Empty: auto-detect ($XDG_STATE_HOME/syncthing, then ~/.config/syncthing).</description>
     </key>
     <key name="gui-uri" type="s">
-      <default>''</default>
+      <default>'http://localhost:8384'</default>
       <summary>Syncthing GUI URI including port</summary>
-      <description>For example http://127.0.0.1:8384. Empty: taken from config.xml.</description>
+      <description>Used for the REST connection and the Syncthing window. Empty: taken from config.xml.</description>
     </key>
     <key name="position" type="s">
       <choices>
@@ -28,22 +28,28 @@
     </key>
     <key name="window-mode" type="s">
       <choices>
+        <choice value="webapp"/>
         <choice value="command"/>
         <choice value="uri"/>
       </choices>
-      <default>'command'</default>
+      <default>'webapp'</default>
       <summary>How the Syncthing window is opened</summary>
-      <description>command: run window-command. uri: open the GUI URI in the default browser.</description>
+      <description>webapp: open the GNOME Web app whose URL matches the GUI URI (created if GNOME Web is installed and there is none). command: run window-command. uri: open the GUI URI in the default browser.</description>
     </key>
     <key name="window-command" type="s">
       <default>''</default>
       <summary>Command that opens the Syncthing window</summary>
-      <description>Run in a shell. Filled in with the Exec line of the GNOME Web app whose URL matches the GUI URI as soon as one is found. Empty: no such web app yet; the default browser is used.</description>
+      <description>Run in a shell in command mode. Empty: the default browser is used.</description>
     </key>
     <key name="first-run-done" type="b">
       <default>false</default>
       <summary>Whether the one-time setup of the Syncthing window has run</summary>
-      <description>On first run, with GNOME Web installed, a Syncthing web app is created if none matches the GUI URI and window-command is set to it. Without GNOME Web, window-mode is set to uri and gui-uri to the address from config.xml.</description>
+      <description>On first run without GNOME Web, window-mode is set to uri and gui-uri to the address from config.xml.</description>
+    </key>
+    <key name="settings-version" type="i">
+      <default>0</default>
+      <summary>Version of the stored settings, for one-time migrations</summary>
+      <description>1: window-command is no longer filled in with the web app's Exec line; such a stored command was cleared.</description>
     </key>
   </schema>
 </schemalist>
