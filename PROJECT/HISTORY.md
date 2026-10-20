@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.18.0` created at _20.10.2026_
+- `v0.18.1` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Wand position fix — the wand that switches the hover functions sits in the bottom right corner of the info box again instead of the middle of the footer (Mutter 50's BinLayout only aligns a child that also expands)
 - [2026-10-20] Info box height limit — the info box is at most 60 % of its monitor's height; beyond that the folder and device lists scroll with the mouse wheel (no scrollbar, faded edges) while the top bar and the wand stay visible; a dim chevron in the middle of the footer shows while more entries follow below
 - [2026-10-20] About note and settings tidy-up — the About section (German "Info") gets a row under Version saying that Syncbeacon is not part of the official Syncthing project, that it needs Syncthing, and that Epiphany (GNOME Web) is recommended for the web app feature (English and German); the top-bar Position moves into the Layout section above Orientation, and the "Top bar" section is gone
 - [2026-10-20] Hover switch in the info box — a wand in the bottom right corner switches all hover functions on or off (status details, folder actions, headline Pause/Resume); off by default, the wand shows the GNOME accent colour while on and dim grey while off; the choice is kept in the setting `hover-functions`

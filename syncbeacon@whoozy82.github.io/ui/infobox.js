@@ -388,7 +388,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
 
         // Footer: the wand that switches the hover functions on or off, in
         // the bottom right corner. The box stays open. A chevron in the middle
-        // shows while the lists go on below the bottom edge.
+        // shows while the lists go on below the bottom edge. BinLayout only
+        // aligns a child that has x_expand.
         const footer = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
             style_class: 'syncbeacon-footer'});
         const footerBin = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true});
@@ -396,7 +397,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
             x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER, visible: false});
         footerBin.add_child(this._moreBelow);
         this._hoverToggle = new St.Button({style_class: 'syncbeacon-folder-action syncbeacon-hover-toggle',
-            can_focus: true, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER,
+            can_focus: true, x_expand: true, x_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
             child: new St.Icon({gicon: this._extensionIcon('syncbeacon-magic-symbolic.svg')})});
         this._hoverToggle.connect('clicked', () =>
             this._settings.set_boolean('hover-functions', !this._hover.enabled));

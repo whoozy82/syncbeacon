@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/yellow)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v0.18.0/green) 
+![version](https://badgen.net/badge/version/v0.18.1/green) 
 
 ```
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
@@ -71,6 +71,7 @@ gnome-extensions enable syncbeacon@whoozy82.github.io       # Enable the extensi
 gsettings reset org.gnome.shell.extensions.syncbeacon first-run-done   # Reset the first run flag
 ###
 scripts/devkit.sh                                           # nested GNOME Shell window for testing
+nix develop -c scripts/devkit.sh                            # nested Gnome Shell w. nix
 ```
 
 GNOME only loads a newly linked extension in the main session after a re-login. Use the devkit window until then. Watch for errors with:
