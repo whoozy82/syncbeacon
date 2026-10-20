@@ -8,10 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- The refresh of the status in folders list and devices list shall be changes:
-  - when box is closed: update the statuses with frequency of 10 seconds
-  - in the event of opening the box: updates all statuses
-  - with a frequency of 1 second it refreshes the statuses as long as the box is shown
 - dynamic arrangement:
   - is the count of devices and folders together below 10 > vertical arrangement as it is now 
   - is the count of devices and folder together 10 or more > horizontal arragement:

@@ -63,6 +63,7 @@ systemd (D-Bus) ◄───►│ systemd.js (unit state, start/stop)          
   - `/rest/system/error`
   - Failed items come from `pullErrors` in `/rest/db/status` and `FolderSummary`. A separate `/rest/folder/errors` call is not needed.
 - **Live updates:** long-poll `/rest/events?since=N&timeout=60&events=StateChanged,FolderSummary,FolderCompletion,FolderErrors,DeviceConnected,DeviceDisconnected,DevicePaused,DeviceResumed,ConfigSaved,ItemFinished`. On `ConfigSaved`, or if the event ID goes backwards (Syncthing restarted), take a fresh snapshot.
+- **Polling:** on top of the events, `poll()` re-fetches the changing data into the current snapshot without restarting the event loop: `/rest/system/connections` (connected and paused flags, transfer rates), `/rest/stats/device`, `/rest/stats/folder` and `/rest/db/completion` for each online device. It runs every 10 s while the info box is closed and every 1 s while it is open. `/rest/db/status` is expensive in Syncthing, so poll() fetches it at most every 15 s. A full snapshot is still taken every 5 min.
 - **Reconnect:** backoff of 1, 2, 5, 10 and 30 s while unreachable.
 - **Actions (pause / resume):** devices and folders are paused separately, from the list headlines in the info box (§3.5).
   - **Devices** cover all devices, online and offline, the same as the web UI's "Pause All" and "Resume All": `POST /rest/system/pause` or `POST /rest/system/resume`.
@@ -122,7 +123,7 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
   - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
   - each list has a headline, `Folders (5)` and `Devices (2/5 online)`, which pauses or resumes its whole area (§3.2). Hovering it underlines it and appends `[Click to pause]` or `[Click to resume]`. While every folder or device is paused it reads `Folders (5, Paused)` or `Devices (5, Paused)`. The box stays open and refreshes once the request succeeds. The headline is not clickable while Syncthing is unreachable or its list is empty.
 
-  Opening it restarts the REST snapshot (aborts the running long-poll or skips the reconnect backoff), re-reads config.xml if that had failed, and rescans for conflict files. It updates live while open. Only the device and folder rows are rebuilt, so the controls keep their focus and hover state.
+  Opening it restarts the REST snapshot (aborts the running long-poll or skips the reconnect backoff), re-reads config.xml if that had failed, and rescans for conflict files. It updates live while open, with a status poll every second (§3.2). Only the device and folder rows are rebuilt, so the controls keep their focus and hover state.
 - **Hotkey:** `Main.wm.addKeybinding('toggle-window', settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, …)`. If the Syncthing window is focused it is minimised. Otherwise it is opened or raised.
 
 ### 3.6 Syncthing window: `lib/webapp.js`

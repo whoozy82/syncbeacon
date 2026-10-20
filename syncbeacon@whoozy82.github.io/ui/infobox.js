@@ -259,7 +259,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
     /**
      * @param {Clutter.Actor} sourceActor - the panel button
      * @param {object} controller - the extension; provides path, openWindow(),
-     *   setPaused(area, bool), refresh(), setRateSampling(bool), openPreferences(),
+     *   setPaused(area, bool), refresh(), setInfoBoxOpen(bool), openPreferences(),
      *   openFolder(path), rescanFolder(id) and editIgnores(path)
      */
     constructor(sourceActor, controller) {
@@ -307,12 +307,12 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._listKey = null;
         this.addMenuItem(this._lists);
 
-        // Fetch a fresh status whenever the box opens; sample the transfer
-        // rates while it is open.
+        // Fetch a fresh status whenever the box opens; poll faster while it
+        // is open.
         this.connect('open-state-changed', (_menu, open) => {
             if (open)
                 this._controller.refresh();
-            this._controller.setRateSampling(open);
+            this._controller.setInfoBoxOpen(open);
         });
     }
 

@@ -21,6 +21,8 @@ const EVENTS = [
 const BACKOFF_MS = [1000, 2000, 5000, 10000, 30000];
 const LONG_POLL_S = 60;
 const FULL_REFRESH_MS = 5 * 60 * 1000;
+// poll() fetches the folder statuses no more often than this.
+const FOLDER_POLL_MS = 15 * 1000;
 // A rate sample older than this is not used as the base for a new rate.
 const RATE_MAX_AGE_S = 10;
 
@@ -47,6 +49,16 @@ class ResetSignal extends Error {}
  */
 export function isCancelled(e) {
     return e?.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED) ?? false;
+}
+
+// A request whose failure is not fatal: it yields fallback instead. Cancelling
+// and a rejected API key still throw.
+function orElse(promise, fallback) {
+    return promise.catch(e => {
+        if (isCancelled(e) || e instanceof AuthError)
+            throw e;
+        return fallback;
+    });
 }
 
 function sleep(ms, cancellable) {
@@ -172,6 +184,8 @@ export class SyncthingClient {
         this._inflight = new Set();
         this._pending = new Set();
         this._rateSample = null;
+        this._polling = false;
+        this._lastFolderPoll = 0;
         this.data = emptySnapshot();
     }
 
@@ -219,14 +233,66 @@ export class SyncthingClient {
         this._cycle?.cancel();
     }
 
-    /** Fetch the byte counters once and update the per-device rates. */
-    async sampleRates() {
-        if (!this._api || !this.data.reachable)
+    /**
+     * Re-fetch the changing data into the current snapshot: connections and
+     * rates, device completion, last seen and last scan, and at most every
+     * FOLDER_POLL_MS the folder statuses (an expensive call in Syncthing).
+     * The event loop keeps running. Skipped while unreachable or while the
+     * previous poll still runs.
+     */
+    async poll() {
+        if (!this._api || !this.data.reachable || this._polling)
             return;
+        this._polling = true;
+        const gen = this._gen;
+        const api = this._api;
         const data = this.data;
-        const res = await this._api.get('/rest/system/connections', this._cancellable);
-        this._applyRates(data, res.connections ?? {});
-        this._emit();
+        const cancellable = this._cancellable;
+        try {
+            const now = GLib.get_monotonic_time();
+            const withFolders = (now - this._lastFolderPoll) / 1000 >= FOLDER_POLL_MS;
+            const [connections, deviceStats, folderStats] = await Promise.all([
+                api.get('/rest/system/connections', cancellable),
+                orElse(api.get('/rest/stats/device', cancellable), {}),
+                orElse(api.get('/rest/stats/folder', cancellable), {}),
+            ]);
+            const conns = connections.connections ?? {};
+            const online = data.devices.filter(d => conns[d.id]?.connected);
+            const [completions, folderResults] = await Promise.all([
+                Promise.all(online.map(d => orElse(api.get(
+                    `/rest/db/completion?device=${encodeURIComponent(d.id)}`, cancellable), null))),
+                withFolders ? Promise.all(data.folders.map(f => orElse(api.get(
+                    `/rest/db/status?folder=${encodeURIComponent(f.id)}`, cancellable), null))) : [],
+            ]);
+            // A reset in the meantime replaced the snapshot; drop the results.
+            if (gen !== this._gen || data !== this.data)
+                return;
+
+            data.connections = conns;
+            for (const id of Object.keys(data.completion)) {
+                if (!conns[id]?.connected)
+                    delete data.completion[id];
+            }
+            online.forEach((d, i) => {
+                if (completions[i])
+                    data.completion[d.id] = completions[i].completion;
+            });
+            if (withFolders) {
+                this._lastFolderPoll = now;
+                data.folders.forEach((f, i) => {
+                    if (folderResults[i])
+                        data.folderStatus[f.id] = folderResults[i];
+                });
+            }
+            for (const [id, st] of Object.entries(deviceStats ?? {}))
+                data.lastSeen[id] = st.lastSeen;
+            for (const [id, st] of Object.entries(folderStats ?? {}))
+                data.lastScan[id] = st.lastScan;
+            this._applyRates(data, conns);
+            this._emit();
+        } finally {
+            this._polling = false;
+        }
     }
 
     /**
@@ -388,6 +454,7 @@ export class SyncthingClient {
         if (gen !== this._gen)
             return;
         this._applyRates(data, data.connections);
+        this._lastFolderPoll = GLib.get_monotonic_time();
         data.reachable = true;
         this.data = data;
         this._emit();
