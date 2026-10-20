@@ -34,7 +34,7 @@ This version replaces the earlier plan (a Python backend with separate panel fro
                      ┌──────────────────── syncbeacon@whoozy82.github.io (GJS, in gnome-shell) ───────────────────┐
 Syncthing REST ◄────►│ client.js ──► state.js (pure) ──► indicator.js: icon + counts, colour by state             │
  /rest/events        │  (Soup 3,      5 rules,            infobox.js:   left-click popup with the controls       │
- long-poll           │  pinned cert)  details rows                      (Run/Pause, Open UI, Settings)          │
+ long-poll           │  pinned cert)  details rows                      (Open UI, Settings, pause headlines)     │
                      │ conflicts.js (async `find`)        keybinding:   hotkey → open/raise window               │
 systemd (D-Bus) ◄───►│ systemd.js (unit state, start/stop)                                                       │
                      └───────────────┬──────────────────────────────────────────────────┬────────────────────────┘
@@ -64,10 +64,11 @@ systemd (D-Bus) ◄───►│ systemd.js (unit state, start/stop)          
   - Failed items come from `pullErrors` in `/rest/db/status` and `FolderSummary`. A separate `/rest/folder/errors` call is not needed.
 - **Live updates:** long-poll `/rest/events?since=N&timeout=60&events=StateChanged,FolderSummary,FolderCompletion,FolderErrors,DeviceConnected,DeviceDisconnected,DevicePaused,DeviceResumed,ConfigSaved,ItemFinished`. On `ConfigSaved`, or if the event ID goes backwards (Syncthing restarted), take a fresh snapshot.
 - **Reconnect:** backoff of 1, 2, 5, 10 and 30 s while unreachable.
-- **Actions (Run / Pause):** these cover all devices, online and offline, the same as the web UI's "Pause All" and "Resume All", and all folders.
-  - **Pause** sends `POST /rest/system/pause` and `PATCH /rest/config/folders/{id}` with `{"paused": true}` for every folder not yet paused, in parallel.
-  - **Run** sends `POST /rest/system/resume` and `{"paused": false}` for every paused folder. This also resumes devices and folders that were paused individually in the web UI.
-  - Syncthing saves the pause in its config, so it survives restarts. An offline device that comes back stays paused. The Paused state still follows the devices only (§3.3), so Run/Pause stays greyed out without remote devices.
+- **Actions (pause / resume):** devices and folders are paused separately, from the list headlines in the info box (§3.5).
+  - **Devices** cover all devices, online and offline, the same as the web UI's "Pause All" and "Resume All": `POST /rest/system/pause` or `POST /rest/system/resume`.
+  - **Folders** send `PATCH /rest/config/folders/{id}` with `{"paused": true}` (or `false`) for every folder not yet in that state, in parallel.
+  - Resuming also resumes devices and folders that were paused individually in the web UI.
+  - Syncthing saves the pause in its config, so it survives restarts. An offline device that comes back stays paused. The Paused state still follows the devices only (§3.3).
 - **Lifetime:** everything is async with a `Gio.Cancellable`. `disable()` cancels it and aborts the session, so nothing outlives the extension.
 
 ### 3.3 State: `lib/state.js`
@@ -91,7 +92,7 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
 
 ### 3.5 Panel element: `ui/indicator.js`, `ui/infobox.js`
 
-- **Button:** a `PanelMenu.Button` with an `St.Icon` (state icon) and an `St.Label` with the counts, e.g. `3/5 · 5` (connected/total peers · folders). Counts can be hidden in the prefs.
+- **Button:** a `PanelMenu.Button` with an `St.Icon` (state icon) and an `St.Label` with the counts, e.g. `3/5 · 5` (connected/total peers · folders). A ⏸ follows the count of an area whose devices or folders are all paused, e.g. `0/5⏸ · 5⏸`.
 - **Colour:** the icon carries the style class `syncbeacon-<state>`. `stylesheet.css` colours `.syncbeacon-folder-issue` yellow (`#e5a50a`) and `.syncbeacon-error` red (`#e01b24`). The other three states set no colour and follow the panel theme.
 - **Placement:** `Main.panel.addToStatusArea(uuid, button, index, box)`. The five positions from PROJECT.md map to GNOME's three panel boxes:
 
@@ -116,10 +117,10 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
   - a bar of controls at the top, on a band 10 % darker than the popup (`rgba(0, 0, 0, 0.1)`) that reaches the popup's edges:
     - Open UI, on the left: a round `icon-button` with the Syncthing logo (`icons/syncbeacon-syncthing-symbolic.svg`). It closes the info box and opens the Syncthing window.
     - the header, left-aligned after Open UI (40 px gap): this device's name, coloured by state, with the short state label ("In Sync", "Paused", …) below it; the state label is the title while the name is unknown
-    - Run/Pause, right-aligned like the rest: a round `icon-button` whose icon shows the current state, `media-playback-start-symbolic` while running and `media-playback-pause-symbolic` while Paused. A click calls Run or Pause (§3.2) and refreshes the status once the request succeeds. It is greyed out when no devices are configured or Syncthing is unreachable.
-    - Settings: a round `icon-button` with a gear. It closes the info box and opens the settings window (`openPreferences()`).
+    - Settings, on the right: a round `icon-button` with a gear. It closes the info box and opens the settings window (`openPreferences()`).
   - one row per folder: name, Up to date / Syncing x % / Scanning / Paused / n failed items / n conflicts
   - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
+  - each list has a headline, `Folders (5)` and `Devices (2/5 online)`, which pauses or resumes its whole area (§3.2). Hovering it underlines it and appends `[Click to pause]` or `[Click to resume]`. While every folder or device is paused it reads `Folders (5, Paused)` or `Devices (5, Paused)`. The box stays open and refreshes once the request succeeds. The headline is not clickable while Syncthing is unreachable or its list is empty.
 
   Opening it restarts the REST snapshot (aborts the running long-poll or skips the reconnect backoff), re-reads config.xml if that had failed, and rescans for conflict files. It updates live while open. Only the device and folder rows are rebuilt, so the controls keep their focus and hover state.
 - **Hotkey:** `Main.wm.addKeybinding('toggle-window', settings, Meta.KeyBindingFlags.NONE, Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, …)`. If the Syncthing window is focused it is minimised. Otherwise it is opened or raised.
@@ -262,7 +263,7 @@ Rough total: 5–6 working days.
 | # | Criterion (PROJECT.md) | How to verify |
 |---|---|---|
 | 1 | UI element is visible on taskbar on this machine | After installation and enabling, the icon and `x/5 · 5` appear in the top bar. Each of the five positions in the prefs moves it live. |
-| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Open UI button (Syncthing icon), the header, the Run/Pause button and the Settings button (gear icon) in its top bar. Clicking Run/Pause (▶) pauses all devices: within 2 s the icon shows Paused and the web UI shows every device, online or offline, as paused. Clicking it again (⏸) resumes all of them. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
+| 2 | Context menu shows the described functions and each one works | The info box (left click) shows the Open UI button (Syncthing icon), the header and the Settings button (gear icon) in its top bar. Clicking the "Devices" headline pauses all devices: within 2 s the icon shows Paused, the counts show `0/5⏸` and the web UI shows every device, online or offline, as paused. Clicking it again resumes all of them. The "Folders" headline does the same for the folders. "Open UI" closes the info box and shows the window. "Settings" closes it and opens the prefs. |
 | 3 | Info box pops up when clicking the taskbar element | A left click shows all 5 folders and, below them, 5 devices with their current status. A click outside, Esc, or another click on the button closes it. |
 | 4 | Syncthing UI pops up when double clicking the taskbar element | A double click opens or raises the "Syncthing" GNOME Web app at `https://localhost:8384`, and the info box is closed. |
 | — | States and colours | Force each of the 5 states (see Phase 1). Folder issue is yellow and Syncthing error is red. The other three match the other top-bar icons in light and dark style. |
@@ -272,11 +273,11 @@ Rough total: 5–6 working days.
 None at the moment.
 
 Resolved:
-- Run / Pause pauses and resumes all devices through the REST API, and Syncthing keeps running (§3.2).
+- The list headlines pause and resume all devices or all folders through the REST API, and Syncthing keeps running (§3.2).
 - In Sync and Paused consider online devices only. A paused device counts as "online and paused" (§3.3).
 - GNOME only. Hyprland, Noctalia and the auto-run setting are dropped.
 - No hover action. A left click shows the info box and a double click opens the window. The acceptance criteria now say the same.
-- No separate context menu and no right-click action. Run/Pause, Open UI and Settings sit in the info box's top bar (PLAN.md, 2026-10-17; header moved into the bar 2026-10-20).
+- No separate context menu and no right-click action. Open UI and Settings sit in the info box's top bar (PLAN.md, 2026-10-17; header moved into the bar 2026-10-20); pausing moved to the list headlines (2026-10-20).
 - Systemd settings: show the name and enabled state, with Start and Stop only.
 - Panel position: five presets (§3.5).
 - Five icons. Folder issues are yellow and Syncthing errors red.

@@ -228,6 +228,9 @@ export function deriveStatus(snap) {
         peersConnected,
         peersTotal: devices.length,
         foldersTotal: folders.length,
+        // Every device / folder paused, as shown on the headlines and the panel.
+        devicesPaused: devices.length > 0 && devices.every(d => d.paused),
+        foldersPaused: folders.length > 0 && folders.every(f => f.paused),
         devices,
         folders,
     };
@@ -261,14 +264,20 @@ export function deriveStatus(snap) {
     };
 }
 
+// Pause sign in text presentation (U+FE0E), so it is not drawn as an emoji.
+export const PAUSE_MARK = '⏸︎';
+
 /**
- * Text shown next to the panel icon, e.g. "3/5 · 5".
+ * Text shown next to the panel icon, e.g. "3/5 · 5". A paused area gets a
+ * pause sign after its count, e.g. "0/5⏸ · 5".
  *
  * @param {object} status
  * @returns {string}
  */
 export function countsText(status) {
-    return `${status.peersConnected}/${status.peersTotal} · ${status.foldersTotal}`;
+    const mark = paused => (paused ? PAUSE_MARK : '');
+    return `${status.peersConnected}/${status.peersTotal}${mark(status.devicesPaused)} · ` +
+        `${status.foldersTotal}${mark(status.foldersPaused)}`;
 }
 
 /**
