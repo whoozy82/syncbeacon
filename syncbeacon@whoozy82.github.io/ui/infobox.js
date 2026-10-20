@@ -9,6 +9,7 @@ import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
 
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {_, N_} from '../lib/i18n.js';
@@ -16,6 +17,9 @@ import {State, STATE_LABELS} from '../lib/state.js';
 
 // Auto layout: folders and devices side by side from this many entries on.
 const AUTO_HORIZONTAL_MIN = 10;
+
+// The box is at most this share of its monitor's height; the lists scroll.
+const MAX_HEIGHT_SHARE = 0.6;
 
 // Accessible names of the headline button: [pause, resume].
 const HEADLINE_ACTIONS = {
@@ -373,37 +377,69 @@ export class InfoBox extends PopupMenu.PopupMenu {
             style_class: 'syncbeacon-devices-column', x_expand: true});
         this._lists.add_child(this._foldersColumn);
         this._lists.add_child(this._devicesColumn);
-        this.box.add_child(this._lists);
+        // The lists scroll without a scrollbar once the box reaches its
+        // maximum height; the top bar and the footer always stay visible.
+        // EXTERNAL rather than NEVER, so the view may get smaller than its content.
+        this._scroll = new St.ScrollView({style_class: 'vfade', child: this._lists,
+            hscrollbar_policy: St.PolicyType.NEVER, vscrollbar_policy: St.PolicyType.EXTERNAL});
+        this.box.add_child(this._scroll);
         this._listKey = null;
         this._entryCount = 0;
 
         // Footer: the wand that switches the hover functions on or off, in
-        // the bottom right corner. The box stays open.
+        // the bottom right corner. The box stays open. A chevron in the middle
+        // shows while the lists go on below the bottom edge.
         const footer = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
             style_class: 'syncbeacon-footer'});
-        footer.add_child(new St.Widget({x_expand: true}));
+        const footerBin = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true});
+        this._moreBelow = new St.Icon({icon_name: 'pan-down-symbolic', style_class: 'syncbeacon-more-below',
+            x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER, visible: false});
+        footerBin.add_child(this._moreBelow);
         this._hoverToggle = new St.Button({style_class: 'syncbeacon-folder-action syncbeacon-hover-toggle',
-            can_focus: true, y_align: Clutter.ActorAlign.CENTER,
+            can_focus: true, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER,
             child: new St.Icon({gicon: this._extensionIcon('syncbeacon-magic-symbolic.svg')})});
         this._hoverToggle.connect('clicked', () =>
             this._settings.set_boolean('hover-functions', !this._hover.enabled));
-        footer.add_child(this._hoverToggle);
+        footerBin.add_child(this._hoverToggle);
+        footer.add_child(footerBin);
         this.addMenuItem(footer);
 
+        this._scroll.vadjustment.connectObject(
+            'changed', () => this._syncMoreBelow(),
+            'notify::value', () => this._syncMoreBelow(),
+            this);
         this._settings.connectObject(
             'changed::layout-orientation', () => this._syncOrientation(),
             'changed::hover-functions', () => this._syncHover(),
             this);
+        Main.layoutManager.connectObject('monitors-changed', () => this._syncMaxHeight(), this);
         this._syncOrientation();
         this._syncHover();
 
         // Fetch a fresh status whenever the box opens; poll faster while it
         // is open.
         this.connect('open-state-changed', (_menu, open) => {
-            if (open)
+            if (open) {
+                this._syncMaxHeight();
                 this._controller.refresh();
+            }
             this._controller.setInfoBoxOpen(open);
         });
+    }
+
+    // Monitor geometry is in physical pixels, CSS in logical ones.
+    _syncMaxHeight() {
+        const monitor = Main.layoutManager.monitors[Main.layoutManager.findIndexForActor(this.sourceActor)] ??
+            Main.layoutManager.primaryMonitor;
+        if (!monitor)
+            return;
+        const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        this.actor.style = `max-height: ${Math.round(monitor.height * MAX_HEIGHT_SHARE / scaleFactor)}px;`;
+    }
+
+    _syncMoreBelow() {
+        const {value, upper, page_size: pageSize} = this._scroll.vadjustment;
+        this._moreBelow.visible = value + pageSize < upper - 1;
     }
 
     _extensionIcon(name) {
@@ -514,6 +550,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
     destroy() {
         this._settings.disconnectObject(this);
         this._settings = null;
+        Main.layoutManager.disconnectObject(this);
         super.destroy();
     }
 }
