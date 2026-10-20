@@ -8,6 +8,8 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
+- Hover text '[Click to Pause]' shall be replaced by the folowing solution:
+  - Similar to the hover buttons in folders list: hovering brings up the Pause Button.
 - Info box and Settings box follow Gnome's Light and Dark Thema
 - i18n: Multilingual UI
   - In settings window: language selection: System, English, German
