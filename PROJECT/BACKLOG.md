@@ -3,12 +3,12 @@
 ## In progress
 
 <!-- List unfinished tasks that are staged and commited -->
-- Follow up to the last change:
-  The default web uri in settings window shall be braught over from the config file (~/.config/syncthing)
+- 
 
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
+- Info box and Settings box follow Gnome's Light and Dark Thema
 - i18n: Multilingual UI
   - In settings window: language selection: System, English, German
 - device list and folders shall hold a maximum of 9 entries. if there exist more, visualize at the bottom with a common symbol
