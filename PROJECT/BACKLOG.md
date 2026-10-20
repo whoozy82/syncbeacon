@@ -8,13 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- In Settings Box in section 'Info': Add the following:
-  ```
-  This extension is not part of the official Syncthing project!
-  But Syncthing is essential for this extension to work.
-  Recommended is Epiphany (Gnome Web) for Web App feature.
-  ``` 
-  Create German version as well.
 - Info Box shall have a maximum height of 60% of desktop height.
   If the content needs more, cut at the bottom and visualize with applicable symbol
 - Release v1.0
