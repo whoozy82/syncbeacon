@@ -22,6 +22,12 @@ const POSITIONS = [
     ['far-right', 'Far right'],
 ];
 
+const ORIENTATIONS = [
+    ['auto', 'Auto'],
+    ['vertical', 'Vertical'],
+    ['horizontal', 'Horizontal'],
+];
+
 const WINDOW_MODES = [
     ['webapp', 'Epiphany Web App'],
     ['command', 'Command'],
@@ -81,6 +87,7 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         page.add(this._serviceGroup(window));
         page.add(this._connectionGroup(window, settings));
         page.add(this._positionGroup(window, settings));
+        page.add(this._layoutGroup(window, settings));
         page.add(this._hotkeyGroup(window, settings));
         page.add(this._aboutGroup());
         window.add(page);
@@ -332,6 +339,25 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
                 settings.set_string('position', value);
         });
         watch(window, settings, 'position', sync);
+        sync();
+        group.add(row);
+        return group;
+    }
+
+    _layoutGroup(window, settings) {
+        const group = new Adw.PreferencesGroup({title: 'Layout'});
+        const model = Gtk.StringList.new(ORIENTATIONS.map(([, label]) => label));
+        const row = new Adw.ComboRow({title: 'Orientation', model,
+            subtitle: 'Auto: side by side with 10 or more folders and devices'});
+        const sync = () => {
+            row.selected = Math.max(0, ORIENTATIONS.findIndex(([v]) => v === settings.get_string('layout-orientation')));
+        };
+        row.connect('notify::selected', () => {
+            const value = ORIENTATIONS[row.selected]?.[0];
+            if (value && value !== settings.get_string('layout-orientation'))
+                settings.set_string('layout-orientation', value);
+        });
+        watch(window, settings, 'layout-orientation', sync);
         sync();
         group.add(row);
         return group;

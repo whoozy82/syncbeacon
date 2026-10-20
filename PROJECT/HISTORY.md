@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.13.0` created at _20.10.2026_
+- `v0.14.0` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Info box layouts — new setting Layout › Orientation: Vertical (folders above devices, as before), Horizontal (folders left, devices right, equally wide, a dim line between them) or Auto (default; side by side with 10 or more folders and devices together)
 - [2026-10-20] GUI URI from config.xml — the GUI URI setting is empty by default again, so the settings window and the extension use the address from Syncthing's `config.xml`; `http://localhost:8384` is only the fallback when `config.xml` cannot be read; applying the shown address unchanged does not pin it; the "GUI URI and port" mode and field are renamed "URL+Port", and the settings texts say "URL" instead of "GUI URI"
 - [2026-10-20] Epiphany Web App window mode — new default "Syncthing window" mode that opens or raises the GNOME Web app matching the GUI URI (looked up each time, created if GNOME Web is installed and it is missing); the settings show its identifier read-only; Command mode is no longer pre-filled, and a stored web app command from earlier versions is cleared once; the GUI URI defaults to `http://localhost:8384`
 - [2026-10-20] Folder actions on the name — hovering a folder's name swaps it for the Open Folder, Rescan and Edit Ignore List buttons (the ⋯ hint is gone); the box is framed in the GNOME accent colour and the buttons are 50 % further apart

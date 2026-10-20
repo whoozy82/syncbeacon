@@ -134,3 +134,14 @@
 .syncbeacon-headline:focus {
   text-decoration: underline;
 }
+
+/* Folders and devices side by side, equally wide, with a vertical line
+   between them; the gap is 7px on each side of the line. */
+.syncbeacon-lists-horizontal .syncbeacon-folders-column {
+  padding-right: 7px;
+}
+
+.syncbeacon-lists-horizontal .syncbeacon-devices-column {
+  padding-left: 7px;
+  border-left: 1px solid rgba(127, 127, 127, 0.175);
+}

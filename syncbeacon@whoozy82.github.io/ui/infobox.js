@@ -1,6 +1,6 @@
 // Info box: a popup with the actions (Open UI, Settings) and the
-// state on top, then every folder and peer with its status; the list
-// headlines pause and resume their area.
+// state on top, then every folder and peer with its status, stacked or side
+// by side; the list headlines pause and resume their area.
 
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -11,6 +11,9 @@ import St from 'gi://St';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {State, STATE_LABELS} from '../lib/state.js';
+
+// Auto layout: folders and devices side by side from this many entries on.
+const AUTO_HORIZONTAL_MIN = 10;
 
 /**
  * The row detail shown on hover: a device's ↓/↑ rates while connected,
@@ -254,7 +257,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
      * @param {Clutter.Actor} sourceActor - the panel button
      * @param {object} controller - the extension; provides path, openWindow(),
      *   setPaused(area, bool), refresh(), setInfoBoxOpen(bool), openPreferences(),
-     *   openFolder(path), rescanFolder(id) and editIgnores(path)
+     *   openFolder(path), rescanFolder(id), editIgnores(path) and getSettings()
      */
     constructor(sourceActor, controller) {
         super(sourceActor, 0.5, St.Side.TOP);
@@ -299,11 +302,25 @@ export class InfoBox extends PopupMenu.PopupMenu {
         actions.add_child(settingsButton);
         this.addMenuItem(actions);
 
-        // Folders, then devices, rebuilt when the set of devices or folders
-        // changes and updated in place otherwise, so a hovered row stays.
-        this._lists = new PopupMenu.PopupMenuSection();
+        // Folders, then devices, each in its own column: stacked or side by
+        // side, depending on the orientation of the box. Rebuilt when the set
+        // of devices or folders changes and updated in place otherwise, so a
+        // hovered row stays.
+        this._lists = new St.BoxLayout({x_expand: true});
+        this._foldersColumn = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL,
+            style_class: 'syncbeacon-folders-column', x_expand: true});
+        this._devicesColumn = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL,
+            style_class: 'syncbeacon-devices-column', x_expand: true});
+        this._lists.add_child(this._foldersColumn);
+        this._lists.add_child(this._devicesColumn);
+        this.box.add_child(this._lists);
         this._listKey = null;
-        this.addMenuItem(this._lists);
+        this._entryCount = 0;
+
+        this._settings = controller.getSettings();
+        this._settings.connectObject('changed::layout-orientation',
+            () => this._syncOrientation(), this);
+        this._syncOrientation();
 
         // Fetch a fresh status whenever the box opens; poll faster while it
         // is open.
@@ -332,7 +349,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._message.visible = !!status?.myName;
 
         if (!status) {
-            this._lists.removeAll();
+            this._clearLists();
             this._listKey = null;
             return;
         }
@@ -342,6 +359,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
             this._listKey = key;
             this._buildLists(status);
         }
+        this._entryCount = status.folders.length + status.devices.length;
+        this._syncOrientation();
 
         // Pause and resume need Syncthing and something to act on.
         this._foldersHeading.set(status.foldersPaused
@@ -357,28 +376,55 @@ export class InfoBox extends PopupMenu.PopupMenu {
             this._folderRows[i].set(folder.label, folder.text, folder.status, folder.detail, folder));
     }
 
-    _buildLists(status) {
-        this._lists.removeAll();
-        this._foldersHeading = headline(paused => this._controller.setPaused('folders', paused));
-        this._lists.addMenuItem(this._foldersHeading.item);
-        if (status.folders.length === 0)
-            this._addPlaceholder('No folders');
-        this._folderRows = status.folders.map(() => this._addRow(rowDetail, () => folderActions(this)));
-
-        this._devicesHeading = headline(paused => this._controller.setPaused('devices', paused));
-        this._lists.addMenuItem(this._devicesHeading.item);
-        if (status.devices.length === 0)
-            this._addPlaceholder('No remote devices');
-        this._deviceRows = status.devices.map(() => this._addRow(rowDetail));
+    _syncOrientation() {
+        const mode = this._settings.get_string('layout-orientation');
+        const horizontal = mode === 'horizontal' ||
+            (mode === 'auto' && this._entryCount >= AUTO_HORIZONTAL_MIN);
+        this._lists.orientation = horizontal
+            ? Clutter.Orientation.HORIZONTAL : Clutter.Orientation.VERTICAL;
+        // Side by side, both columns get the same width.
+        this._lists.layout_manager.homogeneous = horizontal;
+        this._lists.style_class = horizontal ? 'syncbeacon-lists-horizontal' : '';
     }
 
-    _addRow(makeDetail = null, makeActions = null) {
+    _clearLists() {
+        this._foldersColumn.destroy_all_children();
+        this._devicesColumn.destroy_all_children();
+        this._entryCount = 0;
+        this._syncOrientation();
+    }
+
+    _buildLists(status) {
+        this._clearLists();
+        const folders = this._foldersColumn;
+        this._foldersHeading = headline(paused => this._controller.setPaused('folders', paused));
+        folders.add_child(this._foldersHeading.item);
+        if (status.folders.length === 0)
+            this._addPlaceholder(folders, 'No folders');
+        this._folderRows = status.folders.map(() =>
+            this._addRow(folders, rowDetail, () => folderActions(this)));
+
+        const devices = this._devicesColumn;
+        this._devicesHeading = headline(paused => this._controller.setPaused('devices', paused));
+        devices.add_child(this._devicesHeading.item);
+        if (status.devices.length === 0)
+            this._addPlaceholder(devices, 'No remote devices');
+        this._deviceRows = status.devices.map(() => this._addRow(devices, rowDetail));
+    }
+
+    _addRow(column, makeDetail = null, makeActions = null) {
         const row = statusRow(makeDetail, makeActions);
-        this._lists.addMenuItem(row.item);
+        column.add_child(row.item);
         return row;
     }
 
-    _addPlaceholder(text) {
-        this._addRow().set(text, '', 'offline');
+    _addPlaceholder(column, text) {
+        this._addRow(column).set(text, '', 'offline');
+    }
+
+    destroy() {
+        this._settings.disconnectObject(this);
+        this._settings = null;
+        super.destroy();
     }
 }
