@@ -8,7 +8,7 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- device list and folders list shall hold a maximum of 11 entries each. if there exist more, point out at the bottom with applicable symbol
+- Info Box shall have a maximum height of 60% of desktop height. if the content needs more, cut at the bottom and visualize with applicable symbol
 - Extend to scope to non NixOS Gnome systems (maybe publish to extensions.gnome.org)
   - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
 
