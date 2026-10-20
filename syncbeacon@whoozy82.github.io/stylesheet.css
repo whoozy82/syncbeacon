@@ -146,6 +146,12 @@
   padding: 0 6px;
 }
 
+/* Chevron in the middle of the footer while the lists go on below. */
+.syncbeacon-more-below {
+  icon-size: 16px;
+  color: #9a9996;
+}
+
 .syncbeacon-hover-toggle {
   color: -st-accent-color;
 }

@@ -8,8 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Info Box shall have a maximum height of 60% of desktop height.
-  If the content needs more, cut at the bottom and visualize with applicable symbol
 - Release v1.0
 - Extend scope to non NixOS Gnome systems and publish to extensions.gnome.org
   - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
