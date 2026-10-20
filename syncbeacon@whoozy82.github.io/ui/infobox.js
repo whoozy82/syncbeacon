@@ -550,6 +550,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
     }
 
     destroy() {
+        this._scroll.vadjustment.disconnectObject(this);
         this._settings.disconnectObject(this);
         this._settings = null;
         Main.layoutManager.disconnectObject(this);
