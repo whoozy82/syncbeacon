@@ -22,6 +22,16 @@
       <default>'right'</default>
       <summary>Position in the top bar</summary>
     </key>
+    <key name="layout-orientation" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="vertical"/>
+        <choice value="horizontal"/>
+      </choices>
+      <default>'auto'</default>
+      <summary>Arrangement of the folder and device lists in the info box</summary>
+      <description>vertical: folders above devices. horizontal: folders left, devices right. auto: horizontal with 10 or more folders and devices together, vertical otherwise.</description>
+    </key>
     <key name="toggle-window" type="as">
       <default>[]</default>
       <summary>Shortcut to open or hide the Syncthing window</summary>
