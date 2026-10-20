@@ -5,6 +5,7 @@
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Pango from 'gi://Pango';
 import St from 'gi://St';
 
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
@@ -268,8 +269,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this.actor.add_style_class_name('syncbeacon-infobox');
         this._controller = controller;
 
-        // Top bar, on a darker band: Open UI on the left, then the header
-        // (local device name and short state); Settings on the right.
+        // Top bar, on a darker band: Open UI on the left, the header (local
+        // device name and short state) in the middle, Settings on the right.
         const actions = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
             style_class: 'syncbeacon-actions'});
 
@@ -281,13 +282,17 @@ export class InfoBox extends PopupMenu.PopupMenu {
         });
         actions.add_child(openButton);
 
-        // Header: name and short state, wrapped when long. It takes the free
-        // space, so the buttons after it stay on the right.
+        // Header: name and short state, centred and wrapped when long. It
+        // takes the free space between the two equally wide buttons, so it
+        // sits in the middle of the box.
         const header = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL,
             style_class: 'syncbeacon-header', x_expand: true, y_align: Clutter.ActorAlign.CENTER});
-        this._title = new St.Label({style_class: 'syncbeacon-header-title'});
-        this._message = new St.Label({style_class: 'syncbeacon-header-message'});
+        this._title = new St.Label({style_class: 'syncbeacon-header-title',
+            x_align: Clutter.ActorAlign.CENTER});
+        this._message = new St.Label({style_class: 'syncbeacon-header-message',
+            x_align: Clutter.ActorAlign.CENTER});
         this._message.clutter_text.line_wrap = true;
+        this._message.clutter_text.line_alignment = Pango.Alignment.CENTER;
         header.add_child(this._title);
         header.add_child(this._message);
         actions.add_child(header);

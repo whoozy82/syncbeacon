@@ -117,7 +117,7 @@ Syncthing has no API for conflicts, so the extension searches the folders itself
 - **Info box:** a `PopupMenu.PopupMenu` attached to the button, with its own `PopupMenuManager`. Shell positioning, click-outside, Esc and keyboard focus come for free, so no custom popup code is needed. Contents:
   - a bar of controls at the top, on a band 10 % darker than the popup (`rgba(0, 0, 0, 0.1)`) that reaches the popup's edges:
     - Open UI, on the left: a round `icon-button` with the Syncthing logo (`icons/syncbeacon-syncthing-symbolic.svg`). It closes the info box and opens the Syncthing window.
-    - the header, left-aligned after Open UI (40 px gap): this device's name, coloured by state, with the short state label ("In Sync", "Paused", …) below it; the state label is the title while the name is unknown
+    - the header, centred between Open UI and Settings: this device's name, coloured by state, with the short state label ("In Sync", "Paused", …) below it; the state label is the title while the name is unknown
     - Settings, on the right: a round `icon-button` with a gear. It closes the info box and opens the settings window (`openPreferences()`).
   - one row per folder: name, Up to date / Syncing x % / Scanning / Paused / n failed items / n conflicts
   - one row per device: status dot, name, Connected / Syncing x % / Disconnected / Paused
