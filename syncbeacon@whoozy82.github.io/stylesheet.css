@@ -87,27 +87,12 @@
   icon-size: 12px;
 }
 
-/* Folder rows: the line under the centred hint, spaced like a plain row. */
-.syncbeacon-row-line {
-  spacing: 8px;
-}
-
-/* The cell fills the row height; the padding widens the hover zone around
-   the hint. No vertical padding, so the row keeps its height on hover. */
-.syncbeacon-action-cell {
-  padding: 0 4px;
-}
-
-.syncbeacon-action-hint {
-  icon-size: 12px;
-  color: #9a9996;
-}
-
-/* Folder actions in place of the hint, in the same darker box as the device
-   detail. */
+/* Folder actions in place of the name, in the same darker box as the device
+   detail, framed in the GNOME accent colour. */
 .syncbeacon-folder-actions {
   padding: 0 4px;
-  spacing: 8px;
+  spacing: 12px;
+  border: 1px solid -st-accent-color;
 }
 
 /* Square buttons, so hover and press show a circle. */

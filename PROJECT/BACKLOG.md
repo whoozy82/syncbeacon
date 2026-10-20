@@ -8,9 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- redesing folder entry mouse over menu:
-  - Instead of the three-dot-symbol the button-box pops up when hovering over the folder name.
-  - The space between the buttons should be increased by 50%. Also the box shall have a border with gnomes accent color.
 - dynamic arrangement:
   - is the count of devices and folders together below 10 > vertical arrangement as it is now 
   - is the count of devices and folder together 10 or more > horizontal arragement:

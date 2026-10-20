@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.11.1` created at _20.10.2026_
+- `v0.12.0` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Folder actions on the name — hovering a folder's name swaps it for the Open Folder, Rescan and Edit Ignore List buttons (the ⋯ hint is gone); the box is framed in the GNOME accent colour and the buttons are 50 % further apart
 - [2026-10-20] Centred header — the device name and the short state sit centred in the info box's top bar, between Open UI and Settings
 - [2026-10-20] Timed status refresh — besides the live events, the statuses are polled every 10 s while the info box is closed and every 1 s while it is open (rates included, replacing the 2 s rate sampling); the expensive folder status (`/rest/db/status`) at most every 15 s
 - [2026-10-20] Pause from the list headlines — the Run/Pause button is gone; clicking "Folders (x)" or "Devices (x/y online)" pauses or resumes that area on its own (hover underlines it and adds "[Click to pause]"), a paused area reads "Folders (x, Paused)" / "Devices (y, Paused)" and the panel counts show ⏸ after its count
