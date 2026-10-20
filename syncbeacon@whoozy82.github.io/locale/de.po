@@ -512,3 +512,11 @@ msgstr "Keine Ordner"
 #: ui/infobox.js
 msgid "No remote devices"
 msgstr "Keine entfernten Geräte"
+
+#: ui/infobox.js
+msgid "Disable hover functions"
+msgstr "Hover-Funktionen ausschalten"
+
+#: ui/infobox.js
+msgid "Enable hover functions"
+msgstr "Hover-Funktionen einschalten"
