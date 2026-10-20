@@ -8,6 +8,8 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
+- Follow up to the last change:
+  The default web uri in settings window shall be braught over from the config file (~/.config/syncthing)
 - dynamic arrangement:
   - is the count of devices and folders together below 10 > vertical arrangement as it is now 
   - is the count of devices and folder together 10 or more > horizontal arragement:
