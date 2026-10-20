@@ -3,14 +3,14 @@
 ## In progress
 
 <!-- List unfinished tasks that are staged and commited -->
-- ...
+- Follow up to the last change:
+  The default web uri in settings window shall be braught over from the config file (~/.config/syncthing)
 
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Follow up to the last change:
-  The default web uri in settings window shall be braught over from the config file (~/.config/syncthing)
-- dynamic arrangement:
+- New entry in settings window: 'Layout'
+- dynamic arrangement (auto):
   - is the count of devices and folders together below 10 > vertical arrangement as it is now 
   - is the count of devices and folder together 10 or more > horizontal arragement:
     - folders list to the left and devices list to the right 

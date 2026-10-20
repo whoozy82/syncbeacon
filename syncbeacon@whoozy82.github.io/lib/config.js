@@ -8,6 +8,9 @@ Gio._promisify(Gio.File.prototype, 'load_contents_async');
 
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 
+// GUI URI when neither the settings nor config.xml give one: Syncthing's default.
+export const DEFAULT_GUI_URI = 'http://localhost:8384';
+
 /**
  * Directories where Syncthing keeps config.xml, in lookup order.
  *
@@ -175,7 +178,7 @@ export async function resolveConnection(settings, cancellable = null) {
     const override = settings.get_string('gui-uri');
     const uri = override ? normalizeUri(override) : config.uri;
     if (!uri)
-        throw new Error(override ? `Invalid GUI URI: ${override}` : 'GUI address is a unix socket; set a GUI URI');
+        throw new Error(override ? `Invalid URL: ${override}` : 'GUI address is a unix socket; set a URL');
     return {dir, apiKey: config.apiKey, uri, certPath: config.certPath};
 }
 

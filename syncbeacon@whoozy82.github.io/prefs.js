@@ -8,7 +8,7 @@ import Gtk from 'gi://Gtk';
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {isCancelled, testConnection} from './lib/client.js';
-import {detectConfigDir, loadConfig, normalizeUri, resolveConnection} from './lib/config.js';
+import {DEFAULT_GUI_URI, detectConfigDir, loadConfig, normalizeUri, resolveConnection} from './lib/config.js';
 import {SyncthingUnit} from './lib/systemd.js';
 import {commandArgv, epiphanyAvailable, findAppByCommand, findWebApp, windowCommand} from './lib/webapp.js';
 
@@ -25,7 +25,7 @@ const POSITIONS = [
 const WINDOW_MODES = [
     ['webapp', 'Epiphany Web App'],
     ['command', 'Command'],
-    ['uri', 'GUI URI and port'],
+    ['uri', 'URL+Port'],
 ];
 
 const ENABLED_LABELS = {
@@ -208,7 +208,10 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
         group.add(commandRow);
 
         // GUI URI
-        const uriRow = new Adw.EntryRow({title: 'GUI URI and port', show_apply_button: true});
+        // Without a stored URI, the address from config.xml is shown; applying
+        // it unchanged keeps following config.xml.
+        const uriRow = new Adw.EntryRow({title: 'URL+Port', show_apply_button: true});
+        let configUri = null;
         const showUri = async () => {
             const override = settings.get_string('gui-uri');
             if (override) {
@@ -216,11 +219,15 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
                 return;
             }
             const dir = settings.get_string('config-dir') || detectConfigDir();
+            let uri = null;
             try {
-                uriRow.text = dir ? (await loadConfig(dir)).uri ?? '' : '';
+                uri = dir ? (await loadConfig(dir)).uri : null;
             } catch {
-                uriRow.text = '';
+                // Not readable: the fallback below.
             }
+            configUri = uri ?? DEFAULT_GUI_URI;
+            if (!settings.get_string('gui-uri'))
+                uriRow.text = configUri;
         };
         uriRow.connect('apply', () => {
             const text = uriRow.text.trim();
@@ -229,7 +236,8 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
                 toast(window, `Invalid URI: ${text}`);
                 return;
             }
-            settings.set_string('gui-uri', uri);
+            const following = !settings.get_string('gui-uri') && configUri && uri === normalizeUri(configUri);
+            settings.set_string('gui-uri', following ? '' : uri);
         });
         const detectUri = suffixButton({icon_name: 'edit-undo-symbolic', tooltip_text: 'Use the address from config.xml',
             css_classes: ['flat']});
@@ -263,7 +271,7 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
             commandRow.visible = mode === 'command';
             uriRow.visible = mode === 'uri';
             if (mode === 'uri') {
-                modeRow.subtitle = 'Opens the GUI URI in the default browser';
+                modeRow.subtitle = 'Opens the URL in the default browser';
                 return;
             }
             if (mode === 'webapp') {
@@ -275,8 +283,8 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
                 } else if (!epiphanyAvailable()) {
                     modeRow.subtitle = 'GNOME Web is not installed. Until it is, the default browser is used.';
                 } else {
-                    modeRow.subtitle = 'No GNOME Web app for the GUI URI yet. It is created as soon as ' +
-                        'the extension knows the GUI URI; until then the default browser is used.';
+                    modeRow.subtitle = 'No GNOME Web app for the URL yet. It is created as soon as ' +
+                        'the extension knows the URL; until then the default browser is used.';
                 }
                 return;
             }

@@ -9,7 +9,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {SyncthingClient, isCancelled} from './lib/client.js';
-import {resolveConnection} from './lib/config.js';
+import {DEFAULT_GUI_URI, resolveConnection} from './lib/config.js';
 import {ConflictScanner} from './lib/conflicts.js';
 import {deriveStatus} from './lib/state.js';
 import {SyncthingUnit} from './lib/systemd.js';
@@ -280,7 +280,7 @@ export default class SyncbeaconExtension extends Extension {
         } catch (e) {
             if (isCancelled(e) || gen !== this._configGen)
                 return;
-            this._uri = this._settings.get_string('gui-uri') || null;
+            this._uri = this._settings.get_string('gui-uri') || DEFAULT_GUI_URI;
             this._client.configure(null, e.message);
             this._retryId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, CONFIG_RETRY_S, () => {
                 this._retryId = 0;

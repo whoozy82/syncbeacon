@@ -7,9 +7,9 @@
       <description>Directory containing config.xml. Empty: auto-detect ($XDG_STATE_HOME/syncthing, then ~/.config/syncthing).</description>
     </key>
     <key name="gui-uri" type="s">
-      <default>'http://localhost:8384'</default>
-      <summary>Syncthing GUI URI including port</summary>
-      <description>Used for the REST connection and the Syncthing window. Empty: taken from config.xml.</description>
+      <default>''</default>
+      <summary>Syncthing GUI URL including port</summary>
+      <description>Used for the REST connection and the Syncthing window. Empty: taken from config.xml (http://localhost:8384 if that cannot be read).</description>
     </key>
     <key name="position" type="s">
       <choices>
