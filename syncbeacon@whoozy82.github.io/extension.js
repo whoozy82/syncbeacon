@@ -30,7 +30,9 @@ const POSITIONS = {
 const UPDATE_DELAY_MS = 100;
 const CONFIG_RETRY_S = 30;
 const AUTH_RELOAD_MIN_S = 10;
-const RATE_INTERVAL_S = 2;
+// Status poll on top of the events, in seconds: with the info box closed and open.
+const POLL_CLOSED_S = 10;
+const POLL_OPEN_S = 1;
 
 export default class SyncbeaconExtension extends Extension {
     enable() {
@@ -63,21 +65,23 @@ export default class SyncbeaconExtension extends Extension {
             () => this.toggleWindow());
 
         this._reconfigure();
+        this._startPolling(POLL_CLOSED_S);
     }
 
     disable() {
         Main.wm.removeKeybinding('toggle-window');
         this._settings.disconnectObject(this);
-        for (const id of [this._updateId, this._retryId, this._rateId]) {
+        // First, so closing an open info box cannot start the poll timer again.
+        this._indicator?.destroy();
+        this._indicator = null;
+        for (const id of [this._updateId, this._retryId, this._pollId]) {
             if (id)
                 GLib.source_remove(id);
         }
-        this._updateId = this._retryId = this._rateId = 0;
+        this._updateId = this._retryId = this._pollId = 0;
         this._configCancellable?.cancel();
         this._configCancellable = null;
 
-        this._indicator?.destroy();
-        this._indicator = null;
         this._client.stop();
         this._client = null;
         this._conflicts.destroy();
@@ -133,21 +137,9 @@ export default class SyncbeaconExtension extends Extension {
         this._conflicts.scanAll();
     }
 
-    /** Sample the device transfer rates while the info box is open. */
-    setRateSampling(on) {
-        if (this._rateId) {
-            GLib.source_remove(this._rateId);
-            this._rateId = 0;
-        }
-        if (!on)
-            return;
-        this._rateId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, RATE_INTERVAL_S, () => {
-            this._client.sampleRates().catch(e => {
-                if (!isCancelled(e))
-                    console.debug(`Syncbeacon: rate sample failed: ${e}`);
-            });
-            return GLib.SOURCE_CONTINUE;
-        });
+    /** Poll faster while the info box is open. */
+    setInfoBoxOpen(open) {
+        this._startPolling(open ? POLL_OPEN_S : POLL_CLOSED_S);
     }
 
     openFolder(path) {
@@ -236,6 +228,18 @@ export default class SyncbeaconExtension extends Extension {
             }
             if (proc.get_if_exited() && proc.get_exit_status() !== 0)
                 Main.notifyError('Syncbeacon', `${command} exited with status ${proc.get_exit_status()}`);
+        });
+    }
+
+    _startPolling(seconds) {
+        if (this._pollId)
+            GLib.source_remove(this._pollId);
+        this._pollId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, seconds, () => {
+            this._client.poll().catch(e => {
+                if (!isCancelled(e))
+                    console.debug(`Syncbeacon: status poll failed: ${e}`);
+            });
+            return GLib.SOURCE_CONTINUE;
         });
     }
 

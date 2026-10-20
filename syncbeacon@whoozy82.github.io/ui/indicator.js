@@ -22,7 +22,7 @@ export const Indicator = GObject.registerClass(
 class SyncbeaconIndicator extends PanelMenu.Button {
     /**
      * @param {object} controller - the extension; provides path, openWindow(),
-     *   setPaused(area, bool), refresh(), setRateSampling(bool) and openPreferences()
+     *   setPaused(area, bool), refresh(), setInfoBoxOpen(bool) and openPreferences()
      */
     _init(controller) {
         // No menu of its own: the info box is the only popup.
