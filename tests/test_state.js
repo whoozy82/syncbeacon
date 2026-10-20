@@ -2,7 +2,7 @@
 // Run: gjs -m tests/test_state.js
 
 import {assert, assertEqual, run, test} from './harness.js';
-import {Row, State, countsText, deriveStatus, emptySnapshot, formatRate, formatTime,
+import {PAUSE_MARK, Row, State, countsText, deriveStatus, emptySnapshot, formatRate, formatTime,
     isConflictPath} from
     '../syncbeacon@whoozy82.github.io/lib/state.js';
 
@@ -117,6 +117,30 @@ test('paused folders alone do not mean paused', () => {
     const snap = snapshot();
     snap.folders.forEach(f => (f.paused = true));
     assertEqual(deriveStatus(snap).state, State.IN_SYNC);
+});
+
+test('devices paused: every device, shown in the counts', () => {
+    const s = deriveStatus(pauseAll(snapshot()));
+    assertEqual([s.devicesPaused, s.foldersPaused], [true, false]);
+    assertEqual(countsText(s), `0/5${PAUSE_MARK} · 5`);
+});
+
+test('folders paused: every folder, shown in the counts', () => {
+    const snap = snapshot();
+    snap.folders.forEach(f => (f.paused = true));
+    const s = deriveStatus(snap);
+    assertEqual([s.devicesPaused, s.foldersPaused], [false, true]);
+    assertEqual(countsText(s), `2/5 · 5${PAUSE_MARK}`);
+});
+
+test('partly paused areas and empty areas are not paused', () => {
+    const snap = snapshot();
+    snap.devices[0].paused = true;
+    snap.folders[0].paused = true;
+    const s = deriveStatus(snap);
+    assertEqual([s.devicesPaused, s.foldersPaused], [false, false]);
+    const empty = deriveStatus(snapshot({devices: [], folders: []}));
+    assertEqual([empty.devicesPaused, empty.foldersPaused], [false, false]);
 });
 
 test('folder issue: conflicts', () => {

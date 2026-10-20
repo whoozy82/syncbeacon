@@ -188,14 +188,19 @@ export default class SyncbeaconExtension extends Extension {
         }
     }
 
-    setRunning(running) {
-        const action = running ? this._client.resumeAll() : this._client.pauseAll();
+    /**
+     * @param {string} area - 'devices' or 'folders'
+     * @param {boolean} paused
+     */
+    setPaused(area, paused) {
+        const action = area === 'devices'
+            ? this._client.setDevicesPaused(paused) : this._client.setFoldersPaused(paused);
         action.then(() => {
             // Fetch the new state now rather than waiting for the events.
             if (this._client)
                 this.refresh();
         }, e => {
-            Main.notifyError('Syncbeacon', `${running ? 'Resume' : 'Pause'} failed: ${e.message}`);
+            Main.notifyError('Syncbeacon', `${paused ? 'Pause' : 'Resume'} ${area} failed: ${e.message}`);
             this._scheduleUpdate();
         });
     }

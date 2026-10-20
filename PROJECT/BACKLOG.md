@@ -8,12 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Replace the Pause-Run-Button by the following solution: Two separate Links for folders-list and device-list like the following description:
-  - While hovering over the headline 'Folders (x)' it makes a underline and appends the test '[Click to pause]'
-  - Click on the headline pauses all folders and changes the text to 'Folders (x,Paused)'
-  - While hovering over the headline 'Devices (x/y online)' it makes a underline and appends the test '[Click to pause]'
-  - Click on the headline pauses all devices changes the text to 'Devices (y, Paused)'
-  - The element in the tray bar follows this status and shows a paused symbol for the applicable area.
 - The refresh of the status in folders list and devices list shall be changes:
   - when box is closed: update the statuses with frequency of 10 seconds
   - in the event of opening the box: updates all statuses

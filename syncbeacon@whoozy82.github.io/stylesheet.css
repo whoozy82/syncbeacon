@@ -142,3 +142,10 @@
 .syncbeacon-dot-offline { background-color: #9141ac; }
 .syncbeacon-dot-warning { background-color: #e5a50a; }
 .syncbeacon-dot-error { background-color: #e01b24; }
+
+/* List headlines: pause or resume their area. Hover underlines them; the
+   "[Click to …]" hint is added to the text. */
+.syncbeacon-headline:hover,
+.syncbeacon-headline:focus {
+  text-decoration: underline;
+}

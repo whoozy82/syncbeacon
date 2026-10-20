@@ -256,20 +256,15 @@ export class SyncthingClient {
         this._rateSample = {time: now, totals};
     }
 
-    /** Pause every device and every folder. */
-    async pauseAll() {
-        const api = this._requireApi();
-        await Promise.all([api.post('/rest/system/pause'), this._setFoldersPaused(api, true)]);
+    /** Pause or resume every device, also those paused one by one. */
+    async setDevicesPaused(paused) {
+        await this._requireApi().post(paused ? '/rest/system/pause' : '/rest/system/resume');
     }
 
-    /** Resume every device and every folder, also those paused one by one. */
-    async resumeAll() {
+    /** Pause or resume every folder, also those paused one by one. */
+    async setFoldersPaused(paused) {
         const api = this._requireApi();
-        await Promise.all([api.post('/rest/system/resume'), this._setFoldersPaused(api, false)]);
-    }
-
-    _setFoldersPaused(api, paused) {
-        return Promise.all(this.data.folders.filter(f => f.paused !== paused).map(f =>
+        await Promise.all(this.data.folders.filter(f => f.paused !== paused).map(f =>
             api.patch(`/rest/config/folders/${encodeURIComponent(f.id)}`, {paused})));
     }
 
