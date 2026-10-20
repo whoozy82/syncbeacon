@@ -139,3 +139,17 @@
   padding-left: 7px;
   border-left: 1px solid rgba(127, 127, 127, 0.175);
 }
+
+/* Hover switch in the bottom right corner: accent colour while the hover
+   functions are on, dim grey while off. */
+.syncbeacon-infobox .syncbeacon-footer {
+  padding: 0 6px;
+}
+
+.syncbeacon-hover-toggle {
+  color: -st-accent-color;
+}
+
+.syncbeacon-hover-toggle-off {
+  color: #9a9996;
+}

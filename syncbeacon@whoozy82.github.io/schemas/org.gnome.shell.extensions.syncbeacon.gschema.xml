@@ -32,6 +32,11 @@
       <summary>Arrangement of the folder and device lists in the info box</summary>
       <description>vertical: folders above devices. horizontal: folders left, devices right. auto: horizontal with 10 or more folders and devices together, vertical otherwise.</description>
     </key>
+    <key name="hover-functions" type="b">
+      <default>false</default>
+      <summary>Hover functions in the info box</summary>
+      <description>Whether hovering a row or list headline shows its detail or buttons (rates, last seen or scanned, folder actions, Pause/Resume). Off by default; switched with the wand in the info box.</description>
+    </key>
     <key name="language" type="s">
       <default>'system'</default>
       <summary>Language of the extension</summary>

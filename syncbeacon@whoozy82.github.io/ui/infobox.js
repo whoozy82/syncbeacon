@@ -1,6 +1,7 @@
 // Info box: a popup with the actions (Open UI, Settings) and the
 // state on top, then every folder and peer with its status, stacked or side
-// by side; hovering a list headline shows its Pause/Resume button.
+// by side; hovering a list headline shows its Pause/Resume button. A wand
+// in the bottom right corner switches all hover functions on or off.
 
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -82,24 +83,35 @@ function folderActions(infoBox) {
         return b;
     };
     const controller = infoBox._controller;
-    button({icon_name: 'folder-open-symbolic'}, _('Open folder'), f => {
+    const open = button({icon_name: 'folder-open-symbolic'}, _('Open folder'), f => {
         infoBox.close();
         controller.openFolder(f.path);
     });
     // Stays open so the scan state shows up in place.
     const rescan = button({icon_name: 'view-refresh-symbolic'}, _('Rescan folder'),
         f => controller.rescanFolder(f.id));
-    button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, _('Edit ignore list'), f => {
+    const ignores = button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, _('Edit ignore list'), f => {
         infoBox.close();
         controller.editIgnores(f.path);
     });
 
-    const set = value => {
-        folder = value;
-        rescan.reactive = !folder?.paused;
+    // The buttons take clicks only while shown, never through the name.
+    let shown = false;
+    const sync = () => {
+        open.reactive = shown;
+        ignores.reactive = shown;
+        rescan.reactive = shown && !folder?.paused;
         rescan.opacity = folder?.paused ? 128 : 255;
     };
-    return {actor, set};
+    const set = value => {
+        folder = value;
+        sync();
+    };
+    const setShown = value => {
+        shown = value;
+        sync();
+    };
+    return {actor, set, setShown};
 }
 
 /**
@@ -107,8 +119,12 @@ function folderActions(infoBox) {
  * layout (hidden by opacity), so the cell is as wide as the wider of the two
  * and the row does not shift when they swap. BinLayout centres children that
  * do not fill it, so each fills the cell in a box that keeps it at the left.
+ *
+ * @param {St.Label} nameLabel
+ * @param {{actor: St.BoxLayout, setShown: Function}} actions
+ * @param {object} hover - InfoBox._hover: {enabled, syncs}
  */
-function nameCell(nameLabel, actions) {
+function nameCell(nameLabel, actions, hover) {
     actions.actor.opacity = 0;
     const cell = new St.Widget({
         layout_manager: new Clutter.BinLayout(),
@@ -118,10 +134,14 @@ function nameCell(nameLabel, actions) {
     });
     cell.add_child(alignStart(nameLabel));
     cell.add_child(alignStart(actions.actor));
-    cell.connect('notify::hover', () => {
-        nameLabel.opacity = cell.hover ? 0 : 255;
-        actions.actor.opacity = cell.hover ? 255 : 0;
-    });
+    const sync = () => {
+        const shown = cell.hover && hover.enabled;
+        nameLabel.opacity = shown ? 0 : 255;
+        actions.actor.opacity = shown ? 255 : 0;
+        actions.setShown(shown);
+    };
+    cell.connect('notify::hover', sync);
+    hover.syncs.push(sync);
     return cell;
 }
 
@@ -148,11 +168,12 @@ function alignStart(actor) {
  * the status swaps it for the row detail on a darker background. With
  * makeActions, hovering the name swaps it for the folder actions.
  *
+ * @param {object} hover - InfoBox._hover: {enabled, syncs}
  * @param {Function|null} makeDetail - returns {actor, set}
- * @param {Function|null} makeActions - returns {actor, set}
+ * @param {Function|null} makeActions - returns {actor, set, setShown}
  * @returns {{item: PopupMenu.PopupBaseMenuItem, set: Function}}
  */
-function statusRow(makeDetail = null, makeActions = null) {
+function statusRow(hover, makeDetail = null, makeActions = null) {
     const withDetail = !!makeDetail;
     const item = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
         style_class: 'syncbeacon-row'});
@@ -163,7 +184,7 @@ function statusRow(makeDetail = null, makeActions = null) {
     const status = new St.Label({style_class: 'syncbeacon-row-status',
         x_expand: !withDetail, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
     item.add_child(dot);
-    item.add_child(actions ? nameCell(nameLabel, actions) : nameLabel);
+    item.add_child(actions ? nameCell(nameLabel, actions, hover) : nameLabel);
 
     let detail = null;
     if (withDetail) {
@@ -193,10 +214,13 @@ function statusRow(makeDetail = null, makeActions = null) {
             cell.translation_x = shift;
             statusBox.translation_x = -shift;
         });
-        cell.connect('notify::hover', () => {
-            status.opacity = cell.hover ? 0 : 255;
-            detail.actor.opacity = cell.hover ? 255 : 0;
-        });
+        const sync = () => {
+            const shown = cell.hover && hover.enabled;
+            status.opacity = shown ? 0 : 255;
+            detail.actor.opacity = shown ? 255 : 0;
+        };
+        cell.connect('notify::hover', sync);
+        hover.syncs.push(sync);
         item.add_child(cell);
     } else {
         item.add_child(status);
@@ -216,11 +240,12 @@ function statusRow(makeDetail = null, makeActions = null) {
  * A list headline. Hovering its text swaps it for a button that pauses or
  * resumes the area, the same way as a folder name and its actions.
  *
+ * @param {object} hover - InfoBox._hover: {enabled, syncs}
  * @param {string} area - 'folders' or 'devices'
  * @param {Function} onClick - called with the paused value to set
  * @returns {{item: PopupMenu.PopupSeparatorMenuItem, set: Function}}
  */
-function headline(area, onClick) {
+function headline(hover, area, onClick) {
     const item = new PopupMenu.PopupSeparatorMenuItem('');
     // The label moves into a cell with the button, so only the text takes
     // hover and clicks; the item stays non-reactive and the box stays open.
@@ -252,12 +277,13 @@ function headline(area, onClick) {
     let paused = false;
     let enabled = false;
     const sync = () => {
-        const shown = cell.hover && enabled;
+        const shown = cell.hover && enabled && hover.enabled;
         label.opacity = shown ? 0 : 255;
         actions.opacity = shown ? 255 : 0;
         button.reactive = shown;
     };
     cell.connect('notify::hover', sync);
+    hover.syncs.push(sync);
 
     const set = (value, isPaused, isEnabled) => {
         label.text = value;
@@ -335,6 +361,11 @@ export class InfoBox extends PopupMenu.PopupMenu {
         // side, depending on the orientation of the box. Rebuilt when the set
         // of devices or folders changes and updated in place otherwise, so a
         // hovered row stays.
+        // Whether hovering a row or headline shows its detail or buttons;
+        // syncs re-applies it to every cell of the current lists.
+        this._settings = controller.getSettings();
+        this._hover = {enabled: this._settings.get_boolean('hover-functions'), syncs: []};
+
         this._lists = new St.BoxLayout({x_expand: true});
         this._foldersColumn = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL,
             style_class: 'syncbeacon-folders-column', x_expand: true});
@@ -346,10 +377,25 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._listKey = null;
         this._entryCount = 0;
 
-        this._settings = controller.getSettings();
-        this._settings.connectObject('changed::layout-orientation',
-            () => this._syncOrientation(), this);
+        // Footer: the wand that switches the hover functions on or off, in
+        // the bottom right corner. The box stays open.
+        const footer = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
+            style_class: 'syncbeacon-footer'});
+        footer.add_child(new St.Widget({x_expand: true}));
+        this._hoverToggle = new St.Button({style_class: 'syncbeacon-folder-action syncbeacon-hover-toggle',
+            can_focus: true, y_align: Clutter.ActorAlign.CENTER,
+            child: new St.Icon({gicon: this._extensionIcon('syncbeacon-magic-symbolic.svg')})});
+        this._hoverToggle.connect('clicked', () =>
+            this._settings.set_boolean('hover-functions', !this._hover.enabled));
+        footer.add_child(this._hoverToggle);
+        this.addMenuItem(footer);
+
+        this._settings.connectObject(
+            'changed::layout-orientation', () => this._syncOrientation(),
+            'changed::hover-functions', () => this._syncHover(),
+            this);
         this._syncOrientation();
+        this._syncHover();
 
         // Fetch a fresh status whenever the box opens; poll faster while it
         // is open.
@@ -417,7 +463,20 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._lists.style_class = horizontal ? 'syncbeacon-lists-horizontal' : '';
     }
 
+    _syncHover() {
+        const enabled = this._settings.get_boolean('hover-functions');
+        this._hover.enabled = enabled;
+        if (enabled)
+            this._hoverToggle.remove_style_class_name('syncbeacon-hover-toggle-off');
+        else
+            this._hoverToggle.add_style_class_name('syncbeacon-hover-toggle-off');
+        this._hoverToggle.accessible_name = enabled
+            ? _('Disable hover functions') : _('Enable hover functions');
+        this._hover.syncs.forEach(sync => sync());
+    }
+
     _clearLists() {
+        this._hover.syncs = [];
         this._foldersColumn.destroy_all_children();
         this._devicesColumn.destroy_all_children();
         this._entryCount = 0;
@@ -427,7 +486,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
     _buildLists(status) {
         this._clearLists();
         const folders = this._foldersColumn;
-        this._foldersHeading = headline('folders', paused => this._controller.setPaused('folders', paused));
+        this._foldersHeading = headline(this._hover, 'folders', paused => this._controller.setPaused('folders', paused));
         folders.add_child(this._foldersHeading.item);
         if (status.folders.length === 0)
             this._addPlaceholder(folders, _('No folders'));
@@ -435,7 +494,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
             this._addRow(folders, rowDetail, () => folderActions(this)));
 
         const devices = this._devicesColumn;
-        this._devicesHeading = headline('devices', paused => this._controller.setPaused('devices', paused));
+        this._devicesHeading = headline(this._hover, 'devices', paused => this._controller.setPaused('devices', paused));
         devices.add_child(this._devicesHeading.item);
         if (status.devices.length === 0)
             this._addPlaceholder(devices, _('No remote devices'));
@@ -443,7 +502,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
     }
 
     _addRow(column, makeDetail = null, makeActions = null) {
-        const row = statusRow(makeDetail, makeActions);
+        const row = statusRow(this._hover, makeDetail, makeActions);
         column.add_child(row.item);
         return row;
     }
