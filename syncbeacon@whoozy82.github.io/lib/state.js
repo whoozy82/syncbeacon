@@ -1,6 +1,8 @@
 // Pure state derivation: snapshot -> Status.
 // No gi:// imports, so this module can be unit-tested outside the shell.
 
+import {_, _n, N_} from './i18n.js';
+
 export const State = Object.freeze({
     IN_SYNC: 'in-sync',
     SYNCING: 'syncing',
@@ -10,11 +12,11 @@ export const State = Object.freeze({
 });
 
 export const STATE_LABELS = Object.freeze({
-    [State.IN_SYNC]: 'In Sync',
-    [State.SYNCING]: 'Synchronising…',
-    [State.FOLDER_ISSUE]: 'Folder sync error or conflicts',
-    [State.PAUSED]: 'Paused',
-    [State.ERROR]: 'Error with Syncthing',
+    [State.IN_SYNC]: N_('In Sync'),
+    [State.SYNCING]: N_('Synchronising…'),
+    [State.FOLDER_ISSUE]: N_('Folder sync error or conflicts'),
+    [State.PAUSED]: N_('Paused'),
+    [State.ERROR]: N_('Error with Syncthing'),
 });
 
 // Row status kinds, used by the info box for the coloured dot.
@@ -30,12 +32,12 @@ export const Row = Object.freeze({
 const DOWNLOADING_STATES = new Set(['sync-preparing', 'syncing']);
 
 const FOLDER_STATE_TEXT = {
-    'scanning': 'Scanning',
-    'scan-waiting': 'Waiting to scan',
-    'sync-waiting': 'Waiting to sync',
-    'sync-preparing': 'Preparing to sync',
-    'cleaning': 'Cleaning up',
-    'clean-waiting': 'Waiting to clean up',
+    'scanning': N_('Scanning'),
+    'scan-waiting': N_('Waiting to scan'),
+    'sync-waiting': N_('Waiting to sync'),
+    'sync-preparing': N_('Preparing to sync'),
+    'cleaning': N_('Cleaning up'),
+    'clean-waiting': N_('Waiting to clean up'),
 };
 
 /**
@@ -127,22 +129,22 @@ function deviceRow(dev, snap) {
     let status, text;
     if (paused) {
         status = Row.PAUSED;
-        text = 'Paused';
+        text = _('Paused');
     } else if (!conn.connected) {
         status = Row.OFFLINE;
-        text = 'Disconnected';
+        text = _('Disconnected');
     } else if (completion < 100) {
         status = Row.SYNCING;
-        text = `Syncing ${percent(completion)}`;
+        text = _('Syncing {percent}', {percent: percent(completion)});
     } else {
         status = Row.OK;
-        text = 'Connected';
+        text = _('Connected');
     }
     const online = !paused && !!conn.connected;
     // Shown on hover: the rates while connected, otherwise when it was last seen.
     const detail = online
         ? rateDetail(snap.rates?.[dev.id])
-        : {kind: 'last-seen', text: formatTime(snap.lastSeen?.[dev.id], 'Never seen')};
+        : {kind: 'last-seen', text: formatTime(snap.lastSeen?.[dev.id], _('Never seen'))};
     return {id: dev.id, name: dev.name || dev.id.slice(0, 7), status, text, detail,
         online, paused: !!paused, completion};
 }
@@ -157,39 +159,39 @@ function folderRow(folder, snap) {
 
     if (folder.paused || st.state === 'paused') {
         status = Row.PAUSED;
-        text = 'Paused';
+        text = _('Paused');
     } else if (st.state === 'error' || st.error) {
         status = Row.ERROR;
-        text = st.error ? `Error: ${st.error}` : 'Error';
+        text = st.error ? _('Error: {error}', {error: st.error}) : _('Error');
     } else if (DOWNLOADING_STATES.has(st.state)) {
         status = Row.SYNCING;
         text = st.state === 'syncing'
-            ? `Syncing ${percent(folderPercent(st))}` : FOLDER_STATE_TEXT[st.state];
+            ? _('Syncing {percent}', {percent: percent(folderPercent(st))}) : _(FOLDER_STATE_TEXT[st.state]);
     } else if (FOLDER_STATE_TEXT[st.state]) {
         status = Row.SYNCING;
-        text = FOLDER_STATE_TEXT[st.state];
+        text = _(FOLDER_STATE_TEXT[st.state]);
     } else if (st.state === 'idle' && (st.needTotalItems ?? 0) > 0) {
         status = Row.WARNING;
-        text = `Out of sync (${st.needTotalItems} items)`;
+        text = _n('Out of sync ({n} item)', 'Out of sync ({n} items)', st.needTotalItems);
     } else {
-        text = st.state ? 'Up to date' : 'Unknown';
+        text = st.state ? _('Up to date') : _('Unknown');
     }
 
     if (pullErrors > 0)
-        issues.push(`${pullErrors} failed ${pullErrors === 1 ? 'item' : 'items'}`);
+        issues.push(_n('{n} failed item', '{n} failed items', pullErrors));
     if (conflicts > 0)
-        issues.push(`${conflicts} ${conflicts === 1 ? 'conflict' : 'conflicts'}`);
+        issues.push(_n('{n} conflict', '{n} conflicts', conflicts));
     if (issues.length > 0) {
         if (status !== Row.ERROR)
             status = Row.WARNING;
         text = [text, ...issues].join(' · ');
     }
     if (conflicts === null)
-        text += ' · conflict check unavailable';
+        text += ` · ${_('conflict check unavailable')}`;
 
     const hasIssue = st.state === 'error' || !!st.error || pullErrors > 0 || conflicts > 0;
     // Shown on hover: when the folder was last scanned.
-    const detail = {kind: 'last-scan', text: formatTime(snap.lastScan?.[folder.id], 'Never scanned')};
+    const detail = {kind: 'last-scan', text: formatTime(snap.lastScan?.[folder.id], _('Never scanned'))};
     return {id: folder.id, label: folder.label || folder.id, path: folder.path,
         paused: folder.paused, status, text, detail, hasIssue, downloading: !folder.paused && DOWNLOADING_STATES.has(st.state),
         issueSummary: issues.length ? `${folder.label || folder.id}: ${issues.join(', ')}` : null};

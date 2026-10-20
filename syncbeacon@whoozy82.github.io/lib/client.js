@@ -6,6 +6,7 @@ import GLib from 'gi://GLib';
 import Soup from 'gi://Soup?version=3.0';
 
 import {expandHome} from './config.js';
+import {_} from './i18n.js';
 import {emptySnapshot, isConflictPath} from './state.js';
 
 Gio._promisify(Soup.Session.prototype, 'send_and_read_async');
@@ -108,7 +109,7 @@ export class Api {
     async request(method, path, cancellable = null, body = null) {
         const msg = Soup.Message.new(method, `${this.uri}${path}`);
         if (!msg)
-            throw new Error(`Invalid GUI URI: ${this.uri}`);
+            throw new Error(_('Invalid URL: {url}', {url: this.uri}));
         if (body !== null) {
             msg.set_request_body_from_bytes('application/json',
                 new GLib.Bytes(new TextEncoder().encode(JSON.stringify(body))));
@@ -157,7 +158,7 @@ export async function testConnection(conn) {
     const api = new Api({uri: conn.uri, apiKey: '', cert, timeout: 10});
     const health = await api.get('/rest/noauth/health');
     if (health?.status !== 'OK')
-        throw new Error('Health check failed');
+        throw new Error(_('Health check failed'));
     const authed = new Api({uri: conn.uri, apiKey: conn.apiKey, cert, timeout: 10});
     const version = await authed.get('/rest/system/version');
     return version.version;
@@ -340,7 +341,7 @@ export class SyncthingClient {
 
     _requireApi() {
         if (!this._api || !this.data.reachable)
-            throw new Error('Syncthing is not reachable');
+            throw new Error(_('Syncthing is not reachable'));
         return this._api;
     }
 

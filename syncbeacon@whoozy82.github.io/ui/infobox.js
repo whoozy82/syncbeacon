@@ -10,10 +10,17 @@ import St from 'gi://St';
 
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
+import {_, N_} from '../lib/i18n.js';
 import {State, STATE_LABELS} from '../lib/state.js';
 
 // Auto layout: folders and devices side by side from this many entries on.
 const AUTO_HORIZONTAL_MIN = 10;
+
+// Accessible names of the headline button: [pause, resume].
+const HEADLINE_ACTIONS = {
+    folders: [N_('Pause folders'), N_('Resume folders')],
+    devices: [N_('Pause devices'), N_('Resume devices')],
+};
 
 /**
  * The row detail shown on hover: a device's ↓/↑ rates while connected,
@@ -75,14 +82,14 @@ function folderActions(infoBox) {
         return b;
     };
     const controller = infoBox._controller;
-    button({icon_name: 'folder-open-symbolic'}, 'Open folder', f => {
+    button({icon_name: 'folder-open-symbolic'}, _('Open folder'), f => {
         infoBox.close();
         controller.openFolder(f.path);
     });
     // Stays open so the scan state shows up in place.
-    const rescan = button({icon_name: 'view-refresh-symbolic'}, 'Rescan folder',
+    const rescan = button({icon_name: 'view-refresh-symbolic'}, _('Rescan folder'),
         f => controller.rescanFolder(f.id));
-    button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, 'Edit ignore list', f => {
+    button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, _('Edit ignore list'), f => {
         infoBox.close();
         controller.editIgnores(f.path);
     });
@@ -209,7 +216,7 @@ function statusRow(makeDetail = null, makeActions = null) {
  * A list headline. Hovering its text swaps it for a button that pauses or
  * resumes the area, the same way as a folder name and its actions.
  *
- * @param {string} area - the area's name for the button, e.g. 'folders'
+ * @param {string} area - 'folders' or 'devices'
  * @param {Function} onClick - called with the paused value to set
  * @returns {{item: PopupMenu.PopupSeparatorMenuItem, set: Function}}
  */
@@ -257,7 +264,7 @@ function headline(area, onClick) {
         paused = isPaused;
         enabled = isEnabled;
         icon.icon_name = paused ? 'media-playback-start-symbolic' : 'media-playback-pause-symbolic';
-        button.accessible_name = `${paused ? 'Resume' : 'Pause'} ${area}`;
+        button.accessible_name = _(HEADLINE_ACTIONS[area][paused ? 1 : 0]);
         button.can_focus = enabled;
         sync();
     };
@@ -293,7 +300,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
             style_class: 'syncbeacon-actions'});
 
         const openButton = iconButton(this._extensionIcon('syncbeacon-syncthing.svg'),
-            'Open Syncthing');
+            _('Open Syncthing'));
         openButton.connect('clicked', () => {
             this.close();
             this._controller.openWindow();
@@ -316,7 +323,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         actions.add_child(header);
 
         const settingsButton = iconButton(new Gio.ThemedIcon({name: 'emblem-system-symbolic'}),
-            'Settings');
+            _('Settings'));
         settingsButton.connect('clicked', () => {
             this.close();
             this._controller.openPreferences();
@@ -364,10 +371,10 @@ export class InfoBox extends PopupMenu.PopupMenu {
      */
     update(status) {
         const state = status?.state ?? State.ERROR;
-        this._title.text = status ? status.myName || STATE_LABELS[state] : 'Connecting…';
+        this._title.text = status ? status.myName || _(STATE_LABELS[state]) : _('Connecting…');
         this._title.style_class = `syncbeacon-header-title syncbeacon-state-${state}`;
         // The short state under the name; not repeated when it is the title.
-        this._message.text = STATE_LABELS[state];
+        this._message.text = _(STATE_LABELS[state]);
         this._message.visible = !!status?.myName;
 
         if (!status) {
@@ -386,11 +393,12 @@ export class InfoBox extends PopupMenu.PopupMenu {
 
         // Pause and resume need Syncthing and something to act on.
         this._foldersHeading.set(status.foldersPaused
-            ? `Folders (${status.foldersTotal}, Paused)` : `Folders (${status.foldersTotal})`,
+            ? _('Folders ({count}, Paused)', {count: status.foldersTotal})
+            : _('Folders ({count})', {count: status.foldersTotal}),
         status.foldersPaused, status.reachable && status.foldersTotal > 0);
         this._devicesHeading.set(status.devicesPaused
-            ? `Devices (${status.peersTotal}, Paused)`
-            : `Devices (${status.peersConnected}/${status.peersTotal} online)`,
+            ? _('Devices ({count}, Paused)', {count: status.peersTotal})
+            : _('Devices ({online}/{count} online)', {online: status.peersConnected, count: status.peersTotal}),
         status.devicesPaused, status.reachable && status.peersTotal > 0);
         status.devices.forEach((dev, i) =>
             this._deviceRows[i].set(dev.name, dev.text, dev.status, dev.detail));
@@ -422,7 +430,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._foldersHeading = headline('folders', paused => this._controller.setPaused('folders', paused));
         folders.add_child(this._foldersHeading.item);
         if (status.folders.length === 0)
-            this._addPlaceholder(folders, 'No folders');
+            this._addPlaceholder(folders, _('No folders'));
         this._folderRows = status.folders.map(() =>
             this._addRow(folders, rowDetail, () => folderActions(this)));
 
@@ -430,7 +438,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._devicesHeading = headline('devices', paused => this._controller.setPaused('devices', paused));
         devices.add_child(this._devicesHeading.item);
         if (status.devices.length === 0)
-            this._addPlaceholder(devices, 'No remote devices');
+            this._addPlaceholder(devices, _('No remote devices'));
         this._deviceRows = status.devices.map(() => this._addRow(devices, rowDetail));
     }
 

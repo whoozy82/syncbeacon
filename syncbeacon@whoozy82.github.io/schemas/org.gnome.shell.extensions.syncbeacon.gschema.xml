@@ -32,6 +32,11 @@
       <summary>Arrangement of the folder and device lists in the info box</summary>
       <description>vertical: folders above devices. horizontal: folders left, devices right. auto: horizontal with 10 or more folders and devices together, vertical otherwise.</description>
     </key>
+    <key name="language" type="s">
+      <default>'system'</default>
+      <summary>Language of the extension</summary>
+      <description>system: the first system language with a translation in locale/, English otherwise. en: English. Any other value: the language of locale/&lt;value&gt;.po, English if it is missing.</description>
+    </key>
     <key name="toggle-window" type="as">
       <default>[]</default>
       <summary>Shortcut to open or hide the Syncthing window</summary>

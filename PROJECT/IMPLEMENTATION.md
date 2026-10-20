@@ -160,6 +160,7 @@ The GUI URI (`gui-uri`) is empty by default, which means the address from `confi
 
 | Page / group | Settings | Implementation |
 |---|---|---|
+| General | Language: System / English / the languages in `locale/` by their own names (`Adw.ComboRow`, default System) | Stored as `language`. `lib/locale.js` reads `locale/<code>.po` and `lib/i18n.js` (`_()`, `_n()`, `N_()`, no gi imports) looks the texts up; System takes the first of `GLib.get_language_names()` with a file, English if English comes first or none matches. The extension rebuilds the indicator and re-derives the status on a change; the settings window rebuilds its page. Syncthing's own error texts stay as they come. |
 | Service (systemd) | **Info:** unit name and enabled state (e.g. `syncthing.service`, system, enabled), plus the live active state. **Controls:** Start, Stop. | `lib/systemd.js`: `org.freedesktop.systemd1` over the system bus, falling back to the session bus for a user unit. The unit is auto-detected from `syncthing.service`, `syncthing@$USER.service` or a user `syncthing.service`. It reads `Id`, `UnitFileState` and `ActiveState`, and calls `StartUnit` / `StopUnit` with `ALLOW_INTERACTIVE_AUTHORIZATION` so GNOME shows the polkit prompt. Info and buttons update live from `PropertiesChanged`. The enabled state is display-only, so no NixOS special case is needed. |
 | Connection | In this order: Syncthing config directory (file chooser + auto-detect). "Syncthing window": Epiphany Web App, Command or URL+Port (§3.6). The third row depends on that choice: the web app identifier (read-only desktop ID, updated through `Gio.AppInfoMonitor`), the command (empty by default) or the GUI URI including port (default: the address from `config.xml`, else `http://localhost:8384`; reset button to go back to it). "Test connection" button. | The "Syncthing window" row's subtitle says what will happen: which app is opened or raised, that the command runs in a shell, or that the web app is missing (created by the extension) or GNOME Web is not installed. The GUI URI is also used for the REST connection; while the other modes hide its row, the stored GUI URI still applies. Test: `GET /rest/noauth/health`, then an authenticated `/rest/system/version`, showing the result inline. |
 | Position | Far left / Left / Middle / Right / Far right (`Adw.ComboRow`) | Stored as an enum in GSettings and applied live by the extension (§3.5) |
@@ -196,12 +197,13 @@ Syncthing_UX/
     ├── flake.nix  README.md  .gitignore         # package, devShell, checks (unit tests)
     ├── syncbeacon@whoozy82.github.io/
     │   ├── metadata.json  extension.js  prefs.js  stylesheet.css
-    │   ├── lib/      config.js  client.js  state.js  conflicts.js  systemd.js  webapp.js
+    │   ├── lib/      config.js  client.js  state.js  conflicts.js  systemd.js  webapp.js  i18n.js  locale.js
     │   ├── ui/       indicator.js  infobox.js
+    │   ├── locale/   de.po
     │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing,ignore}-symbolic.svg
     │   └── schemas/  org.gnome.shell.extensions.syncbeacon.gschema.xml
-    ├── tests/        harness.js  test_state.js  test_config.js  test_webapp.js   # run with `gjs -m`
-    └── scripts/      dev-install.sh  devkit.sh  pack.sh  status.js  make-icons.py
+    ├── tests/        harness.js  test_state.js  test_config.js  test_webapp.js  test_i18n.js   # run with `gjs -m`
+    └── scripts/      dev-install.sh  devkit.sh  pack.sh  status.js  i18n-check.js  make-icons.py
 ```
 
 `scripts/status.js` runs the real client, systemd and conflict code outside the shell and prints the derived status. It is read-only.
