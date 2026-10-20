@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.8.1` created at _20.10.2026_
+- `v0.9.0` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Coloured Syncthing logo in the info box — the Open UI button shows the logo in Syncthing's colours (blue gradient disc, white mark, `syncbeacon-syncthing.svg` from `make-icons.py`); the panel icon stays symbolic
 - [2026-10-20] Folders first — the info box lists the folders above the devices
 - [2026-10-20] Pause folders too — Pause in the info box pauses every folder as well as every device (`PATCH /rest/config/folders/{id}`); Run resumes all of them, including folders paused one by one in the web UI
 - [2026-10-20] Header in the top bar — the device name and the short state ("In Sync", "Paused", …) sit in the info box's top bar, left-aligned after Open UI; the long state message is no longer shown and the separate header row is gone

@@ -237,7 +237,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
         const actions = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
             style_class: 'syncbeacon-actions'});
 
-        const openButton = iconButton(this._extensionIcon('syncbeacon-syncthing-symbolic.svg'),
+        const openButton = iconButton(this._extensionIcon('syncbeacon-syncthing.svg'),
             'Open Syncthing');
         openButton.connect('clicked', () => {
             this.close();

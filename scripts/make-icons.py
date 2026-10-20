@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generates the symbolic icons in icons/ from Syncthing's own tray icons.
+"""Generates the icons in icons/ from Syncthing's own tray icons: symbolic ones,
+and the full-colour logo for the info box.
 
 The geometry is taken from https://github.com/syncthing/syncthing/tree/main/assets/statusicons
 (MPL-2.0): the logo, a bite out of the bottom right corner, and a badge in it.
@@ -73,12 +74,21 @@ def difference(a, b):
     return pathops.op(a, b, pathops.PathOp.DIFFERENCE)
 
 
-def logo():
+def disc():
+    return circle((8, 8), 8)
+
+
+def mark():
+    """Ring, lines and nodes: cut out of the symbolic logo, white in the coloured one."""
     ring = difference(circle(RING_CENTER, RING_RADIUS + LINE_WIDTH / 2),
                       circle(RING_CENTER, RING_RADIUS - LINE_WIDTH / 2))
     lines = [bar(HUB, node, LINE_WIDTH) for node in NODES]
     nodes = [circle(c, NODE_RADIUS) for c in [HUB, *NODES]]
-    return difference(circle((8, 8), 8), union(ring, *lines, *nodes))
+    return union(ring, *lines, *nodes)
+
+
+def logo():
+    return difference(disc(), mark())
 
 
 def rotated_rect(center, length, width, degrees):
@@ -160,15 +170,36 @@ def to_d(path):
     return ''.join(out)
 
 
-def write(name, path):
-    svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">\n'
-           f'  <path fill="#2e3436" fill-rule="evenodd" d="{to_d(path)}"/>\n'
-           '</svg>\n')
+# Full-colour logo, after Syncthing's app icon: a disc with a blue vertical
+# gradient and the mark in white.
+GRADIENT = ('<linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">'
+            '<stop offset="0" stop-color="#24b2da"/><stop offset="1" stop-color="#0a85c9"/>'
+            '</linearGradient>')
+
+
+def save(filename, svg):
     dest = os.path.join(os.path.dirname(__file__), '..', 'syncbeacon@whoozy82.github.io',
-                        'icons', f'syncbeacon-{name}-symbolic.svg')
+                        'icons', filename)
     with open(dest, 'w') as f:
         f.write(svg)
-    print(f'{name}: {len(svg)} bytes')
+    print(f'{filename}: {len(svg)} bytes')
+
+
+def write(name, path):
+    save(f'syncbeacon-{name}-symbolic.svg',
+         '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">\n'
+         f'  <path fill="#2e3436" fill-rule="evenodd" d="{to_d(path)}"/>\n'
+         '</svg>\n')
+
+
+def write_colored(name):
+    white = pathops.op(disc(), mark(), pathops.PathOp.INTERSECTION)
+    save(f'syncbeacon-{name}.svg',
+         '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">\n'
+         f'  <defs>{GRADIENT}</defs>\n'
+         f'  <path fill="url(#blue)" d="{to_d(disc())}"/>\n'
+         f'  <path fill="#ffffff" fill-rule="evenodd" d="{to_d(white)}"/>\n'
+         '</svg>\n')
 
 
 def main():
@@ -177,6 +208,7 @@ def main():
     for state, glyph in GLYPHS.items():
         write(state, with_badge(glyph()))
     write('ignore', ignore_list())
+    write_colored('syncthing')
 
 
 if __name__ == '__main__':
