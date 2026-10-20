@@ -19,7 +19,7 @@
     folders list and devices list are always stacked on top, same as current implementation
   - Horizontal:
     folders list and devices list next to each other left to right
-  - Entry in settings window 'Layout' with the selected layout as dropdown
+  - Entry in settings window 'Layout' > 'Orientation' with the selected layout option as dropdown [Auto, Vertical, Horizontal]
 - i18n: Multilingual UI
   - In settings window: language selection: System, English, German
 - device list and folders shall hold a maximum of 9 entries. if there exist more, visualize at the bottom with a common symbol
