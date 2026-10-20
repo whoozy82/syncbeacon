@@ -52,7 +52,7 @@ function rowDetail() {
 }
 
 /**
- * The folder actions shown when hovering the folder's ⋯ hint: Open Folder,
+ * The folder actions shown when hovering the folder's name: Open Folder,
  * Rescan and Edit Ignore List.
  *
  * @param {InfoBox} infoBox
@@ -60,7 +60,7 @@ function rowDetail() {
  */
 function folderActions(infoBox) {
     const actor = new St.BoxLayout({style_class: 'syncbeacon-row-detail syncbeacon-folder-actions',
-        x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
+        x_align: Clutter.ActorAlign.START, y_align: Clutter.ActorAlign.CENTER});
     let folder = null;
 
     const button = (icon, accessibleName, onClick) => {
@@ -93,29 +93,24 @@ function folderActions(infoBox) {
 }
 
 /**
- * A small ⋯ hint that turns into the folder actions while hovered. The actions
- * are hidden otherwise, so they take no clicks and the hover zone is the hint;
- * once shown, the cell spans them and moving onto them keeps the hover. The
- * cell fills the row height, so the row does not grow when they show.
+ * The name, swapped for the folder actions while hovered. Both stay in the
+ * layout (hidden by opacity), so the cell is as wide as the wider of the two
+ * and the row does not shift when they swap. BinLayout centres children that
+ * do not fill it, so each fills the cell in a box that keeps it at the left.
  */
-function actionsCell(actions) {
-    const hint = new St.Icon({style_class: 'syncbeacon-action-hint',
-        icon_name: 'view-more-horizontal-symbolic',
-        x_align: Clutter.ActorAlign.CENTER, y_align: Clutter.ActorAlign.CENTER});
-    actions.actor.visible = false;
+function nameCell(nameLabel, actions) {
+    actions.actor.opacity = 0;
     const cell = new St.Widget({
-        style_class: 'syncbeacon-action-cell',
         layout_manager: new Clutter.BinLayout(),
         reactive: true,
         track_hover: true,
-        x_align: Clutter.ActorAlign.CENTER,
-        y_align: Clutter.ActorAlign.FILL,
+        y_align: Clutter.ActorAlign.CENTER,
     });
-    cell.add_child(hint);
-    cell.add_child(actions.actor);
+    cell.add_child(alignStart(nameLabel));
+    cell.add_child(alignStart(actions.actor));
     cell.connect('notify::hover', () => {
-        hint.visible = !cell.hover;
-        actions.actor.visible = cell.hover;
+        nameLabel.opacity = cell.hover ? 0 : 255;
+        actions.actor.opacity = cell.hover ? 255 : 0;
     });
     return cell;
 }
@@ -129,10 +124,19 @@ function alignEnd(actor) {
     return box;
 }
 
+/** Wrap actor in a box that fills its parent and keeps actor at the left. */
+function alignStart(actor) {
+    const box = new St.BoxLayout({x_expand: true, x_align: Clutter.ActorAlign.FILL,
+        y_align: Clutter.ActorAlign.CENTER});
+    box.add_child(actor);
+    box.add_child(new St.Widget({x_expand: true}));
+    return box;
+}
+
 /**
  * A row with a coloured dot, a name and a status. With makeDetail, hovering
  * the status swaps it for the row detail on a darker background. With
- * makeActions, a ⋯ hint centred in the row reveals the folder actions on hover.
+ * makeActions, hovering the name swaps it for the folder actions.
  *
  * @param {Function|null} makeDetail - returns {actor, set}
  * @param {Function|null} makeActions - returns {actor, set}
@@ -142,25 +146,14 @@ function statusRow(makeDetail = null, makeActions = null) {
     const withDetail = !!makeDetail;
     const item = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false,
         style_class: 'syncbeacon-row'});
-    // With actions, the line sits under the hint in an overlay, so every hint
-    // is centred in the row whatever the name and status widths.
     const actions = makeActions?.();
-    const line = actions
-        ? new St.BoxLayout({style_class: 'syncbeacon-row-line', x_expand: true})
-        : item;
-    if (actions) {
-        const overlay = new St.Widget({layout_manager: new Clutter.BinLayout(), x_expand: true});
-        overlay.add_child(line);
-        overlay.add_child(actionsCell(actions));
-        item.add_child(overlay);
-    }
     const dot = new St.Widget({y_align: Clutter.ActorAlign.CENTER});
     const nameLabel = new St.Label({style_class: 'syncbeacon-row-name',
         y_align: Clutter.ActorAlign.CENTER});
     const status = new St.Label({style_class: 'syncbeacon-row-status',
         x_expand: !withDetail, x_align: Clutter.ActorAlign.END, y_align: Clutter.ActorAlign.CENTER});
-    line.add_child(dot);
-    line.add_child(nameLabel);
+    item.add_child(dot);
+    item.add_child(actions ? nameCell(nameLabel, actions) : nameLabel);
 
     let detail = null;
     if (withDetail) {
@@ -194,9 +187,9 @@ function statusRow(makeDetail = null, makeActions = null) {
             status.opacity = cell.hover ? 0 : 255;
             detail.actor.opacity = cell.hover ? 255 : 0;
         });
-        line.add_child(cell);
+        item.add_child(cell);
     } else {
-        line.add_child(status);
+        item.add_child(status);
     }
 
     const set = (name, text, kind, detailValue = null, actionsValue = null) => {
