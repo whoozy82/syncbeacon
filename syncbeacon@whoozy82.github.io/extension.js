@@ -14,7 +14,7 @@ import {ConflictScanner} from './lib/conflicts.js';
 import {deriveStatus} from './lib/state.js';
 import {SyncthingUnit} from './lib/systemd.js';
 import {
-    createWebApp, epiphanyAvailable, findAppByCommand, findWebApp, storeWebAppCommand, windowCommand,
+    createWebApp, epiphanyAvailable, findAppByCommand, findWebApp, isWebAppCommand, windowCommand,
 } from './lib/webapp.js';
 import {Indicator} from './ui/indicator.js';
 
@@ -42,6 +42,8 @@ export default class SyncbeaconExtension extends Extension {
         this._configGen = 0;
         this._lastAuthReload = 0;
         this._folderKey = '';
+        this._webAppCreatedFor = null;
+        this._migrateSettings();
 
         this._client = new SyncthingClient({
             onUpdate: () => this._scheduleUpdate(),
@@ -56,6 +58,7 @@ export default class SyncbeaconExtension extends Extension {
             'changed::config-dir', () => this._reconfigure(),
             'changed::gui-uri', () => this._reconfigure(),
             'changed::position', () => this._placeIndicator(),
+            'changed::window-mode', () => this._ensureWebApp(),
             this);
 
         this._placeIndicator();
@@ -95,17 +98,18 @@ export default class SyncbeaconExtension extends Extension {
     // ---- Actions used by the indicator ----
 
     openWindow() {
-        const command = this._windowCommand();
-        const app = this._windowApp(command);
+        const app = this._windowApp();
         if (app) {
             app.activate();
             return;
         }
+        const command = this._windowCommand();
         if (command) {
             this._runCommand(command);
             return;
         }
-        // URI mode, or command mode without a command: the default browser.
+        // URI mode, web app mode without a web app, or command mode without a
+        // command: the default browser.
         const uri = this._uri;
         if (!uri) {
             Main.notifyError('Syncbeacon', 'The Syncthing GUI address is unknown.');
@@ -119,7 +123,7 @@ export default class SyncbeaconExtension extends Extension {
     }
 
     toggleWindow() {
-        const app = this._windowApp(this._windowCommand());
+        const app = this._windowApp();
         const focused = global.display.focus_window;
         if (app && focused && app.get_windows().includes(focused)) {
             focused.minimize();
@@ -202,14 +206,22 @@ export default class SyncbeaconExtension extends Extension {
     _windowCommand() {
         if (this._settings.get_string('window-mode') !== 'command')
             return null;
-        return windowCommand(this._settings, this._uri);
+        return windowCommand(this._settings);
     }
 
-    // The app whose Exec line is the window command, so an open window is
-    // raised (or minimised by the hotkey) instead of started again.
-    _windowApp(command) {
-        const info = command ? findAppByCommand(command) : null;
-        return info ? Shell.AppSystem.get_default().lookup_app(info.get_id()) : null;
+    // The app behind the Syncthing window, so an open window is raised (or
+    // minimised by the hotkey) instead of started again: the web app for the
+    // GUI URI, or the app whose Exec line is the window command.
+    _windowApp() {
+        let id = null;
+        const mode = this._settings.get_string('window-mode');
+        if (mode === 'webapp' && this._uri) {
+            id = findWebApp(this._uri)?.id;
+        } else if (mode === 'command') {
+            const command = this._windowCommand();
+            id = command ? findAppByCommand(command)?.get_id() : null;
+        }
+        return id ? Shell.AppSystem.get_default().lookup_app(id) : null;
     }
 
     _runCommand(command) {
@@ -282,39 +294,53 @@ export default class SyncbeaconExtension extends Extension {
         this._uri = conn.uri;
         this._client.configure(conn);
         this._firstRun();
-        storeWebAppCommand(this._settings, this._uri);
+        this._ensureWebApp();
     }
 
-    // One-time setup once the GUI address is known. With GNOME Web, the
-    // window is its Syncthing web app, created if there is none yet. Without
-    // it, the window is the GUI address in the default browser. Keys that are
-    // already set stay as they are.
+    // Earlier versions stored the web app's Exec line as the window command.
+    // It is cleared once, and the command mode it implied goes back to the
+    // default (the web app mode, which finds the web app by its URL).
+    _migrateSettings() {
+        const settings = this._settings;
+        if (settings.get_int('settings-version') >= 1)
+            return;
+        if (isWebAppCommand(settings.get_string('window-command'))) {
+            settings.reset('window-command');
+            if (settings.get_string('window-mode') === 'command')
+                settings.reset('window-mode');
+        }
+        settings.set_int('settings-version', 1);
+    }
+
+    // In web app mode, with GNOME Web installed, create the Syncthing web app
+    // if none matches the GUI URI; at most once per URI, so a failed attempt
+    // or a deleted app is not created again and again.
+    _ensureWebApp() {
+        const uri = this._uri;
+        if (this._settings.get_string('window-mode') !== 'webapp' || !uri ||
+            uri === this._webAppCreatedFor || !epiphanyAvailable() || findWebApp(uri))
+            return;
+        this._webAppCreatedFor = uri;
+        try {
+            createWebApp(uri, GLib.build_filenamev([this.path, 'icons', 'syncbeacon-syncthing-symbolic.svg']));
+        } catch (e) {
+            console.error(`Syncbeacon: cannot create the Syncthing web app: ${e}`);
+        }
+    }
+
+    // One-time setup once the GUI address is known: without GNOME Web, the
+    // window is the GUI address in the default browser. Keys that are already
+    // set stay as they are.
     _firstRun() {
         const settings = this._settings;
         if (settings.get_boolean('first-run-done') || !this._uri)
             return;
         settings.set_boolean('first-run-done', true);
 
-        if (epiphanyAvailable()) {
-            let command = findWebApp(this._uri)?.command;
-            if (!command) {
-                try {
-                    command = createWebApp(this._uri,
-                        GLib.build_filenamev([this.path, 'icons', 'syncbeacon-syncthing-symbolic.svg']));
-                } catch (e) {
-                    console.error(`Syncbeacon: cannot create the Syncthing web app: ${e}`);
-                }
-            }
-            if (command) {
-                if (!settings.get_string('window-command'))
-                    settings.set_string('window-command', command);
-                return;
-            }
-        }
+        if (epiphanyAvailable())
+            return;
         if (settings.get_user_value('window-mode') === null)
             settings.set_string('window-mode', 'uri');
-        if (!settings.get_string('gui-uri'))
-            settings.set_string('gui-uri', this._uri);
     }
 
     _onAuthError() {
