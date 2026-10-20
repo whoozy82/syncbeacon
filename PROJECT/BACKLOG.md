@@ -8,7 +8,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Color Syncthing icon like this: @syncbeacon/PROJECT/resources/syncthing-icon.png
 - Replace the Pause-Run-Button by the following solution: Two separate Links for folders-list and device-list
   - While hovering over the headline 'Folders (x)' it makes a underline and appends the test '[Click to pause]'
   - Click on the headline pauses all folders and changes the text to 'Folders (x,Paused)'
