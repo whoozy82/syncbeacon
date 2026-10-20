@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v0.18.1` created at _20.10.2026_
+- `v1.0.0` created at _20.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-20] Release 1.0.0 — first stable release for GNOME Shell 50: acceptance checklist passed in the devkit, release zip tested in an isolated shell (install, 10 enable/disable cycles without errors), GitHub release with the zip; README with new screenshots (horizontal and vertical layout), zip install instructions and flake pinning to a tag
 - [2026-10-20] Scroll signal leak fix — disabling the extension now also disconnects the info box's scroll handlers; before, each enable left two handlers behind, which GNOME Shell reported as "St.Adjustment … already disposed" criticals on shutdown
 - [2026-10-20] Wand position fix — the wand that switches the hover functions sits in the bottom right corner of the info box again instead of the middle of the footer (Mutter 50's BinLayout only aligns a child that also expands)
 - [2026-10-20] Info box height limit — the info box is at most 60 % of its monitor's height; beyond that the folder and device lists scroll with the mouse wheel (no scrollbar, faded edges) while the top bar and the wand stay visible; a dim chevron in the middle of the footer shows while more entries follow below

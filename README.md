@@ -1,17 +1,16 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/yellow)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v0.18.1/green) 
+![version](https://badgen.net/badge/version/v1.0.0/green) 
 
 ```
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
 ```
 
-_**This extenion is NOT part of the official Syncthing project! It requires a running Syncthing instance though. To get Syncthing, check out the offical site at [https://syncthing.net](https://syncthing.net).**_
+_**This extension is NOT part of the official Syncthing project! It requires a running Syncthing instance though. To get Syncthing, check out the official site at [https://syncthing.net](https://syncthing.net).**_
 
 ## Goal
 
 This little project aims to publish this extension to the official Gnome Shell Extension Site as quickly as possible.
-Currently the implementation is in its infancy.
 
 ## AI
 
@@ -27,9 +26,11 @@ The implementation foots on agentic coding.
 Design and decisions: [IMPLEMENTATION.md](PROJECT/IMPLEMENTATION.md)
 Change log: [HISTORY.md](PROJECT/HISTORY.md)
 
-## Screenshot
+## Screenshots
 
-![syncbeacon](screenshots/syncbeacon.png)
+| Horizontal layout | Vertical layout |
+|---|---|
+| ![Syncbeacon info box, horizontal layout](screenshots/syncbeacon-horizontal.png) | ![Syncbeacon info box, vertical layout](screenshots/syncbeacon-vertical.png) |
 
 ## Gnome Shell Target Versions
 
@@ -91,7 +92,7 @@ To add a language: copy the header of `de.po` into a new `<code>.po` (e.g. `fr.p
 ## Install with Nix
 
 ```nix
-# flake inputs
+# flake inputs; pin a release with "github:whoozy82/syncbeacon/v1.0.0"
 syncbeacon.url = "github:whoozy82/syncbeacon";
 
 # NixOS configuration
@@ -100,4 +101,14 @@ environment.systemPackages = [ inputs.syncbeacon.packages.${pkgs.system}.default
 ```
 
 `nix flake check` runs the unit tests. `scripts/pack.sh` builds the zip for extensions.gnome.org.
+
+## Install from a release zip
+
+Download `syncbeacon@whoozy82.github.io.shell-extension.zip` from the [latest release](https://github.com/whoozy82/syncbeacon/releases/latest), then:
+
+```sh
+gnome-extensions install --force syncbeacon@whoozy82.github.io.shell-extension.zip
+# log out and in again, then
+gnome-extensions enable syncbeacon@whoozy82.github.io
+```
 
