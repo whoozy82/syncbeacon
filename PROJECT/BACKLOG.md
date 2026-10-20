@@ -8,7 +8,7 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Replace the Pause-Run-Button by the following solution: Two separate Links for folders-list and device-list
+- Replace the Pause-Run-Button by the following solution: Two separate Links for folders-list and device-list like the following description:
   - While hovering over the headline 'Folders (x)' it makes a underline and appends the test '[Click to pause]'
   - Click on the headline pauses all folders and changes the text to 'Folders (x,Paused)'
   - While hovering over the headline 'Devices (x/y online)' it makes a underline and appends the test '[Click to pause]'
