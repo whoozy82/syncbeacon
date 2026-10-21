@@ -10,7 +10,7 @@
 - Add to tests if not already there:
   - shexli path_to_zip_or_folder (possibly via `nix shell -p`)
   - Enable + Test extension in case systemd service is not available
-
+- Add extensions.gnome.org link to README after approval of the peer review
 
 ## To refine
 
