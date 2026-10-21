@@ -11,7 +11,8 @@
 
 <!-- Refined features, changes, fixes -->
 - Add to tests if not already there:
-  - Enable / Run extension while systemd service not available
+  - shexli path_to_zip_or_folder (possibly via `nix shell -p`)
+  - Enable + Test extension in case systemd service is not available
 
 
 ## To refine
