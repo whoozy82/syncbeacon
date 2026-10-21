@@ -38,7 +38,7 @@ Change log: [HISTORY.md](PROJECT/HISTORY.md)
 ## Gnome Shell Target Versions
 
 - GNOME Shell 50 (developed on)
-- Gnome Shell 49
+- GNOME Shell 49
 
 ## Layout
 
