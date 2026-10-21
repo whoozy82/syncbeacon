@@ -7,10 +7,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Add shexli check (`shexli [--format json] <zip|dir>`)
-  - Not in nixpkgs: `pip install "git+https://gitlab.gnome.org/Infrastructure/extensions-web.git#subdirectory=shexli"`, needs Python ≥ 3.14 (`nix shell nixpkgs#python314`)
-  - Exits 0 even on errors → wrapper must parse the JSON output
-  - shexli 0.2.1 segfaulted here on the dist zip (Python 3.14.7, tree-sitter 0.26) → investigate first
 - Add extensions.gnome.org link to README after approval of the peer review
 
 ## To refine
