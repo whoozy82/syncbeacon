@@ -1,10 +1,18 @@
 // State derivation: every rule and the priority order.
 // Run: gjs -m tests/test_state.js
 
+import GLib from 'gi://GLib';
+import System from 'system';
+
 import {assert, assertEqual, run, test} from './harness.js';
+import {loadLanguage} from '../syncbeacon@whoozy82.github.io/lib/locale.js';
 import {PAUSE_MARK, Row, State, countsText, deriveStatus, emptySnapshot, formatRate, formatTime,
     isConflictPath} from
     '../syncbeacon@whoozy82.github.io/lib/state.js';
+
+// The expected texts below are the English ones from en.po.
+loadLanguage(GLib.build_filenamev([GLib.path_get_dirname(System.programPath), '..',
+    'syncbeacon@whoozy82.github.io']), 'en');
 
 // Shaped like this machine: 5 remote devices, 5 folders, 2 devices online.
 function snapshot(overrides = {}) {

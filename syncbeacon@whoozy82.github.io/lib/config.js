@@ -150,13 +150,13 @@ export async function loadConfig(dir, cancellable = null) {
     } catch (e) {
         if (e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
             throw e;
-        throw new Error(_('Cannot read {path}: {error}', {path: file.get_path(), error: e.message}));
+        throw new Error(_('config.cannot-read', {path: file.get_path(), error: e.message}));
     }
     const gui = parseConfigXml(new TextDecoder().decode(contents));
     if (!gui)
-        throw new Error(_('No <gui> section in {path}', {path: file.get_path()}));
+        throw new Error(_('config.no-gui-section', {path: file.get_path()}));
     if (!gui.apiKey)
-        throw new Error(_('No API key in {path}', {path: file.get_path()}));
+        throw new Error(_('config.no-api-key', {path: file.get_path()}));
     return {
         dir,
         ...gui,
@@ -175,12 +175,12 @@ export async function loadConfig(dir, cancellable = null) {
 export async function resolveConnection(settings, cancellable = null) {
     const dir = settings.get_string('config-dir') || detectConfigDir();
     if (!dir)
-        throw new Error(_('Syncthing config not found'));
+        throw new Error(_('config.not-found'));
     const config = await loadConfig(dir, cancellable);
     const override = settings.get_string('gui-uri');
     const uri = override ? normalizeUri(override) : config.uri;
     if (!uri)
-        throw new Error(override ? _('Invalid URL: {url}', {url: override}) : _('GUI address is a unix socket; set a URL'));
+        throw new Error(override ? _('common.invalid-url', {url: override}) : _('config.unix-socket'));
     return {dir, apiKey: config.apiKey, uri, certPath: config.certPath};
 }
 

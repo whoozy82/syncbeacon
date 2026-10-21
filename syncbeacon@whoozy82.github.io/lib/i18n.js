@@ -1,10 +1,13 @@
 // Translations: our own lookup instead of gettext, because gettext follows
 // the language of the whole Shell process and an extension cannot pick its
-// own. The texts come from gettext .po files in locale/, read at runtime.
+// own. The code uses symbolic keys (e.g. 'notify.rescan-failed'); the texts,
+// English included, come from gettext .po files in locale/, read at runtime.
 // No gi:// imports, so this module can be unit-tested outside the shell.
 
-// msgid -> [msgstr, msgstr[1], …]; empty while the language is English.
+// key -> [msgstr, msgstr[1], …]: the chosen language, and English (en.po)
+// for the keys it lacks.
 let messages = new Map();
+let fallback = new Map();
 
 /**
  * Replace {name} placeholders with values.
@@ -20,51 +23,56 @@ function fill(text, values) {
         name in values ? String(values[name]) : match);
 }
 
-/**
- * The translation of an English text, the text itself if there is none.
- *
- * @param {string} msgid - may contain {name} placeholders
- * @param {object} [values] - values for the placeholders
- * @returns {string}
- */
-export function _(msgid, values) {
-    return fill(messages.get(msgid)?.[0] || msgid, values);
+/** The text forms of key: the chosen language, then English. */
+function forms(key) {
+    return messages.get(key) ?? fallback.get(key);
 }
 
 /**
- * The singular or plural translation for count. Only languages with one
+ * The text for a key in the chosen language, the English text if it has
+ * none, the key itself if English has none either.
+ *
+ * @param {string} key - its text may contain {name} placeholders
+ * @param {object} [values] - values for the placeholders
+ * @returns {string}
+ */
+export function _(key, values) {
+    return fill(forms(key)?.[0] || key, values);
+}
+
+/**
+ * The singular or plural text of key for count. Only languages with one
  * singular and one plural form (n == 1) are supported. The count is
  * available as {n}.
  *
- * @param {string} msgid
- * @param {string} msgidPlural
+ * @param {string} key
  * @param {number} n
  * @param {object} [values]
  * @returns {string}
  */
-export function _n(msgid, msgidPlural, n, values) {
-    const forms = messages.get(msgid);
-    const index = n === 1 ? 0 : 1;
-    const text = forms?.[index] || (index === 0 ? msgid : msgidPlural);
+export function _n(key, n, values) {
+    const text = forms(key)?.[n === 1 ? 0 : 1] || key;
     return fill(text, {n, ...values});
 }
 
 /**
- * Marks a text for translation without translating it, for constants that
+ * Marks a key for translation without translating it, for constants that
  * are translated where they are shown.
  *
- * @param {string} msgid
+ * @param {string} key
  * @returns {string}
  */
-export function N_(msgid) {
-    return msgid;
+export function N_(key) {
+    return key;
 }
 
 /**
- * @param {Map<string, string[]>|null} table - from parsePo(); null for English
+ * @param {Map<string, string[]>|null} table - the chosen language, from parsePo()
+ * @param {Map<string, string[]>|null} [base] - English, for keys table lacks
  */
-export function setMessages(table) {
+export function setMessages(table, base = null) {
     messages = table ?? new Map();
+    fallback = base ?? new Map();
 }
 
 function unquote(s) {
@@ -135,28 +143,26 @@ export function parsePo(text) {
 }
 
 /**
- * The language to use: a code from available, or null for English (the
- * texts in the code). 'system' takes the first of the system's languages
- * that is available; English among them wins over the ones after it.
+ * The language to use: a code from available, 'en' if none fits. 'system'
+ * takes the first of the system's languages that is available; English
+ * among them wins over the ones after it.
  *
- * @param {string} setting - 'system', 'en' or a language code
- * @param {string[]} available - codes with a .po file, e.g. ['de']
+ * @param {string} setting - 'system' or a language code
+ * @param {string[]} available - codes with a .po file, e.g. ['de', 'en']
  * @param {string[]} systemNames - e.g. GLib.get_language_names()
- * @returns {string|null}
+ * @returns {string}
  */
 export function pickLanguage(setting, available, systemNames) {
     if (setting !== 'system')
-        return available.includes(setting) ? setting : null;
+        return available.includes(setting) ? setting : 'en';
     for (const name of systemNames) {
         // de_DE.UTF-8@euro -> de_DE, de
         const full = name.replace(/[.@].*$/, '');
         const lang = full.split('_')[0];
-        if (lang === 'en')
-            return null;
         if (available.includes(full))
             return full;
-        if (available.includes(lang))
+        if (available.includes(lang) || lang === 'en')
             return lang;
     }
-    return null;
+    return 'en';
 }

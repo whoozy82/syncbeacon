@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v1.0.0` created at _20.10.2026_
+- `v1.1.0` created at _21.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-21] English as a translation — the code uses symbolic keys (e.g. `notify.rescan-failed`) instead of English texts; the English texts move to `locale/en.po`, so every language, English included, is a `.po` file; a key the chosen language lacks falls back to English, then to the key itself; `_n()` takes one key; English in the settings' language list now comes from `en.po`; `scripts/i18n-check.js` checks `en.po` like any other language
 - [2026-10-21] Added Gnome 49 compatibility
 - [2026-10-20] Release 1.0.0 — first stable release for GNOME Shell 50: acceptance checklist passed in the devkit, release zip tested in an isolated shell (install, 10 enable/disable cycles without errors), GitHub release with the zip; README with new screenshots (horizontal and vertical layout), zip install instructions and flake pinning to a tag
 - [2026-10-20] Scroll signal leak fix — disabling the extension now also disconnects the info box's scroll handlers; before, each enable left two handlers behind, which GNOME Shell reported as "St.Adjustment … already disposed" criticals on shutdown

@@ -125,7 +125,7 @@ export class SyncthingUnit {
 
     async _action(method) {
         if (!this.found)
-            throw new Error(_('No Syncthing unit found'));
+            throw new Error(_('systemd.no-unit'));
         await this._bus.call(SYSTEMD, MANAGER_PATH, MANAGER_IFACE, method,
             new GLib.Variant('(ss)', [this.name, 'replace']), new GLib.VariantType('(o)'),
             Gio.DBusCallFlags.ALLOW_INTERACTIVE_AUTHORIZATION, ACTION_TIMEOUT_MS, this._cancellable);

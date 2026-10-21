@@ -8,523 +8,531 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: extension.js
-msgid "The Syncthing GUI address is unknown."
+msgid "notify.gui-address-unknown"
 msgstr "Die Adresse der Syncthing-Oberfläche ist unbekannt."
 
 #: extension.js
-msgid "Cannot open {target}: {error}"
+msgid "notify.cannot-open"
 msgstr "{target} kann nicht geöffnet werden: {error}"
 
 #: extension.js
-msgid "Rescan failed: {error}"
+msgid "notify.rescan-failed"
 msgstr "Neu scannen fehlgeschlagen: {error}"
 
 #: extension.js
-msgid "no default text editor"
+msgid "notify.no-text-editor"
 msgstr "kein Standard-Texteditor"
 
 #: extension.js
-msgid "Cannot edit {path}: {error}"
+msgid "notify.cannot-edit"
 msgstr "{path} kann nicht bearbeitet werden: {error}"
 
 #: extension.js
-msgid "Pause devices failed: {error}"
+msgid "notify.pause-devices-failed"
 msgstr "Pausieren der Geräte fehlgeschlagen: {error}"
 
 #: extension.js
-msgid "Resume devices failed: {error}"
+msgid "notify.resume-devices-failed"
 msgstr "Fortsetzen der Geräte fehlgeschlagen: {error}"
 
 #: extension.js
-msgid "Pause folders failed: {error}"
+msgid "notify.pause-folders-failed"
 msgstr "Pausieren der Ordner fehlgeschlagen: {error}"
 
 #: extension.js
-msgid "Resume folders failed: {error}"
+msgid "notify.resume-folders-failed"
 msgstr "Fortsetzen der Ordner fehlgeschlagen: {error}"
 
 #: extension.js
-msgid "Cannot run {command}: {error}"
+msgid "notify.cannot-run"
 msgstr "{command} kann nicht ausgeführt werden: {error}"
 
 #: extension.js
-msgid "{command} exited with status {status}"
+msgid "notify.command-exit-status"
 msgstr "{command} wurde mit Status {status} beendet"
 
 #: lib/client.js lib/config.js prefs.js
-msgid "Invalid URL: {url}"
+msgid "common.invalid-url"
 msgstr "Ungültige URL: {url}"
 
+#: prefs.js ui/infobox.js
+msgid "common.settings"
+msgstr "Einstellungen"
+
+#: prefs.js ui/infobox.js
+msgid "common.connecting"
+msgstr "Verbinde…"
+
 #: lib/client.js
-msgid "Health check failed"
+msgid "client.health-check-failed"
 msgstr "Statusprüfung fehlgeschlagen"
 
 #: lib/client.js
-msgid "Syncthing is not reachable"
+msgid "client.not-reachable"
 msgstr "Syncthing ist nicht erreichbar"
 
 #: lib/config.js
-msgid "Cannot read {path}: {error}"
+msgid "config.cannot-read"
 msgstr "{path} kann nicht gelesen werden: {error}"
 
 #: lib/config.js
-msgid "No <gui> section in {path}"
+msgid "config.no-gui-section"
 msgstr "Kein <gui>-Abschnitt in {path}"
 
 #: lib/config.js
-msgid "No API key in {path}"
+msgid "config.no-api-key"
 msgstr "Kein API-Schlüssel in {path}"
 
 #: lib/config.js
-msgid "Syncthing config not found"
+msgid "config.not-found"
 msgstr "Syncthing-Konfiguration nicht gefunden"
 
 #: lib/config.js
-msgid "GUI address is a unix socket; set a URL"
+msgid "config.unix-socket"
 msgstr "Die GUI-Adresse ist ein Unix-Socket; bitte eine URL angeben"
 
+#: lib/systemd.js prefs.js
+msgid "systemd.no-unit"
+msgstr "Keine Syncthing-Unit gefunden"
+
 #: lib/state.js
-msgid "Out of sync ({n} item)"
-msgid_plural "Out of sync ({n} items)"
+msgid "state.in-sync"
+msgstr "Synchron"
+
+#: lib/state.js
+msgid "state.syncing"
+msgstr "Synchronisiere…"
+
+#: lib/state.js
+msgid "state.folder-issue"
+msgstr "Synchronisationsfehler oder Konflikte in Ordnern"
+
+#: lib/state.js
+msgid "state.paused"
+msgstr "Pausiert"
+
+#: lib/state.js
+msgid "state.error"
+msgstr "Fehler bei Syncthing"
+
+#: lib/state.js
+msgid "state.syncing-percent"
+msgstr "Synchronisiere {percent}"
+
+#: lib/state.js
+msgid "state.device.connected"
+msgstr "Verbunden"
+
+#: lib/state.js
+msgid "state.device.disconnected"
+msgstr "Getrennt"
+
+#: lib/state.js
+msgid "state.device.never-seen"
+msgstr "Nie gesehen"
+
+#: lib/state.js
+msgid "state.folder.scanning"
+msgstr "Scanne"
+
+#: lib/state.js
+msgid "state.folder.scan-waiting"
+msgstr "Warte auf Scan"
+
+#: lib/state.js
+msgid "state.folder.sync-waiting"
+msgstr "Warte auf Synchronisation"
+
+#: lib/state.js
+msgid "state.folder.sync-preparing"
+msgstr "Bereite Synchronisation vor"
+
+#: lib/state.js
+msgid "state.folder.cleaning"
+msgstr "Räume auf"
+
+#: lib/state.js
+msgid "state.folder.clean-waiting"
+msgstr "Warte auf Aufräumen"
+
+#: lib/state.js
+msgid "state.folder.error"
+msgstr "Fehler"
+
+#: lib/state.js
+msgid "state.folder.error-detail"
+msgstr "Fehler: {error}"
+
+#: lib/state.js
+msgid "state.folder.up-to-date"
+msgstr "Aktuell"
+
+#: lib/state.js
+msgid "state.folder.unknown"
+msgstr "Unbekannt"
+
+#: lib/state.js
+msgid "state.folder.out-of-sync"
+msgid_plural "state.folder.out-of-sync"
 msgstr[0] "Nicht synchron ({n} Element)"
 msgstr[1] "Nicht synchron ({n} Elemente)"
 
 #: lib/state.js
-msgid "{n} failed item"
-msgid_plural "{n} failed items"
+msgid "state.folder.failed-items"
+msgid_plural "state.folder.failed-items"
 msgstr[0] "{n} fehlerhaftes Element"
 msgstr[1] "{n} fehlerhafte Elemente"
 
 #: lib/state.js
-msgid "{n} conflict"
-msgid_plural "{n} conflicts"
+msgid "state.folder.conflicts"
+msgid_plural "state.folder.conflicts"
 msgstr[0] "{n} Konflikt"
 msgstr[1] "{n} Konflikte"
 
 #: lib/state.js
-msgid "In Sync"
-msgstr "Synchron"
-
-#: lib/state.js
-msgid "Synchronising…"
-msgstr "Synchronisiere…"
-
-#: lib/state.js
-msgid "Folder sync error or conflicts"
-msgstr "Synchronisationsfehler oder Konflikte in Ordnern"
-
-#: lib/state.js
-msgid "Paused"
-msgstr "Pausiert"
-
-#: lib/state.js
-msgid "Error with Syncthing"
-msgstr "Fehler bei Syncthing"
-
-#: lib/state.js
-msgid "Scanning"
-msgstr "Scanne"
-
-#: lib/state.js
-msgid "Waiting to scan"
-msgstr "Warte auf Scan"
-
-#: lib/state.js
-msgid "Waiting to sync"
-msgstr "Warte auf Synchronisation"
-
-#: lib/state.js
-msgid "Preparing to sync"
-msgstr "Bereite Synchronisation vor"
-
-#: lib/state.js
-msgid "Cleaning up"
-msgstr "Räume auf"
-
-#: lib/state.js
-msgid "Waiting to clean up"
-msgstr "Warte auf Aufräumen"
-
-#: lib/state.js
-msgid "Disconnected"
-msgstr "Getrennt"
-
-#: lib/state.js
-msgid "Syncing {percent}"
-msgstr "Synchronisiere {percent}"
-
-#: lib/state.js
-msgid "Connected"
-msgstr "Verbunden"
-
-#: lib/state.js
-msgid "Never seen"
-msgstr "Nie gesehen"
-
-#: lib/state.js
-msgid "Error: {error}"
-msgstr "Fehler: {error}"
-
-#: lib/state.js
-msgid "Error"
-msgstr "Fehler"
-
-#: lib/state.js
-msgid "Up to date"
-msgstr "Aktuell"
-
-#: lib/state.js
-msgid "Unknown"
-msgstr "Unbekannt"
-
-#: lib/state.js
-msgid "conflict check unavailable"
+msgid "state.folder.conflict-check-unavailable"
 msgstr "Konfliktprüfung nicht verfügbar"
 
 #: lib/state.js
-msgid "Never scanned"
+msgid "state.folder.never-scanned"
 msgstr "Nie gescannt"
 
-#: lib/systemd.js prefs.js
-msgid "No Syncthing unit found"
-msgstr "Keine Syncthing-Unit gefunden"
-
-#: prefs.js
-msgid "Far left"
-msgstr "Ganz links"
-
-#: prefs.js
-msgid "Left"
-msgstr "Links"
-
-#: prefs.js
-msgid "Middle"
-msgstr "Mitte"
-
-#: prefs.js
-msgid "Right"
-msgstr "Rechts"
-
-#: prefs.js
-msgid "Far right"
-msgstr "Ganz rechts"
-
-#: prefs.js
-msgid "Auto"
-msgstr "Automatisch"
-
-#: prefs.js
-msgid "Vertical"
-msgstr "Vertikal"
-
-#: prefs.js
-msgid "Horizontal"
-msgstr "Horizontal"
-
-#: prefs.js
-msgid "Epiphany Web App"
-msgstr "Epiphany-Web-App"
-
-#: prefs.js
-msgid "Command"
-msgstr "Befehl"
-
-#: prefs.js
-msgid "URL+Port"
-msgstr "URL+Port"
-
-#: prefs.js
-msgid "Yes"
-msgstr "Ja"
-
-#: prefs.js
-msgid "Yes (until reboot)"
-msgstr "Ja (bis zum Neustart)"
-
-#: prefs.js
-msgid "Static (started by another unit)"
-msgstr "Statisch (von einer anderen Unit gestartet)"
-
-#: prefs.js
-msgid "Linked"
-msgstr "Verknüpft"
-
-#: prefs.js
-msgid "No"
-msgstr "Nein"
-
-#: prefs.js
-msgid "Masked"
-msgstr "Maskiert"
-
-#: prefs.js
-msgid "Not authorised"
-msgstr "Nicht berechtigt"
-
-#: prefs.js ui/infobox.js
-msgid "Settings"
-msgstr "Einstellungen"
-
-#: prefs.js
-msgid "General"
-msgstr "Allgemein"
-
-#: prefs.js
-msgid "System"
-msgstr "System"
-
-#: prefs.js
-msgid "Language"
-msgstr "Sprache"
-
-#: prefs.js
-msgid "About"
-msgstr "Info"
-
-#: prefs.js
-msgid "Version"
-msgstr "Version"
-
-#: prefs.js
-msgid "This extension is not part of the official Syncthing project!"
-msgstr "Diese Erweiterung ist kein Teil des offiziellen Syncthing-Projekts!"
-
-#: prefs.js
-msgid "But Syncthing is essential for this extension to work."
-msgstr "Syncthing ist jedoch Voraussetzung, damit diese Erweiterung funktioniert."
-
-#: prefs.js
-msgid "Recommended is Epiphany (GNOME Web) for Web App feature."
-msgstr "Für die Web-App-Funktion wird Epiphany (GNOME Web) empfohlen."
-
-#: prefs.js
-msgid "Syncthing service"
-msgstr "Syncthing-Dienst"
-
-#: prefs.js
-msgid "Unit"
-msgstr "Unit"
-
-#: prefs.js
-msgid "Detecting…"
-msgstr "Wird erkannt…"
-
-#: prefs.js
-msgid "Enabled at boot"
-msgstr "Beim Systemstart aktiviert"
-
-#: prefs.js
-msgid "Status"
-msgstr "Status"
-
-#: prefs.js
-msgid "Start"
-msgstr "Starten"
-
-#: prefs.js
-msgid "Stop"
-msgstr "Stoppen"
-
-#: prefs.js
-msgid "{name} (system unit)"
-msgstr "{name} (System-Unit)"
-
-#: prefs.js
-msgid "{name} (user unit)"
-msgstr "{name} (Benutzer-Unit)"
-
-#: prefs.js
-msgid "Detection failed: {error}"
-msgstr "Erkennung fehlgeschlagen: {error}"
-
-#: prefs.js
-msgid "Connection"
-msgstr "Verbindung"
-
-#: prefs.js
-msgid "Config directory"
-msgstr "Konfigurationsverzeichnis"
-
-#: prefs.js
-msgid "Choose…"
-msgstr "Auswählen…"
-
-#: prefs.js
-msgid "Syncthing config directory"
-msgstr "Syncthing-Konfigurationsverzeichnis"
-
-#: prefs.js
-msgid "Auto-detect"
-msgstr "Automatisch erkennen"
-
-#: prefs.js
-msgid "Syncthing window"
-msgstr "Syncthing-Fenster"
-
-#: prefs.js
-msgid "Web app identifier"
-msgstr "Kennung der Web-App"
-
-#: prefs.js
-msgid "Invalid command: {command}"
-msgstr "Ungültiger Befehl: {command}"
-
-#: prefs.js
-msgid "Use the address from config.xml"
-msgstr "Adresse aus config.xml verwenden"
-
-#: prefs.js
-msgid "Test connection"
-msgstr "Verbindung testen"
-
-#: prefs.js
-msgid "Test"
-msgstr "Testen"
-
-#: prefs.js ui/infobox.js
-msgid "Connecting…"
-msgstr "Verbinde…"
-
-#: prefs.js
-msgid "Connected to Syncthing {version} at {url}"
-msgstr "Verbunden mit Syncthing {version} unter {url}"
-
-#: prefs.js
-msgid "Failed: {error}"
-msgstr "Fehlgeschlagen: {error}"
-
-#: prefs.js
-msgid "Opens the URL in the default browser"
-msgstr "Öffnet die URL im Standardbrowser"
-
-#: prefs.js
-msgid "Opens or raises {app}"
-msgstr "Öffnet {app} oder holt es nach vorne"
-
-#: prefs.js
-msgid "GNOME Web is not installed. Until it is, the default browser is used."
-msgstr "GNOME Web ist nicht installiert. Bis dahin wird der Standardbrowser verwendet."
-
-#: prefs.js
-msgid "No GNOME Web app for the URL yet. It is created as soon as the extension knows the URL; until then the default browser is used."
-msgstr "Noch keine GNOME-Web-App für die URL. Sie wird erstellt, sobald die Erweiterung die URL kennt; bis dahin wird der Standardbrowser verwendet."
-
-#: prefs.js
-msgid "Enter a command. Until then the default browser is used."
-msgstr "Bitte einen Befehl eingeben. Bis dahin wird der Standardbrowser verwendet."
-
-#: prefs.js
-msgid "Runs the command in a shell"
-msgstr "Führt den Befehl in einer Shell aus"
-
-#: prefs.js
-msgid "Position"
-msgstr "Position"
-
-#: prefs.js
-msgid "Layout"
-msgstr "Layout"
-
-#: prefs.js
-msgid "Orientation"
-msgstr "Ausrichtung"
-
-#: prefs.js
-msgid "Auto: side by side with 10 or more folders and devices"
-msgstr "Automatisch: nebeneinander ab 10 Ordnern und Geräten"
-
-#: prefs.js
-msgid "Hotkey"
-msgstr "Tastenkürzel"
-
-#: prefs.js
-msgid "Open or hide the Syncthing window"
-msgstr "Syncthing-Fenster öffnen oder verbergen"
-
-#: prefs.js
-msgid "Disabled"
-msgstr "Deaktiviert"
-
-#: prefs.js
-msgid "Set…"
-msgstr "Festlegen…"
-
-#: prefs.js
-msgid "Disable"
-msgstr "Deaktivieren"
-
-#: prefs.js
-msgid "Set shortcut"
-msgstr "Tastenkürzel festlegen"
-
-#: prefs.js
-msgid "Press a key combination"
-msgstr "Tastenkombination drücken"
-
-#: prefs.js
-msgid "Use at least one modifier, e.g. Super or Ctrl.\nEsc cancels, Backspace disables the shortcut."
-msgstr "Mindestens eine Zusatztaste verwenden, z. B. Super oder Strg.\nEsc bricht ab, Rücktaste deaktiviert das Tastenkürzel."
-
 #: ui/infobox.js
-msgid "Pause folders"
-msgstr "Ordner pausieren"
-
-#: ui/infobox.js
-msgid "Resume folders"
-msgstr "Ordner fortsetzen"
-
-#: ui/infobox.js
-msgid "Pause devices"
-msgstr "Geräte pausieren"
-
-#: ui/infobox.js
-msgid "Resume devices"
-msgstr "Geräte fortsetzen"
-
-#: ui/infobox.js
-msgid "Open folder"
-msgstr "Ordner öffnen"
-
-#: ui/infobox.js
-msgid "Rescan folder"
-msgstr "Ordner neu scannen"
-
-#: ui/infobox.js
-msgid "Edit ignore list"
-msgstr "Ignorierliste bearbeiten"
-
-#: ui/infobox.js
-msgid "Open Syncthing"
+msgid "infobox.open-syncthing"
 msgstr "Syncthing öffnen"
 
 #: ui/infobox.js
-msgid "Folders ({count}, Paused)"
-msgstr "Ordner ({count}, pausiert)"
-
-#: ui/infobox.js
-msgid "Folders ({count})"
+msgid "infobox.folders"
 msgstr "Ordner ({count})"
 
 #: ui/infobox.js
-msgid "Devices ({count}, Paused)"
-msgstr "Geräte ({count}, pausiert)"
+msgid "infobox.folders-paused"
+msgstr "Ordner ({count}, pausiert)"
 
 #: ui/infobox.js
-msgid "Devices ({online}/{count} online)"
+msgid "infobox.devices"
 msgstr "Geräte ({online}/{count} online)"
 
 #: ui/infobox.js
-msgid "No folders"
+msgid "infobox.devices-paused"
+msgstr "Geräte ({count}, pausiert)"
+
+#: ui/infobox.js
+msgid "infobox.pause-folders"
+msgstr "Ordner pausieren"
+
+#: ui/infobox.js
+msgid "infobox.resume-folders"
+msgstr "Ordner fortsetzen"
+
+#: ui/infobox.js
+msgid "infobox.pause-devices"
+msgstr "Geräte pausieren"
+
+#: ui/infobox.js
+msgid "infobox.resume-devices"
+msgstr "Geräte fortsetzen"
+
+#: ui/infobox.js
+msgid "infobox.no-folders"
 msgstr "Keine Ordner"
 
 #: ui/infobox.js
-msgid "No remote devices"
+msgid "infobox.no-devices"
 msgstr "Keine entfernten Geräte"
 
 #: ui/infobox.js
-msgid "Disable hover functions"
+msgid "infobox.folder.open"
+msgstr "Ordner öffnen"
+
+#: ui/infobox.js
+msgid "infobox.folder.rescan"
+msgstr "Ordner neu scannen"
+
+#: ui/infobox.js
+msgid "infobox.folder.edit-ignores"
+msgstr "Ignorierliste bearbeiten"
+
+#: ui/infobox.js
+msgid "infobox.hover-disable"
 msgstr "Hover-Funktionen ausschalten"
 
 #: ui/infobox.js
-msgid "Enable hover functions"
+msgid "infobox.hover-enable"
 msgstr "Hover-Funktionen einschalten"
+
+#: prefs.js
+msgid "prefs.general.title"
+msgstr "Allgemein"
+
+#: prefs.js
+msgid "prefs.general.language"
+msgstr "Sprache"
+
+#: prefs.js
+msgid "prefs.general.language-system"
+msgstr "System"
+
+#: prefs.js
+msgid "prefs.about.title"
+msgstr "Info"
+
+#: prefs.js
+msgid "prefs.about.version"
+msgstr "Version"
+
+#: prefs.js
+msgid "prefs.about.not-official"
+msgstr "Diese Erweiterung ist kein Teil des offiziellen Syncthing-Projekts!"
+
+#: prefs.js
+msgid "prefs.about.needs-syncthing"
+msgstr "Syncthing ist jedoch Voraussetzung, damit diese Erweiterung funktioniert."
+
+#: prefs.js
+msgid "prefs.about.epiphany-recommended"
+msgstr "Für die Web-App-Funktion wird Epiphany (GNOME Web) empfohlen."
+
+#: prefs.js
+msgid "prefs.service.title"
+msgstr "Syncthing-Dienst"
+
+#: prefs.js
+msgid "prefs.service.unit"
+msgstr "Unit"
+
+#: prefs.js
+msgid "prefs.service.detecting"
+msgstr "Wird erkannt…"
+
+#: prefs.js
+msgid "prefs.service.system-unit"
+msgstr "{name} (System-Unit)"
+
+#: prefs.js
+msgid "prefs.service.user-unit"
+msgstr "{name} (Benutzer-Unit)"
+
+#: prefs.js
+msgid "prefs.service.detection-failed"
+msgstr "Erkennung fehlgeschlagen: {error}"
+
+#: prefs.js
+msgid "prefs.service.enabled-at-boot"
+msgstr "Beim Systemstart aktiviert"
+
+#: prefs.js
+msgid "prefs.service.enabled.yes"
+msgstr "Ja"
+
+#: prefs.js
+msgid "prefs.service.enabled.runtime"
+msgstr "Ja (bis zum Neustart)"
+
+#: prefs.js
+msgid "prefs.service.enabled.static"
+msgstr "Statisch (von einer anderen Unit gestartet)"
+
+#: prefs.js
+msgid "prefs.service.enabled.linked"
+msgstr "Verknüpft"
+
+#: prefs.js
+msgid "prefs.service.enabled.no"
+msgstr "Nein"
+
+#: prefs.js
+msgid "prefs.service.enabled.masked"
+msgstr "Maskiert"
+
+#: prefs.js
+msgid "prefs.service.status"
+msgstr "Status"
+
+#: prefs.js
+msgid "prefs.service.start"
+msgstr "Starten"
+
+#: prefs.js
+msgid "prefs.service.stop"
+msgstr "Stoppen"
+
+#: prefs.js
+msgid "prefs.service.not-authorised"
+msgstr "Nicht berechtigt"
+
+#: prefs.js
+msgid "prefs.connection.title"
+msgstr "Verbindung"
+
+#: prefs.js
+msgid "prefs.connection.config-dir"
+msgstr "Konfigurationsverzeichnis"
+
+#: prefs.js
+msgid "prefs.connection.choose"
+msgstr "Auswählen…"
+
+#: prefs.js
+msgid "prefs.connection.config-dir-dialog"
+msgstr "Syncthing-Konfigurationsverzeichnis"
+
+#: prefs.js
+msgid "prefs.connection.auto-detect"
+msgstr "Automatisch erkennen"
+
+#: prefs.js
+msgid "prefs.connection.window"
+msgstr "Syncthing-Fenster"
+
+#: prefs.js
+msgid "prefs.connection.window.webapp"
+msgstr "Epiphany-Web-App"
+
+#: prefs.js
+msgid "prefs.connection.window.command"
+msgstr "Befehl"
+
+#: prefs.js
+msgid "prefs.connection.window.uri"
+msgstr "URL+Port"
+
+#: prefs.js
+msgid "prefs.connection.window.uri-hint"
+msgstr "Öffnet die URL im Standardbrowser"
+
+#: prefs.js
+msgid "prefs.connection.window.opens-app"
+msgstr "Öffnet {app} oder holt es nach vorne"
+
+#: prefs.js
+msgid "prefs.connection.window.no-epiphany"
+msgstr "GNOME Web ist nicht installiert. Bis dahin wird der Standardbrowser verwendet."
+
+#: prefs.js
+msgid "prefs.connection.window.no-webapp"
+msgstr "Noch keine GNOME-Web-App für die URL. Sie wird erstellt, sobald die Erweiterung die URL kennt; bis dahin wird der Standardbrowser verwendet."
+
+#: prefs.js
+msgid "prefs.connection.window.enter-command"
+msgstr "Bitte einen Befehl eingeben. Bis dahin wird der Standardbrowser verwendet."
+
+#: prefs.js
+msgid "prefs.connection.window.command-hint"
+msgstr "Führt den Befehl in einer Shell aus"
+
+#: prefs.js
+msgid "prefs.connection.webapp-id"
+msgstr "Kennung der Web-App"
+
+#: prefs.js
+msgid "prefs.connection.command"
+msgstr "Befehl"
+
+#: prefs.js
+msgid "prefs.connection.invalid-command"
+msgstr "Ungültiger Befehl: {command}"
+
+#: prefs.js
+msgid "prefs.connection.uri"
+msgstr "URL+Port"
+
+#: prefs.js
+msgid "prefs.connection.use-config-address"
+msgstr "Adresse aus config.xml verwenden"
+
+#: prefs.js
+msgid "prefs.connection.test-connection"
+msgstr "Verbindung testen"
+
+#: prefs.js
+msgid "prefs.connection.test"
+msgstr "Testen"
+
+#: prefs.js
+msgid "prefs.connection.connected-to"
+msgstr "Verbunden mit Syncthing {version} unter {url}"
+
+#: prefs.js
+msgid "prefs.connection.test-failed"
+msgstr "Fehlgeschlagen: {error}"
+
+#: prefs.js
+msgid "prefs.layout.title"
+msgstr "Layout"
+
+#: prefs.js
+msgid "prefs.layout.position"
+msgstr "Position"
+
+#: prefs.js
+msgid "prefs.layout.position.far-left"
+msgstr "Ganz links"
+
+#: prefs.js
+msgid "prefs.layout.position.left"
+msgstr "Links"
+
+#: prefs.js
+msgid "prefs.layout.position.middle"
+msgstr "Mitte"
+
+#: prefs.js
+msgid "prefs.layout.position.right"
+msgstr "Rechts"
+
+#: prefs.js
+msgid "prefs.layout.position.far-right"
+msgstr "Ganz rechts"
+
+#: prefs.js
+msgid "prefs.layout.orientation"
+msgstr "Format"
+
+#: prefs.js
+msgid "prefs.layout.orientation-hint"
+msgstr "Automatisch: nebeneinander ab 10 Ordnern und Geräten"
+
+#: prefs.js
+msgid "prefs.layout.orientation.auto"
+msgstr "Automatisch"
+
+#: prefs.js
+msgid "prefs.layout.orientation.vertical"
+msgstr "Vertikal"
+
+#: prefs.js
+msgid "prefs.layout.orientation.horizontal"
+msgstr "Horizontal"
+
+#: prefs.js
+msgid "prefs.hotkey.title"
+msgstr "Tastenkürzel"
+
+#: prefs.js
+msgid "prefs.hotkey.toggle-window"
+msgstr "Syncthing-Fenster öffnen oder verbergen"
+
+#: prefs.js
+msgid "prefs.hotkey.disabled"
+msgstr "Deaktiviert"
+
+#: prefs.js
+msgid "prefs.hotkey.set"
+msgstr "Festlegen…"
+
+#: prefs.js
+msgid "prefs.hotkey.disable"
+msgstr "Deaktivieren"
+
+#: prefs.js
+msgid "prefs.hotkey.dialog-title"
+msgstr "Tastenkürzel festlegen"
+
+#: prefs.js
+msgid "prefs.hotkey.press"
+msgstr "Tastenkombination drücken"
+
+#: prefs.js
+msgid "prefs.hotkey.hint"
+msgstr "Mindestens eine Zusatztaste verwenden, z. B. Super oder Strg.\nEsc bricht ab, Rücktaste deaktiviert das Tastenkürzel."

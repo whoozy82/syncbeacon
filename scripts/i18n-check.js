@@ -1,8 +1,8 @@
-// Compare the texts marked for translation in the code (_('…'), _n('…', '…'),
-// N_('…')) with the translation files in locale/.
+// Compare the keys marked for translation in the code (_('…'), _n('…', n),
+// N_('…')) with the translation files in locale/, en.po included.
 //
 // Run: gjs -m scripts/i18n-check.js [--update]
-//   lists per language the texts that are missing and the ones no longer used;
+//   lists per language the keys that are missing and the ones no longer used;
 //   --update appends the missing ones as empty entries to each .po file.
 // Exits with 1 if a text is missing or untranslated, so it can run in checks.
 
@@ -19,7 +19,7 @@ const encoder = new TextEncoder();
 
 const STR = String.raw`'((?:[^'\\]|\\.)*)'`;
 const PATTERNS = [
-    new RegExp(String.raw`\b_n\(\s*${STR}\s*,\s*${STR}`, 'g'),
+    new RegExp(String.raw`\b_n\(\s*${STR}()`, 'g'),
     new RegExp(String.raw`\b[N]?_\(\s*${STR}`, 'g'),
 ];
 
@@ -58,8 +58,9 @@ for (const [rel, path] of sourceFiles(EXT)) {
         for (const m of text.matchAll(pattern)) {
             const msgid = jsUnescape(m[1]);
             const entry = used.get(msgid) ?? {plural: null, refs: new Set()};
+            // Plural entries use the key as msgid and msgid_plural.
             if (m[2] !== undefined)
-                entry.plural = jsUnescape(m[2]);
+                entry.plural = msgid;
             entry.refs.add(rel);
             used.set(msgid, entry);
         }
@@ -77,7 +78,7 @@ while ((file = dir.read_name()) !== null) {
 }
 dir.close();
 
-print(`${used.size} texts in the code`);
+print(`${used.size} keys in the code`);
 for (const po of poFiles.sort()) {
     const path = GLib.build_filenamev([LOCALE, po]);
     const text = read(path);

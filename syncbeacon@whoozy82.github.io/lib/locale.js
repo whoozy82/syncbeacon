@@ -18,7 +18,7 @@ function localeDir(extensionPath) {
 
 /**
  * The languages with a translation file, by their own name, e.g.
- * [{code: 'de', name: 'Deutsch'}]. English is not listed.
+ * [{code: 'de', name: 'Deutsch'}, {code: 'en', name: 'English'}].
  *
  * @param {string} extensionPath
  * @returns {{code: string, name: string}[]}
@@ -51,8 +51,24 @@ export function availableLanguages(extensionPath) {
 }
 
 /**
- * Activate the language of the setting ('system', 'en' or a code); English
- * if its file is missing or unreadable.
+ * The texts of a language, null if its file is missing or unreadable.
+ *
+ * @param {string} extensionPath
+ * @param {string} code
+ * @returns {Map<string, string[]>|null}
+ */
+function loadMessages(extensionPath, code) {
+    try {
+        return readPo(GLib.build_filenamev([localeDir(extensionPath), `${code}.po`])).messages;
+    } catch (e) {
+        console.error(`Syncbeacon: cannot load the ${code} translation: ${e.message}`);
+        return null;
+    }
+}
+
+/**
+ * Activate the language of the setting ('system' or a code), with English
+ * for the texts it lacks.
  *
  * @param {string} extensionPath
  * @param {string} setting
@@ -60,14 +76,6 @@ export function availableLanguages(extensionPath) {
 export function loadLanguage(extensionPath, setting) {
     const codes = availableLanguages(extensionPath).map(l => l.code);
     const code = pickLanguage(setting, codes, GLib.get_language_names());
-    if (!code) {
-        setMessages(null);
-        return;
-    }
-    try {
-        setMessages(readPo(GLib.build_filenamev([localeDir(extensionPath), `${code}.po`])).messages);
-    } catch (e) {
-        console.error(`Syncbeacon: cannot load the ${code} translation: ${e.message}`);
-        setMessages(null);
-    }
+    const english = loadMessages(extensionPath, 'en');
+    setMessages(code === 'en' ? english : loadMessages(extensionPath, code), english);
 }

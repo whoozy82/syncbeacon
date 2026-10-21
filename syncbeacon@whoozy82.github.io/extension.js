@@ -116,13 +116,13 @@ export default class SyncbeaconExtension extends Extension {
         // command: the default browser.
         const uri = this._uri;
         if (!uri) {
-            Main.notifyError('Syncbeacon', _('The Syncthing GUI address is unknown.'));
+            Main.notifyError('Syncbeacon', _('notify.gui-address-unknown'));
             return;
         }
         try {
             Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(0, -1));
         } catch (e) {
-            Main.notifyError('Syncbeacon', _('Cannot open {target}: {error}', {target: uri, error: e.message}));
+            Main.notifyError('Syncbeacon', _('notify.cannot-open', {target: uri, error: e.message}));
         }
     }
 
@@ -155,14 +155,14 @@ export default class SyncbeaconExtension extends Extension {
             Gio.AppInfo.launch_default_for_uri(Gio.File.new_for_path(path).get_uri(),
                 global.create_app_launch_context(0, -1));
         } catch (e) {
-            Main.notifyError('Syncbeacon', _('Cannot open {target}: {error}', {target: path, error: e.message}));
+            Main.notifyError('Syncbeacon', _('notify.cannot-open', {target: path, error: e.message}));
         }
     }
 
     rescanFolder(folderId) {
         // The new folder state arrives through the events.
         this._client.rescan(folderId).catch(e =>
-            Main.notifyError('Syncbeacon', _('Rescan failed: {error}', {error: e.message})));
+            Main.notifyError('Syncbeacon', _('notify.rescan-failed', {error: e.message})));
     }
 
     /**
@@ -181,10 +181,10 @@ export default class SyncbeaconExtension extends Extension {
             }
             const app = Gio.AppInfo.get_default_for_type('text/plain', false);
             if (!app)
-                throw new Error(_('no default text editor'));
+                throw new Error(_('notify.no-text-editor'));
             app.launch([file], global.create_app_launch_context(0, -1));
         } catch (e) {
-            Main.notifyError('Syncbeacon', _('Cannot edit {path}: {error}', {path: file.get_path(), error: e.message}));
+            Main.notifyError('Syncbeacon', _('notify.cannot-edit', {path: file.get_path(), error: e.message}));
         }
     }
 
@@ -201,8 +201,8 @@ export default class SyncbeaconExtension extends Extension {
                 this.refresh();
         }, e => {
             const failed = area === 'devices'
-                ? paused ? N_('Pause devices failed: {error}') : N_('Resume devices failed: {error}')
-                : paused ? N_('Pause folders failed: {error}') : N_('Resume folders failed: {error}');
+                ? paused ? N_('notify.pause-devices-failed') : N_('notify.resume-devices-failed')
+                : paused ? N_('notify.pause-folders-failed') : N_('notify.resume-folders-failed');
             Main.notifyError('Syncbeacon', _(failed, {error: e.message}));
             this._scheduleUpdate();
         });
@@ -236,7 +236,7 @@ export default class SyncbeaconExtension extends Extension {
         try {
             proc = Gio.Subprocess.new(['/bin/sh', '-c', command], Gio.SubprocessFlags.NONE);
         } catch (e) {
-            Main.notifyError('Syncbeacon', _('Cannot run {command}: {error}', {command, error: e.message}));
+            Main.notifyError('Syncbeacon', _('notify.cannot-run', {command, error: e.message}));
             return;
         }
         proc.wait_async(null, (_proc, result) => {
@@ -246,7 +246,7 @@ export default class SyncbeaconExtension extends Extension {
                 return;
             }
             if (proc.get_if_exited() && proc.get_exit_status() !== 0)
-                Main.notifyError('Syncbeacon', _('{command} exited with status {status}', {command, status: proc.get_exit_status()}));
+                Main.notifyError('Syncbeacon', _('notify.command-exit-status', {command, status: proc.get_exit_status()}));
         });
     }
 

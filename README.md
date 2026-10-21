@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/blue)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v1.0.0/yellow) 
+![version](https://badgen.net/badge/version/v1.1.0/yellow) 
 
 
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the
@@ -66,7 +66,7 @@ scripts/                           dev-install, devkit, pack, status, i18n-check
 ```sh
 nix develop
 for t in tests/test_*.js; do gjs -m $t; done                 # unit tests
-gjs -m scripts/i18n-check.js [--update]                     # translations vs. code; --update adds missing texts to the .po files
+gjs -m scripts/i18n-check.js [--update]                     # translation keys vs. code; --update adds missing keys to the .po files
 gjs -m scripts/status.js                                    # live status of the local Syncthing, read-only
 scripts/dev-install.sh                                      # compile schema, symlink into ~/.local/share/gnome-shell/extensions
 ###
@@ -89,9 +89,11 @@ Disable the other Syncthing indicators while testing.
 
 ## Translations
 
-The texts in the code are English. Other languages live in `syncbeacon@whoozy82.github.io/locale/<code>.po` (gettext format, read at runtime, no compiling). GNOME's own gettext follows the language of the whole Shell, so the extension uses its own small loader to make the language selectable in the settings.
+The code uses symbolic keys instead of texts, e.g. `_('notify.rescan-failed', {error})`. Every language, English included, lives in `syncbeacon@whoozy82.github.io/locale/<code>.po` (gettext format, read at runtime, no compiling): the key is the `msgid`, the text the `msgstr`. English (`en.po`) fills in keys that another language lacks; a key missing from `en.po` too shows as the key. GNOME's own gettext follows the language of the whole Shell, so the extension uses its own small loader to make the language selectable in the settings.
 
-To add a language: copy the header of `de.po` into a new `<code>.po` (e.g. `fr.po`), set `Language` and `Language-Name` (the name shown in the settings, e.g. `Français`), run `gjs -m scripts/i18n-check.js --update` and fill in the empty `msgstr` lines, by hand or with Poedit. Placeholders like `{count}` stay as they are. Only languages with one singular and one plural form are supported. `nix flake check` fails while a text is missing or untranslated.
+Keys are `<area>.<name>` in lowercase kebab-case, e.g. `infobox.folders` or `prefs.connection.test`; texts used in several places start with `common.`. To add a text: use a new key in the code, run `gjs -m scripts/i18n-check.js --update` and fill in the empty `msgstr` lines in `en.po` and the other files. For a plural, call `_n('key', n)`; the entry gets `msgstr[0]` (singular) and `msgstr[1]` (plural), with the count as `{n}`.
+
+To add a language: copy the header of `de.po` into a new `<code>.po` (e.g. `fr.po`), set `Language` and `Language-Name` (the name shown in the settings, e.g. `Français`), run `gjs -m scripts/i18n-check.js --update` and fill in the empty `msgstr` lines, by hand or with Poedit; the English texts are in `en.po`. Placeholders like `{count}` stay as they are. Only languages with one singular and one plural form are supported. `nix flake check` fails while a key is missing or untranslated in any file.
 
 ## Install with Nix
 
