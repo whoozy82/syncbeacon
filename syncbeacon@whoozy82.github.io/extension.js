@@ -359,11 +359,8 @@ export default class SyncbeaconExtension extends Extension {
             uri === this._webAppCreatedFor || !epiphanyAvailable() || findWebApp(uri))
             return;
         this._webAppCreatedFor = uri;
-        try {
-            createWebApp(uri, GLib.build_filenamev([this.path, 'icons', 'syncbeacon-syncthing-symbolic.svg']));
-        } catch (e) {
-            console.error(`Syncbeacon: cannot create the Syncthing web app: ${e}`);
-        }
+        createWebApp(uri, GLib.build_filenamev([this.path, 'icons', 'syncbeacon-syncthing-symbolic.svg']))
+            .catch(e => console.error(`Syncbeacon: cannot create the Syncthing web app: ${e}`));
     }
 
     // One-time setup once the GUI address is known: without GNOME Web, the
