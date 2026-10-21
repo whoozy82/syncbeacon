@@ -7,6 +7,12 @@ import GLib from 'gi://GLib';
 
 import {sameGui} from './config.js';
 
+Gio._promisify(Gio.File.prototype, 'replace_contents_bytes_async', 'replace_contents_finish');
+Gio._promisify(Gio.File.prototype, 'replace_async');
+Gio._promisify(Gio.OutputStream.prototype, 'close_async');
+Gio._promisify(Gio.File.prototype, 'copy_async');
+Gio._promisify(Gio.File.prototype, 'make_symbolic_link_async');
+
 const WEBAPP_PREFIX = 'org.gnome.Epiphany.WebApp_';
 
 /**
@@ -123,9 +129,9 @@ function syncthingIconFile() {
  *
  * @param {string} uri - GUI URI the web app opens
  * @param {string|null} fallbackIcon - icon file if Syncthing ships none
- * @returns {string} the web app's command
+ * @returns {Promise<string>} the web app's command
  */
-export function createWebApp(uri, fallbackIcon = null) {
+export async function createWebApp(uri, fallbackIcon = null) {
     const dataDir = GLib.get_user_data_dir();
     const portalDir = GLib.build_filenamev([dataDir, 'xdg-desktop-portal']);
     const desktopName = id => `${id}.desktop`;
@@ -145,9 +151,18 @@ export function createWebApp(uri, fallbackIcon = null) {
         if (GLib.mkdir_with_parents(path, mode) !== 0)
             throw new Error(`Cannot create ${path}`);
     };
+    const write = (path, text) => Gio.File.new_for_path(path).replace_contents_bytes_async(
+        new GLib.Bytes(new TextEncoder().encode(text)), null, false,
+        Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+    // An empty file: write() cannot do this, empty bytes never complete.
+    const touch = async path => {
+        const stream = await Gio.File.new_for_path(path).replace_async(null, false,
+            Gio.FileCreateFlags.REPLACE_DESTINATION, GLib.PRIORITY_DEFAULT, null);
+        await stream.close_async(GLib.PRIORITY_DEFAULT, null);
+    };
     const profile = GLib.build_filenamev([dataDir, id]);
     mkdir(profile, 0o750);
-    GLib.file_set_contents(GLib.build_filenamev([profile, '.app']), '');
+    await touch(GLib.build_filenamev([profile, '.app']));
 
     let icon = 'syncthing';
     const iconSource = syncthingIconFile() ?? fallbackIcon;
@@ -155,8 +170,8 @@ export function createWebApp(uri, fallbackIcon = null) {
         const iconDir = GLib.build_filenamev([portalDir, 'icons', '192x192']);
         mkdir(iconDir);
         icon = GLib.build_filenamev([iconDir, `${id}.${iconSource.split('.').pop()}`]);
-        Gio.File.new_for_path(iconSource).copy(Gio.File.new_for_path(icon),
-            Gio.FileCopyFlags.OVERWRITE, null, null);
+        await Gio.File.new_for_path(iconSource).copy_async(Gio.File.new_for_path(icon),
+            Gio.FileCopyFlags.OVERWRITE, GLib.PRIORITY_DEFAULT, null, null);
     }
 
     const command = `epiphany --application-mode "--profile=${profile}" ${uri}`;
@@ -175,12 +190,13 @@ export function createWebApp(uri, fallbackIcon = null) {
     ].join('\n');
     const appsDir = GLib.build_filenamev([portalDir, 'applications']);
     mkdir(appsDir);
-    GLib.file_set_contents(GLib.build_filenamev([appsDir, desktopName(id)]), desktop);
+    await write(GLib.build_filenamev([appsDir, desktopName(id)]), desktop);
 
     const linkDir = GLib.build_filenamev([dataDir, 'applications']);
     mkdir(linkDir);
-    Gio.File.new_for_path(GLib.build_filenamev([linkDir, desktopName(id)]))
-        .make_symbolic_link(`../xdg-desktop-portal/applications/${desktopName(id)}`, null);
+    await Gio.File.new_for_path(GLib.build_filenamev([linkDir, desktopName(id)]))
+        .make_symbolic_link_async(`../xdg-desktop-portal/applications/${desktopName(id)}`,
+            GLib.PRIORITY_DEFAULT, null);
     return command;
 }
 
