@@ -3,13 +3,12 @@
 ## In progress
 
 <!-- List unfinished tasks that are staged and commited -->
-- 
+- Upload to extensions.gnome.org: `dist/` zip from `scripts/pack.sh` passes `scripts/ego-check.sh`; upload by hand with the own account, then add the extensions.gnome.org link to the README
+  - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
 
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Extend scope to non NixOS Gnome systems and publish to extensions.gnome.org
-  - Extension Manager's "Show details" page only works once published there (fetched from extensions.gnome.org by UUID)
 - Publish as nix package to nix repo
 
 ## To refine

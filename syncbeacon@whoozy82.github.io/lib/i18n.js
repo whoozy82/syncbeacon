@@ -143,6 +143,28 @@ export function parsePo(text) {
 }
 
 /**
+ * A parsed .po file as JSON, the form the release zip ships it in
+ * (extensions.gnome.org does not accept .po files).
+ *
+ * @param {{headers: object, messages: Map<string, string[]>}} catalog
+ * @returns {string}
+ */
+export function catalogToJson({headers, messages}) {
+    return JSON.stringify({headers, messages: Object.fromEntries(messages)}, null, 1);
+}
+
+/**
+ * Read a catalog written by catalogToJson().
+ *
+ * @param {string} text
+ * @returns {{headers: object, messages: Map<string, string[]>}}
+ */
+export function parseCatalogJson(text) {
+    const {headers = {}, messages = {}} = JSON.parse(text);
+    return {headers, messages: new Map(Object.entries(messages))};
+}
+
+/**
  * The language to use: a code from available, 'en' if none fits. 'system'
  * takes the first of the system's languages that is available; English
  * among them wins over the ones after it.

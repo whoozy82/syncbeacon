@@ -1,19 +1,47 @@
 // Reads the translation files in locale/ and activates the chosen language.
 // Used by the extension and by the settings window (a separate process).
+// The source tree has <code>.po files; the release zip has <code>.json
+// instead (scripts/pack.sh), which win when both exist.
 
 import GLib from 'gi://GLib';
 
-import {parsePo, pickLanguage, setMessages} from './i18n.js';
+import {parseCatalogJson, parsePo, pickLanguage, setMessages} from './i18n.js';
 
 const decoder = new TextDecoder();
 
-function readPo(path) {
+function readCatalog(path) {
     const [, bytes] = GLib.file_get_contents(path);
-    return parsePo(decoder.decode(bytes));
+    const text = decoder.decode(bytes);
+    return path.endsWith('.json') ? parseCatalogJson(text) : parsePo(text);
 }
 
 function localeDir(extensionPath) {
     return GLib.build_filenamev([extensionPath, 'locale']);
+}
+
+/**
+ * The translation file of each language, e.g. {de: '…/locale/de.json'}.
+ *
+ * @param {string} extensionPath
+ * @returns {Map<string, string>}
+ */
+function catalogFiles(extensionPath) {
+    const dir = localeDir(extensionPath);
+    const files = new Map();
+    let names;
+    try {
+        names = GLib.Dir.open(dir, 0);
+    } catch {
+        return files;
+    }
+    let file;
+    while ((file = names.read_name()) !== null) {
+        const m = file.match(/^(.+)\.(po|json)$/);
+        if (m && (m[2] === 'json' || !files.has(m[1])))
+            files.set(m[1], GLib.build_filenamev([dir, file]));
+    }
+    names.close();
+    return files;
 }
 
 /**
@@ -24,29 +52,17 @@ function localeDir(extensionPath) {
  * @returns {{code: string, name: string}[]}
  */
 export function availableLanguages(extensionPath) {
-    const dir = localeDir(extensionPath);
-    let names;
-    try {
-        names = GLib.Dir.open(dir, 0);
-    } catch {
-        return [];
-    }
     const languages = [];
-    let file;
-    while ((file = names.read_name()) !== null) {
-        if (!file.endsWith('.po'))
-            continue;
-        const code = file.slice(0, -3);
+    for (const [code, path] of catalogFiles(extensionPath)) {
         let name = code;
         try {
-            name = readPo(GLib.build_filenamev([dir, file])).headers['Language-Name'] || code;
+            name = readCatalog(path).headers['Language-Name'] || code;
         } catch (e) {
-            console.error(`Syncbeacon: cannot read ${file}: ${e.message}`);
+            console.error(`Syncbeacon: cannot read ${path}: ${e.message}`);
             continue;
         }
         languages.push({code, name});
     }
-    names.close();
     return languages.sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -58,8 +74,11 @@ export function availableLanguages(extensionPath) {
  * @returns {Map<string, string[]>|null}
  */
 function loadMessages(extensionPath, code) {
+    const path = catalogFiles(extensionPath).get(code);
     try {
-        return readPo(GLib.build_filenamev([localeDir(extensionPath), `${code}.po`])).messages;
+        if (!path)
+            throw new Error('no translation file');
+        return readCatalog(path).messages;
     } catch (e) {
         console.error(`Syncbeacon: cannot load the ${code} translation: ${e.message}`);
         return null;

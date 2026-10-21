@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/blue)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v1.1.0/yellow) 
+![version](https://badgen.net/badge/version/v1.2.0/yellow) 
 
 
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the
@@ -12,7 +12,7 @@ GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web
 ## Goal
 
 This little project aims to publish this extension to the official Gnome Shell Extension Site and publish
-as NixOS package as well.
+as NixOS package as well. It runs on any distribution with GNOME Shell 49 or 50, NixOS or not.
 
 ## AI
 
@@ -58,7 +58,7 @@ syncbeacon@whoozy82.github.io/     the extension
   ui/indicator.js  ui/infobox.js   panel button, info box with controls
   icons/  schemas/  stylesheet.css
 tests/                             gjs unit tests
-scripts/                           dev-install, devkit, pack, status, i18n-check, make-icons (icons from Syncthing's tray icons)
+scripts/                           dev-install, devkit, pack (+ po2json, ego-check), status, i18n-check, make-icons (icons from Syncthing's tray icons)
 ```
 
 ## Develop
@@ -82,8 +82,10 @@ nix develop -c scripts/devkit.sh                            # nested Gnome Shell
 GNOME only loads a newly linked extension in the main session after a re-login. Use the devkit window until then. Watch for errors with:
 
 ```sh
-journalctl --user -f -o cat /run/current-system/sw/bin/gnome-shell
+journalctl --user -f -o cat "$(command -v gnome-shell)"      # e.g. /usr/bin/gnome-shell, on NixOS /run/current-system/sw/bin/gnome-shell
 ```
+
+Without Nix, the unit tests and scripts need `gjs`, `glib-compile-schemas` and `gnome-extensions` (packages `gjs`, `glib2`/`libglib2.0-bin` and `gnome-shell`).
 
 Disable the other Syncthing indicators while testing.
 
@@ -106,7 +108,12 @@ environment.systemPackages = [ inputs.syncbeacon.packages.${pkgs.system}.default
 # and add "syncbeacon@whoozy82.github.io" to org/gnome/shell enabled-extensions
 ```
 
-`nix flake check` runs the unit tests. `scripts/pack.sh` builds the zip for extensions.gnome.org.
+`nix flake check` runs the unit tests. `scripts/pack.sh` builds the zip for extensions.gnome.org: it converts the `.po` files to `.json` (extensions.gnome.org does not accept `.po` files), leaves out `version` in `metadata.json` (extensions.gnome.org sets its own) and checks the result with `scripts/ego-check.sh`.
+
+## Requirements on other distributions
+
+- Syncthing, run any way: as a systemd unit (system `syncthing.service` or `syncthing@<user>.service`, or user `syncthing.service`) or started otherwise. Start / Stop in the settings needs one of these units. The config is looked up in `~/.local/state/syncthing` and `~/.config/syncthing`; another directory can be set in the settings.
+- Optional: GNOME Web (`epiphany`) for the Syncthing window. A web app for Syncthing is only created automatically with a natively installed GNOME Web. With GNOME Web as a Flatpak, a web app you created yourself in GNOME Web ("Install Site as Web App…") is found and used; otherwise the GUI opens in the default browser.
 
 ## Install from a release zip
 
@@ -118,3 +125,7 @@ gnome-extensions install --force syncbeacon@whoozy82.github.io.shell-extension.z
 gnome-extensions enable syncbeacon@whoozy82.github.io
 ```
 
+
+## License
+
+[MIT](LICENSE)
