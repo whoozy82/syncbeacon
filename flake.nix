@@ -36,6 +36,7 @@
           meta = {
             description = "Syncthing status in the GNOME top bar";
             homepage = "https://github.com/whoozy82/syncbeacon";
+            license = pkgs.lib.licenses.mit;
             platforms = pkgs.lib.platforms.linux;
           };
         };

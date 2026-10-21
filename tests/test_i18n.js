@@ -2,7 +2,9 @@
 // Run: gjs -m tests/test_i18n.js
 
 import {assertEqual, run, test} from './harness.js';
-import {_, _n, parsePo, pickLanguage, setMessages} from '../syncbeacon@whoozy82.github.io/lib/i18n.js';
+import {
+    _, _n, catalogToJson, parseCatalogJson, parsePo, pickLanguage, setMessages,
+} from '../syncbeacon@whoozy82.github.io/lib/i18n.js';
 
 const PO = `# Comment
 msgid ""
@@ -73,6 +75,13 @@ test('fallback to English, then to the key', () => {
     assertEqual(_('missing.key'), 'missing.key');
     assertEqual(_n('missing.plural', 2), 'missing.plural');
     assertEqual(_('missing.key {unknown}', {}), 'missing.key {unknown}');
+});
+
+test('json catalog round trip', () => {
+    const po = parsePo(PO);
+    const json = parseCatalogJson(catalogToJson(po));
+    assertEqual(json.headers, po.headers);
+    assertEqual([...json.messages], [...po.messages]);
 });
 
 test('English as the chosen language', () => {
