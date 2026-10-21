@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
-![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/yellow)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v1.0.0/green) 
+![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/blue)   &nbsp;&nbsp;
+![version](https://badgen.net/badge/version/v1.0.0/yellow) 
 
 ```
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
@@ -10,13 +10,15 @@ _**This extension is NOT part of the official Syncthing project! It requires a r
 
 ## Goal
 
-This little project aims to publish this extension to the official Gnome Shell Extension Site as quickly as possible.
+This little project aims to publish this extension to the official Gnome Shell Extension Site and publish
+as NixOS package as well.
 
 ## AI
 
-The implementation foots on agentic coding.
+- The refinements, testing and code review was done by human.
+- The implementation and pre-tests were done be Claude Code.
 
-## Functional Description
+## Detailed Description
 
 - A state icon with counts, e.g. `2/5 · 5` (online/total peers · folders); a ⏸ after a count means all devices or all folders are paused. There are five states: In Sync, Synchronising…, Folder sync error or conflicts (yellow), Paused, Error with Syncthing (red).
 - **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left, Settings on the right), with this device's name (coloured by state) and the short state between them, then every folder and every peer, stacked or side by side (see Layout in the settings); the box is at most 60 % of the screen height, longer lists scroll and a chevron at the bottom shows that more follows. Hovering the "Folders" or "Devices" headline shows a Pause/Resume button in its place that pauses or resumes all folders or all devices. Hovering a device's status shows its transfer rates or, if disconnected, when it was last seen; hovering a folder's status shows when it was last scanned. Hovering a folder's name shows buttons in its place to open the folder, rescan it and edit its ignore list (`.stignore`). These hover functions are off after installing; the wand in the bottom right corner of the info box switches them on or off.
