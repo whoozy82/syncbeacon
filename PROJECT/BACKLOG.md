@@ -10,39 +10,13 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-- Shexli at externsions.gnome.org: EGO-L-004 - warning:
-  main loop sources should be removed in disable()
-  Main loop sources assigned in `enable()` are missing matching removals in `disable()` or its helper methods.
-  Remove main loop sources:
-    `extension.js:256`:
-      ```
-      this._pollId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, seconds, () => {
-          this._client.poll().catch(e => {
-              if (!isCancelled(e))
-                  console.debug(`Syncbeacon: status poll failed: ${e}`);
-          });
-          return GLib.SOURCE_CONTINUE
-      ```
-    `extension.js:300`:
-      ```
-        this._retryId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, CONFIG_RETRY_S, () => {
-            this._retryId = 0;
-            this._reconfigure();
-            return GLib.SOURCE_REMOVE;
-        })
-      ```
-    `extension.js:380`:
-      ```
-        this._updateId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, UPDATE_DELAY_MS, () => {
-            this._updateId = 0;
-            this._update();
-            return GLib.SOURCE_REMOVE;
-        })
-      ```
+- Fix: `GLib-CRITICAL: Source ID … was not found when attempting to remove it` on disable / shell shutdown (seen in the devkit log, also before v1.2.2)
+  - Likely `sleep()` in `lib/client.js`: after the timeout fired, the `_wakeup` cancellable handler stays connected, and a later cancel removes the dead source; disconnect the handler once the timeout fires
+  - Also check the `GLib-GObject-CRITICAL: instance … has no handler with id …` lines logged right after it
 
-- Fix: "Error: GSettings key hover-functions not found in schema org.gnome.shell.extensions.syncbeacon"
+- Shexli at externsions.gnome.org (not flagged yet): `lib/webapp.js` writes files synchronously with `GLib.file_set_contents` (lines 150, 178)
 
-- Add to tests:
+- Add to tests if not already there:
   - Enable / Run extension while systemd service not available
 
 

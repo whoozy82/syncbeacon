@@ -82,11 +82,18 @@ export default class SyncbeaconExtension extends Extension {
         // First, so closing an open info box cannot start the poll timer again.
         this._indicator?.destroy();
         this._indicator = null;
-        for (const id of [this._updateId, this._retryId, this._pollId]) {
-            if (id)
-                GLib.source_remove(id);
+        if (this._updateId) {
+            GLib.source_remove(this._updateId);
+            this._updateId = 0;
         }
-        this._updateId = this._retryId = this._pollId = 0;
+        if (this._retryId) {
+            GLib.source_remove(this._retryId);
+            this._retryId = 0;
+        }
+        if (this._pollId) {
+            GLib.source_remove(this._pollId);
+            this._pollId = 0;
+        }
         this._configCancellable?.cancel();
         this._configCancellable = null;
         this._languageCancellable?.cancel();
