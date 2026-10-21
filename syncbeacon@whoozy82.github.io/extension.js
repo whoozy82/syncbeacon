@@ -46,7 +46,6 @@ export default class SyncbeaconExtension extends Extension {
         this._folderKey = '';
         this._webAppCreatedFor = null;
         this._migrateSettings();
-        loadLanguage(this.path, this._settings.get_string('language'));
 
         this._client = new SyncthingClient({
             onUpdate: () => this._scheduleUpdate(),
@@ -66,6 +65,8 @@ export default class SyncbeaconExtension extends Extension {
             this);
 
         this._placeIndicator();
+        // Async: the indicator is built again once the texts are loaded.
+        this._onLanguageChanged();
         Main.wm.addKeybinding('toggle-window', this._settings,
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
@@ -88,6 +89,8 @@ export default class SyncbeaconExtension extends Extension {
         this._updateId = this._retryId = this._pollId = 0;
         this._configCancellable?.cancel();
         this._configCancellable = null;
+        this._languageCancellable?.cancel();
+        this._languageCancellable = null;
 
         this._client.stop();
         this._client = null;
@@ -273,8 +276,21 @@ export default class SyncbeaconExtension extends Extension {
 
     // New texts everywhere: the indicator and the info box are built again,
     // and the status is derived again for the row texts.
-    _onLanguageChanged() {
-        loadLanguage(this.path, this._settings.get_string('language'));
+    // A newer change or disable() cancels a load that is still running.
+    async _onLanguageChanged() {
+        this._languageCancellable?.cancel();
+        const cancellable = new Gio.Cancellable();
+        this._languageCancellable = cancellable;
+        try {
+            await loadLanguage(this.path, this._settings.get_string('language'), cancellable);
+        } catch (e) {
+            if (!isCancelled(e))
+                console.error(`Syncbeacon: cannot load the language: ${e}`);
+            return;
+        }
+        if (cancellable.is_cancelled())
+            return;
+        this._languageCancellable = null;
         this._placeIndicator();
         this._scheduleUpdate();
     }
