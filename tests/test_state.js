@@ -11,7 +11,7 @@ import {PAUSE_MARK, Row, State, countsText, deriveStatus, emptySnapshot, formatR
     '../syncbeacon@whoozy82.github.io/lib/state.js';
 
 // The expected texts below are the English ones from en.po.
-loadLanguage(GLib.build_filenamev([GLib.path_get_dirname(System.programPath), '..',
+await loadLanguage(GLib.build_filenamev([GLib.path_get_dirname(System.programPath), '..',
     'syncbeacon@whoozy82.github.io']), 'en');
 
 // Shaped like this machine: 5 remote devices, 5 folders, 2 devices online.

@@ -92,32 +92,48 @@ function dbusErrorMessage(e) {
 }
 
 export default class SyncbeaconPreferences extends ExtensionPreferences {
-    fillPreferencesWindow(window) {
+    async fillPreferencesWindow(window) {
         const settings = this.getSettings();
         window.set_default_size(640, 760);
 
-        // Another language: the page is built again with the new texts.
+        // Another language: the page is built again with the new texts. A
+        // newer change or closing the window cancels a load still running.
         let page = null;
-        const build = () => {
+        let cancellable = null;
+        const build = async () => {
+            cancellable?.cancel();
+            const current = new Gio.Cancellable();
+            cancellable = current;
+            let languages;
+            try {
+                await loadLanguage(this.path, settings.get_string('language'), current);
+                languages = await availableLanguages(this.path, current);
+            } catch (e) {
+                if (!isCancelled(e))
+                    console.error(`Syncbeacon: cannot load the language: ${e}`);
+                return;
+            }
+            if (current.is_cancelled())
+                return;
             dispose();
             if (page)
                 window.remove(page);
-            loadLanguage(this.path, settings.get_string('language'));
-            page = this._page(window, settings);
+            page = this._page(window, settings, languages);
             window.add(page);
         };
-        const languageId = settings.connect('changed::language', build);
+        const languageId = settings.connect('changed::language', () => build());
         window.connect('close-request', () => {
             settings.disconnect(languageId);
+            cancellable?.cancel();
             dispose();
             return false;
         });
-        build();
+        await build();
     }
 
-    _page(window, settings) {
+    _page(window, settings, languages) {
         const page = new Adw.PreferencesPage({title: _('common.settings'), icon_name: 'emblem-system-symbolic'});
-        page.add(this._languageGroup(settings));
+        page.add(this._languageGroup(settings, languages));
         page.add(this._serviceGroup(window));
         page.add(this._connectionGroup(window, settings));
         page.add(this._layoutGroup(settings));
@@ -127,10 +143,10 @@ export default class SyncbeaconPreferences extends ExtensionPreferences {
     }
 
     // System, then the languages in locale/ (English included) by their own names.
-    _languageGroup(settings) {
+    _languageGroup(settings, available) {
         const group = new Adw.PreferencesGroup({title: _('prefs.general.title')});
         const languages = [['system', _('prefs.general.language-system')],
-            ...availableLanguages(this.path).map(({code, name}) => [code, name])];
+            ...available.map(({code, name}) => [code, name])];
         const row = new Adw.ComboRow({title: _('prefs.general.language'),
             model: Gtk.StringList.new(languages.map(([, label]) => label))});
         const current = settings.get_string('language');

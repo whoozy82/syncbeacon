@@ -10,13 +10,6 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
-
-- Shexli at externsions.gnome.org: EGO-X-004 - warning:
-  extensions should avoid synchronous file IO in shell code
-  Shell code should avoid synchronous file IO APIs like `GLib.file_get_contents()` and `Gio.File.load_contents()`.
-  File Operations:
-    `lib/locale.js:13` > `GLib.file_get_contents(path)`
-
 - Shexli at externsions.gnome.org: EGO-L-004 - warning:
   main loop sources should be removed in disable()
   Main loop sources assigned in `enable()` are missing matching removals in `disable()` or its helper methods.
@@ -47,13 +40,20 @@
         })
       ```
 
+- Fix: "Error: GSettings key hover-functions not found in schema org.gnome.shell.extensions.syncbeacon"
 
-- Publish as nix package to nix repo
+- Add to tests:
+  - Enable / Run extension while systemd service not available
+
 
 ## To refine
 
 <!-- list of features that are not fully refined -->
-- ...
+- Publish as nix package to nix repo ...
+- Make use of Prometheus-Style Metrics at /metrics endpoint
+  Left bottom > small button to open metrics site
+  ...
+
 
 *Maybe parallel to this project*
 - icon overlays in nautilus w syncthing status (maybe incl hover to show more info)

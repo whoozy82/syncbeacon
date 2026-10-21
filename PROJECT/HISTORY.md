@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new updates -->
-- `v1.2.0` created at _21.10.2026_
+- `v1.2.1` created at _21.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-21] Async translation loading (extensions.gnome.org warning EGO-X-004) — `lib/locale.js` reads the translation files with `Gio.File.load_contents_async` and lists `locale/` with `enumerate_children_async` instead of the synchronous `GLib.file_get_contents` and `GLib.Dir`; `loadLanguage()` and `availableLanguages()` are async and cancellable; the extension rebuilds the indicator once the texts are loaded, and the settings window builds its page after loading (`fillPreferencesWindow` is async); a newer language change or disabling the extension cancels a load still running
 - [2026-10-21] Ready for extensions.gnome.org and other distributions — licence changed from Apache-2.0 to MIT (extensions.gnome.org needs GPL-2.0-or-later compatible terms); `scripts/pack.sh` packs a copy in which the `.po` files become `locale/<code>.json` (`scripts/po2json.js`; extensions.gnome.org does not accept `.po` files) and `metadata.json` has no `version`, then checks the zip with the new `scripts/ego-check.sh`; `lib/locale.js` reads `.json` before `.po`; README: requirements on other distributions (Syncthing units, config directories, GNOME Web as Flatpak) and a distro-neutral journal command
 - [2026-10-21] English as a translation — the code uses symbolic keys (e.g. `notify.rescan-failed`) instead of English texts; the English texts move to `locale/en.po`, so every language, English included, is a `.po` file; a key the chosen language lacks falls back to English, then to the key itself; `_n()` takes one key; English in the settings' language list now comes from `en.po`; `scripts/i18n-check.js` checks `en.po` like any other language
 - [2026-10-21] Added Gnome 49 compatibility
