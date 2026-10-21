@@ -7,7 +7,7 @@
 > GNOME top bar and opens the Syncthing web UI in its own window, like a GNOME Web app.
 
 
-_**This extension is NOT part of the official Syncthing project! It requires a running Syncthing instance though. To get Syncthing, check out the official site at [https://syncthing.net](https://syncthing.net).**_
+_Note that this extension is NOT part of the official Syncthing project! It requires a running Syncthing instance though. To get Syncthing, check out the official site at [https://syncthing.net](https://syncthing.net)._
 
 ## Goal
 
