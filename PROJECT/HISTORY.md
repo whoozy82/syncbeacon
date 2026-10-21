@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new changes / fixes -->
-- `v1.2.3` created at _21.10.2026_
+- `v1.2.4` created at _21.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-21] Test without systemd — new `tests/test_systemd.js`, run by `tests/run-systemd.sh` on a private D-Bus (no service directories) that serves as session and system bus, so systemd is not reachable: unit detection ends without a unit and calls `onChange` once, Start/Stop fail with `systemd.no-unit`, destroying during detection leaves nothing behind; part of `nix flake check`; the test harness awaits async tests
 - [2026-10-21] Uploaded to extensions.gnome.org — the `dist/` zip from `scripts/pack.sh` passes `scripts/ego-check.sh` and was uploaded by hand with the own account; waiting for the peer review (once published: add the extensions.gnome.org link to the README; Extension Manager's "Show details" page only works then, as it is fetched from extensions.gnome.org by UUID)
 - [2026-10-21] Async web app creation — `createWebApp()` in `lib/webapp.js` is async: the desktop file is written with `replace_contents_bytes_async`, the empty `.app` marker with `replace_async`/`close_async` (empty bytes never complete an async write), the icon is copied with `copy_async` and the symlink made with `make_symbolic_link_async`, so no synchronous file writes remain in shell code; directories and existence checks stay synchronous
 - [2026-10-21] Explicit timer removal in `disable()` (extensions.gnome.org warning EGO-L-004) — the poll, config retry and update timers are removed one by one instead of in a loop over an array, which the static check could not match to the fields set in `enable()`; no change in behaviour
