@@ -20,11 +20,12 @@ export function assert(cond, what = 'assertion failed') {
         throw new Error(what);
 }
 
-export function run() {
+// Async tests are awaited; a test file with async tests uses `await run()`.
+export async function run() {
     let failed = 0;
     for (const {name, fn} of tests) {
         try {
-            fn();
+            await fn();
             print(`ok    ${name}`);
         } catch (e) {
             failed++;

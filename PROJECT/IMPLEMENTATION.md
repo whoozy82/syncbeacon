@@ -203,7 +203,7 @@ Syncthing_UX/
     │   ├── locale/   de.po  en.po
     │   ├── icons/    syncbeacon-{in-sync,syncing,folder-issue,paused,error,syncthing,ignore,magic}-symbolic.svg  syncbeacon-syncthing.svg
     │   └── schemas/  org.gnome.shell.extensions.syncbeacon.gschema.xml
-    ├── tests/        harness.js  test_state.js  test_config.js  test_webapp.js  test_i18n.js   # run with `gjs -m`
+    ├── tests/        harness.js  test_state.js  test_config.js  test_webapp.js  test_i18n.js  test_systemd.js  run-systemd.sh   # run with `gjs -m` (test_systemd.js via run-systemd.sh)
     └── scripts/      dev-install.sh  devkit.sh  pack.sh  po2json.js  ego-check.sh  status.js  i18n-check.js  make-icons.py
 ```
 
@@ -266,6 +266,7 @@ Rough total: 5–6 working days.
 ## 6. Testing
 
 - **Unit:** `gjs -m tests/test_state.js` and `tests/test_config.js`, run against snapshots built in the tests. No running Syncthing needed.
+- **No systemd:** `tests/run-systemd.sh` runs `tests/test_systemd.js` on a private D-Bus (`dbus-run-session`, no service directories) that is both session and system bus, so systemd is unreachable: unit detection ends with no unit, Start/Stop fail with "no unit", destroying during detection is clean. Part of `nix flake check`.
 - **Integration:** a throwaway Syncthing instance (`syncthing serve --home=$(mktemp -d) --no-browser --gui-address=127.0.0.1:18384`), with the extension's URI and config path pointed at it and driven over REST to produce each state.
 - **Shell:** run `journalctl --user -f -o cat /run/current-system/sw/bin/gnome-shell` and watch for JS errors. Enable and disable the extension 10 times and confirm there are no errors, no leftover actors or keybindings, and no running `find` processes.
 

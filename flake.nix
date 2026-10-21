@@ -54,12 +54,13 @@
       });
 
       checks = forAll (pkgs: {
-        unit-tests = pkgs.runCommand "syncbeacon-tests" { nativeBuildInputs = [ pkgs.gjs ]; } ''
+        unit-tests = pkgs.runCommand "syncbeacon-tests" { nativeBuildInputs = [ pkgs.gjs pkgs.dbus ]; } ''
           cp -r ${./.}/. src && cd src
           gjs -m tests/test_state.js
           gjs -m tests/test_config.js
           gjs -m tests/test_webapp.js
           gjs -m tests/test_i18n.js
+          bash tests/run-systemd.sh
           gjs -m scripts/i18n-check.js
           touch $out
         '';
