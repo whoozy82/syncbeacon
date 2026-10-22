@@ -92,7 +92,7 @@
    the GNOME accent colour. */
 .syncbeacon-folder-actions {
   padding: 0 4px;
-  spacing: 12px;
+  spacing: 10px;
   border: 1px solid -st-accent-color;
 }
 

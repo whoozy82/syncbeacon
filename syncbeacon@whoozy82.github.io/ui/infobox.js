@@ -67,59 +67,113 @@ function rowDetail() {
 }
 
 /**
- * The folder actions shown when hovering the folder's name: Open Folder,
- * Rescan and Edit Ignore List.
+ * The framed box of round buttons shown when hovering a row's name.
+ * addButtons(button) adds the buttons via button(icon, accessibleName,
+ * onClick) and returns sync(item, shown), which updates them for the row's
+ * folder or device and whether the box is shown.
  *
- * @param {InfoBox} infoBox
- * @returns {{actor: St.BoxLayout, set: Function}}
+ * @param {Function} addButtons
+ * @returns {{actor: St.BoxLayout, set: Function, setShown: Function}}
  */
-function folderActions(infoBox) {
+function rowActions(addButtons) {
     const actor = new St.BoxLayout({style_class: 'syncbeacon-row-detail syncbeacon-folder-actions',
         x_align: Clutter.ActorAlign.START, y_align: Clutter.ActorAlign.CENTER});
-    let folder = null;
+    let item = null;
+    let shown = false;
 
     const button = (icon, accessibleName, onClick) => {
         const b = new St.Button({style_class: 'syncbeacon-folder-action',
             accessible_name: accessibleName, child: new St.Icon(icon),
             y_align: Clutter.ActorAlign.CENTER});
-        b.connect('clicked', () => folder && onClick(folder));
+        b.connect('clicked', () => item && onClick(item));
         actor.add_child(b);
         return b;
     };
-    const controller = infoBox._controller;
-    const open = button({icon_name: 'folder-open-symbolic'}, _('infobox.folder.open'), f => {
-        infoBox.close();
-        controller.openFolder(f.path);
-    });
-    // Stays open so the scan state shows up in place.
-    const rescan = button({icon_name: 'view-refresh-symbolic'}, _('infobox.folder.rescan'),
-        f => controller.rescanFolder(f.id));
-    const ignores = button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, _('infobox.folder.edit-ignores'), f => {
-        infoBox.close();
-        controller.editIgnores(f.path);
-    });
-
-    // The buttons take clicks only while shown, never through the name.
-    let shown = false;
-    const sync = () => {
-        open.reactive = shown;
-        ignores.reactive = shown;
-        rescan.reactive = shown && !folder?.paused;
-        rescan.opacity = folder?.paused ? 128 : 255;
-    };
+    const sync = addButtons(button);
     const set = value => {
-        folder = value;
-        sync();
+        item = value;
+        sync(item, shown);
     };
     const setShown = value => {
         shown = value;
-        sync();
+        sync(item, shown);
     };
     return {actor, set, setShown};
 }
 
 /**
- * The name, swapped for the folder actions while hovered. Both stay in the
+ * Show ⏸ on a pause button while running and ▶ while paused.
+ *
+ * @param {St.Button} button
+ * @param {boolean} paused
+ * @param {string[]} names - accessible names [pause, resume]
+ */
+function syncPauseButton(button, paused, names) {
+    button.child.icon_name = paused ? 'media-playback-start-symbolic' : 'media-playback-pause-symbolic';
+    button.accessible_name = _(names[paused ? 1 : 0]);
+}
+
+const FOLDER_PAUSE_NAMES = [N_('infobox.folder.pause'), N_('infobox.folder.resume')];
+const DEVICE_PAUSE_NAMES = [N_('infobox.device.pause'), N_('infobox.device.resume')];
+
+/**
+ * The folder actions shown when hovering the folder's name: Open Folder,
+ * Pause/Resume, Rescan and Edit Ignore List.
+ *
+ * @param {InfoBox} infoBox
+ * @returns {{actor: St.BoxLayout, set: Function, setShown: Function}}
+ */
+function folderActions(infoBox) {
+    const controller = infoBox._controller;
+    return rowActions(button => {
+        const open = button({icon_name: 'folder-open-symbolic'}, _('infobox.folder.open'), f => {
+            infoBox.close();
+            controller.openFolder(f.path);
+        });
+        // Stays open so the paused state shows up in place.
+        const pause = button({icon_name: 'media-playback-pause-symbolic'}, _(FOLDER_PAUSE_NAMES[0]),
+            f => controller.setFolderPaused(f.id, !f.paused));
+        // Stays open so the scan state shows up in place.
+        const rescan = button({icon_name: 'view-refresh-symbolic'}, _('infobox.folder.rescan'),
+            f => controller.rescanFolder(f.id));
+        const ignores = button({gicon: infoBox._extensionIcon('syncbeacon-ignore-symbolic.svg')}, _('infobox.folder.edit-ignores'), f => {
+            infoBox.close();
+            controller.editIgnores(f.path);
+        });
+
+        // The buttons take clicks only while shown, never through the name.
+        return (folder, shown) => {
+            open.reactive = shown;
+            ignores.reactive = shown;
+            rescan.reactive = shown && !folder?.paused;
+            rescan.opacity = folder?.paused ? 128 : 255;
+            pause.reactive = shown;
+            syncPauseButton(pause, !!folder?.paused, FOLDER_PAUSE_NAMES);
+        };
+    });
+}
+
+/**
+ * The device actions shown when hovering the device's name: Pause/Resume.
+ *
+ * @param {InfoBox} infoBox
+ * @returns {{actor: St.BoxLayout, set: Function, setShown: Function}}
+ */
+function deviceActions(infoBox) {
+    const controller = infoBox._controller;
+    return rowActions(button => {
+        // Stays open so the paused state shows up in place.
+        const pause = button({icon_name: 'media-playback-pause-symbolic'}, _(DEVICE_PAUSE_NAMES[0]),
+            d => controller.setDevicePaused(d.id, !d.paused));
+        return (device, shown) => {
+            pause.reactive = shown;
+            syncPauseButton(pause, !!device?.paused, DEVICE_PAUSE_NAMES);
+        };
+    });
+}
+
+/**
+ * The name, swapped for the row actions while hovered. Both stay in the
  * layout (hidden by opacity), so the cell is as wide as the wider of the two
  * and the row does not shift when they swap. BinLayout centres children that
  * do not fill it, so each fills the cell in a box that keeps it at the left.
@@ -170,7 +224,7 @@ function alignStart(actor) {
 /**
  * A row with a coloured dot, a name and a status. With makeDetail, hovering
  * the status swaps it for the row detail on a darker background. With
- * makeActions, hovering the name swaps it for the folder actions.
+ * makeActions, hovering the name swaps it for the folder or device actions.
  *
  * @param {object} hover - InfoBox._hover: {enabled, syncs}
  * @param {Function|null} makeDetail - returns {actor, set}
@@ -316,7 +370,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
      * @param {Clutter.Actor} sourceActor - the panel button
      * @param {object} controller - the extension; provides path, openWindow(),
      *   setPaused(area, bool), refresh(), setInfoBoxOpen(bool), openPreferences(),
-     *   openFolder(path), rescanFolder(id), editIgnores(path) and getSettings()
+     *   openFolder(path), rescanFolder(id), editIgnores(path),
+     *   setFolderPaused(id, bool), setDevicePaused(id, bool) and getSettings()
      */
     constructor(sourceActor, controller) {
         super(sourceActor, 0.5, St.Side.TOP);
@@ -485,7 +540,7 @@ export class InfoBox extends PopupMenu.PopupMenu {
             : _('infobox.devices', {online: status.peersConnected, count: status.peersTotal}),
         status.devicesPaused, status.reachable && status.peersTotal > 0);
         status.devices.forEach((dev, i) =>
-            this._deviceRows[i].set(dev.name, dev.text, dev.status, dev.detail));
+            this._deviceRows[i].set(dev.name, dev.text, dev.status, dev.detail, dev));
         status.folders.forEach((folder, i) =>
             this._folderRows[i].set(folder.label, folder.text, folder.status, folder.detail, folder));
     }
@@ -536,7 +591,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
         devices.add_child(this._devicesHeading.item);
         if (status.devices.length === 0)
             this._addPlaceholder(devices, _('infobox.no-devices'));
-        this._deviceRows = status.devices.map(() => this._addRow(devices, rowDetail));
+        this._deviceRows = status.devices.map(() =>
+            this._addRow(devices, rowDetail, () => deviceActions(this)));
     }
 
     _addRow(column, makeDetail = null, makeActions = null) {

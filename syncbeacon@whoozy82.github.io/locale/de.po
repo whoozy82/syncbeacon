@@ -536,3 +536,35 @@ msgstr "Tastenkombination drücken"
 #: prefs.js
 msgid "prefs.hotkey.hint"
 msgstr "Mindestens eine Zusatztaste verwenden, z. B. Super oder Strg.\nEsc bricht ab, Rücktaste deaktiviert das Tastenkürzel."
+
+#: extension.js
+msgid "notify.pause-folder-failed"
+msgstr "Pausieren des Ordners fehlgeschlagen: {error}"
+
+#: extension.js
+msgid "notify.resume-folder-failed"
+msgstr "Fortsetzen des Ordners fehlgeschlagen: {error}"
+
+#: ui/infobox.js
+msgid "infobox.folder.pause"
+msgstr "Diesen Ordner pausieren"
+
+#: ui/infobox.js
+msgid "infobox.folder.resume"
+msgstr "Diesen Ordner fortsetzen"
+
+#: extension.js
+msgid "notify.pause-device-failed"
+msgstr "Pausieren des Geräts fehlgeschlagen: {error}"
+
+#: extension.js
+msgid "notify.resume-device-failed"
+msgstr "Fortsetzen des Geräts fehlgeschlagen: {error}"
+
+#: ui/infobox.js
+msgid "infobox.device.pause"
+msgstr "Gerät pausieren"
+
+#: ui/infobox.js
+msgid "infobox.device.resume"
+msgstr "Gerät fortsetzen"

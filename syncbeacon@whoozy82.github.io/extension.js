@@ -175,6 +175,16 @@ export default class SyncbeaconExtension extends Extension {
             Main.notifyError('Syncbeacon', _('notify.rescan-failed', {error: e.message})));
     }
 
+    setFolderPaused(folderId, paused) {
+        this._afterPause(this._client.setFolderPaused(folderId, paused),
+            paused ? N_('notify.pause-folder-failed') : N_('notify.resume-folder-failed'));
+    }
+
+    setDevicePaused(deviceId, paused) {
+        this._afterPause(this._client.setDevicePaused(deviceId, paused),
+            paused ? N_('notify.pause-device-failed') : N_('notify.resume-device-failed'));
+    }
+
     /**
      * Open the folder's .stignore in the default text editor, creating it if
      * needed. The content type is fixed, because an empty or extension-less
@@ -219,6 +229,16 @@ export default class SyncbeaconExtension extends Extension {
     }
 
     // ---- Internals ----
+
+    // Refresh after pausing or resuming one folder or device, or notify
+    // with the failed message key.
+    _afterPause(action, failed) {
+        action.then(() => {
+            // Fetch the new state now rather than waiting for the events.
+            if (this._client)
+                this.refresh();
+        }, e => Main.notifyError('Syncbeacon', _(failed, {error: e.message})));
+    }
 
     _windowCommand() {
         if (this._settings.get_string('window-mode') !== 'command')

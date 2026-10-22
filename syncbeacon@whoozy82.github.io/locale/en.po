@@ -536,3 +536,35 @@ msgstr "Press a key combination"
 #: prefs.js
 msgid "prefs.hotkey.hint"
 msgstr "Use at least one modifier, e.g. Super or Ctrl.\nEsc cancels, Backspace disables the shortcut."
+
+#: extension.js
+msgid "notify.pause-folder-failed"
+msgstr "Pause folder failed: {error}"
+
+#: extension.js
+msgid "notify.resume-folder-failed"
+msgstr "Resume folder failed: {error}"
+
+#: ui/infobox.js
+msgid "infobox.folder.pause"
+msgstr "Pause folder"
+
+#: ui/infobox.js
+msgid "infobox.folder.resume"
+msgstr "Resume folder"
+
+#: extension.js
+msgid "notify.pause-device-failed"
+msgstr "Pause device failed: {error}"
+
+#: extension.js
+msgid "notify.resume-device-failed"
+msgstr "Resume device failed: {error}"
+
+#: ui/infobox.js
+msgid "infobox.device.pause"
+msgstr "Pause device"
+
+#: ui/infobox.js
+msgid "infobox.device.resume"
+msgstr "Resume device"
