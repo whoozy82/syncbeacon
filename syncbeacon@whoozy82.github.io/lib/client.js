@@ -335,6 +335,17 @@ export class SyncthingClient {
             api.patch(`/rest/config/folders/${encodeURIComponent(f.id)}`, {paused})));
     }
 
+    /** Pause or resume one device. */
+    async setDevicePaused(deviceId, paused) {
+        await this._requireApi().post(
+            `/rest/system/${paused ? 'pause' : 'resume'}?device=${encodeURIComponent(deviceId)}`);
+    }
+
+    /** Pause or resume one folder. */
+    async setFolderPaused(folderId, paused) {
+        await this._requireApi().patch(`/rest/config/folders/${encodeURIComponent(folderId)}`, {paused});
+    }
+
     async rescan(folderId) {
         await this._requireApi().post(`/rest/db/scan?folder=${encodeURIComponent(folderId)}`);
     }
