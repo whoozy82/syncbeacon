@@ -7,6 +7,7 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
+- At the small hover manu over each folder: Add a button to pause the specific folder and reduce the spacing between the icons by 20%.
 - Add extensions.gnome.org link to README after approval of the peer review
 
 ## Unrefined
