@@ -8,6 +8,8 @@
 
 <!-- Refined features, changes, fixes -->
 
+- Sync status is not updated in some cases, the sync status must follow the specification
+  refer to @PROJECT/resourses/sync-status-not-up-to-date.png 
 - The application shall react upon new shared folder request
   Reference @resources/new-shared-folder-acc-decl.png
   The taskbar icon shall visualize the fact that another peer tries to share a folder
