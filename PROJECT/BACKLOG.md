@@ -7,11 +7,17 @@
 ## Backlog
 
 <!-- Refined features, changes, fixes -->
+
+- The application shall react upon new shared folder request
+  Reference @resources/new-shared-folder-acc-decl.png
+  The taskbar icon shall visualize the fact that another peer tries to share a folder
+  within infobox this request is shown as info block below header bar with 'New Folder <folder name>' 'from <device name>', with 3 buttons: 'Add', 'Ignore', 'Dismiss'
 - Add extensions.gnome.org link to README after approval of the peer review
 
 ## Unrefined
 
 <!-- list of features that are not fully refined -->
+
 - If the connection to systemd or the api fails, or the syncthing config was not found, the main info window shall display a quick 'how to' in a black text window ... tbd
   @syncbeacon/PROJECT/resourses/no-connection-how-to-handle.png
 - The main info window shall have new feature to display the sync history ... tbd
