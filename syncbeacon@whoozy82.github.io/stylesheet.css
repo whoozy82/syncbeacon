@@ -7,6 +7,11 @@
   color: #e01b24;
 }
 
+/* Another device offers a folder. */
+.syncbeacon-pending {
+  color: #9141ac;
+}
+
 .syncbeacon-counts {
   padding-left: 4px;
   font-feature-settings: "tnum";
@@ -46,6 +51,41 @@
   padding: 6px 12px;
   border-radius: 19px 19px 0 0;
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Folder offered by another device: a violet framed block below the band. */
+.syncbeacon-pending-list {
+  spacing: 6px;
+  margin: 0 12px 6px 12px;
+}
+
+.syncbeacon-pending-request {
+  spacing: 10px;
+  padding: 4px 18px 4px 20px;
+  border-radius: 8px;
+  border: 1px solid #9141ac;
+}
+
+.syncbeacon-pending-icon {
+  icon-size: 16px;
+  color: #c061cb;
+}
+
+.syncbeacon-pending-text {
+  spacing: 6px;
+}
+
+/* Folder and device name on the same 10 % darker background as the row details. */
+.syncbeacon-pending-name {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+}
+
+.syncbeacon-pending-check {
+  padding: 4px 12px;
+  border-radius: 999px;
 }
 
 .syncbeacon-action {

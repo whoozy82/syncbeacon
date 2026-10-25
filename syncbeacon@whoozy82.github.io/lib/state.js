@@ -63,7 +63,27 @@ export function emptySnapshot() {
         folderStatus: {}, // folder id -> /rest/db/status object
         systemErrors: [], // [string]
         conflicts: {}, // folder id -> count, or null if the check is unavailable
+        pendingFolders: {}, // /rest/cluster/pending/folders: folder id -> {offeredBy: {device id -> {time, label}}}
     };
+}
+
+/**
+ * Folders other devices offer to share, one entry per folder and offering
+ * device, newest first.
+ *
+ * @param {object} snap - see emptySnapshot()
+ * @returns {Array<{folderId, label, deviceId, deviceName, time}>}
+ */
+function pendingFolderList(snap) {
+    const names = new Map(snap.devices.map(d => [d.id, d.name]));
+    const list = [];
+    for (const [folderId, entry] of Object.entries(snap.pendingFolders ?? {})) {
+        for (const [deviceId, offer] of Object.entries(entry?.offeredBy ?? {})) {
+            list.push({folderId, label: offer?.label || folderId, deviceId,
+                deviceName: names.get(deviceId) || deviceId.slice(0, 7), time: offer?.time ?? ''});
+        }
+    }
+    return list.sort((a, b) => b.time.localeCompare(a.time) || a.label.localeCompare(b.label));
 }
 
 function percent(value) {
@@ -235,6 +255,7 @@ export function deriveStatus(snap) {
         foldersPaused: folders.length > 0 && folders.every(f => f.paused),
         devices,
         folders,
+        pendingFolders: pendingFolderList(snap),
     };
 
     const error = errorMessage(snap);

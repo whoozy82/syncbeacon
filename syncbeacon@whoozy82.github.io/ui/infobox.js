@@ -1,5 +1,5 @@
 // Info box: a popup with the actions (Open UI, Settings) and the
-// state on top, then every folder and peer with its status, stacked or side
+// state on top, a block per folder another device offers, then every folder and peer with its status, stacked or side
 // by side; hovering a list headline shows its Pause/Resume button. A wand
 // in the bottom right corner switches all hover functions on or off.
 
@@ -416,6 +416,13 @@ export class InfoBox extends PopupMenu.PopupMenu {
         actions.add_child(settingsButton);
         this.addMenuItem(actions);
 
+        // Folders other devices offer to share, one block each, below the
+        // top bar; Check opens the Syncthing window to accept or decline.
+        this._pending = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL,
+            style_class: 'syncbeacon-pending-list', visible: false});
+        this.box.add_child(this._pending);
+        this._pendingKey = null;
+
         // Folders, then devices, each in its own column: stacked or side by
         // side, depending on the orientation of the box. Rebuilt when the set
         // of devices or folders changes and updated in place otherwise, so a
@@ -516,6 +523,8 @@ export class InfoBox extends PopupMenu.PopupMenu {
         this._message.text = _(STATE_LABELS[state]);
         this._message.visible = !!status?.myName;
 
+        this._syncPending(status?.pendingFolders ?? []);
+
         if (!status) {
             this._clearLists();
             this._listKey = null;
@@ -543,6 +552,44 @@ export class InfoBox extends PopupMenu.PopupMenu {
             this._deviceRows[i].set(dev.name, dev.text, dev.status, dev.detail, dev));
         status.folders.forEach((folder, i) =>
             this._folderRows[i].set(folder.label, folder.text, folder.status, folder.detail, folder));
+    }
+
+    _syncPending(requests) {
+        const key = JSON.stringify(requests);
+        if (key === this._pendingKey)
+            return;
+        this._pendingKey = key;
+        this._pending.destroy_all_children();
+        for (const req of requests) {
+            const block = new St.BoxLayout({style_class: 'syncbeacon-pending-request'});
+            block.add_child(new St.Icon({icon_name: 'folder-symbolic', style_class: 'syncbeacon-pending-icon',
+                y_align: Clutter.ActorAlign.CENTER}));
+            // One line, e.g. "New folder [Test] from [Zenfone]": the
+            // translated sentence split at its placeholders, the names on a
+            // darker background.
+            const names = {folder: req.label, device: req.deviceName};
+            const text = new St.BoxLayout({style_class: 'syncbeacon-pending-text',
+                x_expand: true, y_align: Clutter.ActorAlign.CENTER});
+            for (const part of _('infobox.pending-request').split(/(\{\w+\})/)) {
+                const name = names[part.slice(1, -1)];
+                if (name !== undefined) {
+                    text.add_child(new St.Label({style_class: 'syncbeacon-pending-name', text: name,
+                        y_align: Clutter.ActorAlign.CENTER}));
+                } else if (part.trim()) {
+                    text.add_child(new St.Label({text: part.trim(), y_align: Clutter.ActorAlign.CENTER}));
+                }
+            }
+            block.add_child(text);
+            const check = new St.Button({style_class: 'button syncbeacon-pending-check',
+                label: _('infobox.pending-check'), can_focus: true, y_align: Clutter.ActorAlign.CENTER});
+            check.connect('clicked', () => {
+                this.close();
+                this._controller.openWindow();
+            });
+            block.add_child(check);
+            this._pending.add_child(block);
+        }
+        this._pending.visible = requests.length > 0;
     }
 
     _syncOrientation() {

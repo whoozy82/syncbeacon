@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/blue)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v1.3.1/yellow) 
+![version](https://badgen.net/badge/version/v1.4.0/yellow) 
 
 
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the
@@ -21,7 +21,7 @@ as NixOS package as well. It runs on any distribution with GNOME Shell 49 or 50,
 
 ## Detailed Description
 
-- A state icon with counts, e.g. `2/5 · 5` (online/total peers · folders); a ⏸ after a count means all devices or all folders are paused. There are five states: In Sync, Synchronising…, Folder sync error or conflicts (yellow), Paused, Error with Syncthing (red).
+- A state icon with counts, e.g. `2/5 · 5` (online/total peers · folders); a ⏸ after a count means all devices or all folders are paused. There are five states: In Sync, Synchronising…, Folder sync error or conflicts (yellow), Paused, Error with Syncthing (red). The icon turns violet when another device offers a new folder; the info box then shows the offer below its top bar with a Check button that opens the Syncthing window to accept or decline it.
 - **Left click** opens an info box and refreshes the status: a slightly darker bar of controls on top (Open UI on the left, Settings on the right), with this device's name (coloured by state) and the short state between them, then every folder and every peer, stacked or side by side (see Layout in the settings); the box is at most 60 % of the screen height, longer lists scroll and a chevron at the bottom shows that more follows. Hovering the "Folders" or "Devices" headline shows a Pause/Resume button in its place that pauses or resumes all folders or all devices. Hovering a device's status shows its transfer rates or, if disconnected, when it was last seen; hovering a folder's status shows when it was last scanned. Hovering a folder's name shows buttons in its place to open the folder, pause or resume it, rescan it and edit its ignore list (`.stignore`); hovering a device's name shows a button to pause or resume that device. These hover functions are off after installing; the wand in the bottom right corner of the info box switches them on or off.
 - **Left double click** opens the Syncthing window: by default the Syncthing web UI in its GNOME Web app window (created automatically if GNOME Web is installed).
 - **Settings:** language (System, English, Deutsch; System picks the first system language with a translation, else English), systemd unit info with Start / Stop, Syncthing config directory, how the Syncthing window opens (the Epiphany web app, a command, or URL+Port in the default browser; the GUI URI defaults to the address in Syncthing's `config.xml`, or `http://localhost:8384` if that cannot be read), layout (position in the top bar, far left … far right, and orientation of the info box: Auto, Vertical, Horizontal; Auto puts folders and devices side by side from 10 entries on), a hotkey, and an About section with the version and a note that Syncbeacon is not part of the Syncthing project.

@@ -282,4 +282,29 @@ test('folder detail: last scan', () => {
     assertEqual(detail.Tech, {kind: 'last-scan', text: 'Never scanned'}, 'no stats');
 });
 
+test('pending folders: none by default', () => {
+    assertEqual(deriveStatus(snapshot()).pendingFolders, []);
+    assertEqual(deriveStatus(snapshot({pendingFolders: undefined})).pendingFolders, [], 'missing data');
+    assertEqual(deriveStatus(emptySnapshot()).pendingFolders, []);
+});
+
+test('pending folders: one entry per folder and device, newest first', () => {
+    const snap = snapshot({pendingFolders: {
+        'home-projekte': {offeredBy: {
+            HOMENAS: {time: '2026-10-24T20:14:31+02:00', label: 'home-projekte'},
+            ZENFONE: {time: '2026-10-25T08:00:00+02:00', label: 'Projekte'},
+        }},
+        'abcd-1234': {offeredBy: {
+            UNKNOWNDEVICEID: {time: '2026-10-23T10:00:00+02:00', label: ''},
+        }},
+    }});
+    const s = deriveStatus(snap);
+    assertEqual(s.pendingFolders.map(p => [p.folderId, p.label, p.deviceId, p.deviceName]), [
+        ['home-projekte', 'Projekte', 'ZENFONE', 'Zenfone'],
+        ['home-projekte', 'home-projekte', 'HOMENAS', 'HomeNAS'],
+        ['abcd-1234', 'abcd-1234', 'UNKNOWNDEVICEID', 'UNKNOWN'],
+    ], 'label falls back to the ID, device name to the short ID');
+    assertEqual(s.state, State.IN_SYNC, 'a request does not change the state');
+});
+
 run();
