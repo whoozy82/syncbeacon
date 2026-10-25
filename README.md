@@ -1,6 +1,6 @@
 # Syncbeacon - a Gnome Shell Extension for Syncthing
 ![version](https://badgen.net/badge/App/Gnome%20Shell%20Extension/blue)   &nbsp;&nbsp;
-![version](https://badgen.net/badge/version/v1.4.0/yellow) 
+![version](https://badgen.net/badge/version/v1.4.1/yellow) 
 
 
 Syncbeacon is a Gnome Shell Extension that shows the Syncthing status at a glance in the
