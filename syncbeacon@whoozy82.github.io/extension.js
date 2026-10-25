@@ -136,6 +136,20 @@ export default class SyncbeaconExtension extends Extension {
         }
     }
 
+    // GNOME shows one settings window at a time and only logs an error when
+    // asked for another, so an open Syncbeacon settings window is raised. The
+    // window belongs to no GTK application; its app ID (WM class) is the
+    // service's program name.
+    openPreferences() {
+        const window = global.display.list_all_windows().find(w =>
+            w.get_wm_class() === 'org.gnome.Shell.Extensions' &&
+            w.get_title() === this.metadata.name);
+        if (window)
+            Main.activateWindow(window);
+        else
+            super.openPreferences();
+    }
+
     toggleWindow() {
         const app = this._windowApp();
         const focused = global.display.focus_window;
