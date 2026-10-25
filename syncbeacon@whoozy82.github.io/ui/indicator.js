@@ -68,7 +68,12 @@ class SyncbeaconIndicator extends PanelMenu.Button {
         const file = Gio.File.new_for_path(
             GLib.build_filenamev([this._controller.path, 'icons', `syncbeacon-${state}-symbolic.svg`]));
         this._icon.gicon = new Gio.FileIcon({file});
-        this._icon.style_class = `system-status-icon syncbeacon-icon syncbeacon-state-${state}`;
+        // A pending folder request turns the icon violet, unless an error or
+        // folder issue already colours it.
+        const pending = status?.pendingFolders.length > 0 &&
+            state !== State.ERROR && state !== State.FOLDER_ISSUE;
+        this._icon.style_class = `system-status-icon syncbeacon-icon syncbeacon-state-${state}` +
+            (pending ? ' syncbeacon-pending' : '');
         this._label.text = status ? countsText(status) : '';
         this._infoBox.update(status);
     }

@@ -8,11 +8,6 @@
 
 <!-- Refined features, changes, fixes -->
 
-- The application shall react upon new shared folder request
-  Reference @resources/new-shared-folder-acc-decl.png
-  The taskbar icon shall visualize the fact that another peer tries to share a folder, color change to violet
-  within infobox this request is shown as info block below header bar with 'New Folder <folder name>' 'from <device name>' ... [Check]
-  When clicking on button 'Check' the web ui opens (as configured).
 - Add extensions.gnome.org link to README after approval of the peer review
 
 ## Unrefined

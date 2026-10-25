@@ -39,6 +39,7 @@ function print_() {
         `${STATE_LABELS[status.state]}  [${countsText(status)}]  ${status.message}`,
         ...status.devices.map(d => `  device  ${d.name.padEnd(12)} ${d.status.padEnd(8)} ${d.text}`),
         ...status.folders.map(f => `  folder  ${f.label.padEnd(12)} ${f.status.padEnd(8)} ${f.text}`),
+        ...status.pendingFolders.map(p => `  pending ${p.label.padEnd(12)} from ${p.deviceName}`),
     ];
     const text = lines.join('\n');
     if (text !== last) {

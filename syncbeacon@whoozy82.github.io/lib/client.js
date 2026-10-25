@@ -16,7 +16,7 @@ const EVENTS = [
     'StateChanged', 'FolderSummary', 'FolderCompletion', 'FolderErrors',
     'FolderPaused', 'FolderResumed',
     'DeviceConnected', 'DeviceDisconnected', 'DevicePaused', 'DeviceResumed',
-    'ConfigSaved', 'ItemFinished', 'LocalIndexUpdated',
+    'ConfigSaved', 'ItemFinished', 'LocalIndexUpdated', 'PendingFoldersChanged',
 ].join(',');
 
 const BACKOFF_MS = [1000, 2000, 5000, 10000, 30000];
@@ -236,7 +236,8 @@ export class SyncthingClient {
 
     /**
      * Re-fetch the changing data into the current snapshot: connections and
-     * rates, device completion, last seen and last scan, and at most every
+     * rates, device completion, last seen and last scan, the folders other
+     * devices offer (in case the event was missed), and at most every
      * FOLDER_POLL_MS the folder statuses (an expensive call in Syncthing).
      * The event loop keeps running. Skipped while unreachable or while the
      * previous poll still runs.
@@ -252,10 +253,11 @@ export class SyncthingClient {
         try {
             const now = GLib.get_monotonic_time();
             const withFolders = (now - this._lastFolderPoll) / 1000 >= FOLDER_POLL_MS;
-            const [connections, deviceStats, folderStats] = await Promise.all([
+            const [connections, deviceStats, folderStats, pendingFolders] = await Promise.all([
                 api.get('/rest/system/connections', cancellable),
                 orElse(api.get('/rest/stats/device', cancellable), {}),
                 orElse(api.get('/rest/stats/folder', cancellable), {}),
+                orElse(api.get('/rest/cluster/pending/folders', cancellable), null),
             ]);
             const conns = connections.connections ?? {};
             const online = data.devices.filter(d => conns[d.id]?.connected);
@@ -289,6 +291,8 @@ export class SyncthingClient {
                 data.lastSeen[id] = st.lastSeen;
             for (const [id, st] of Object.entries(folderStats ?? {}))
                 data.lastScan[id] = st.lastScan;
+            if (pendingFolders)
+                data.pendingFolders = pendingFolders;
             this._applyRates(data, conns);
             this._emit();
         } finally {
@@ -419,14 +423,16 @@ export class SyncthingClient {
                 throw e;
             return {};
         });
-        const [status, config, connections, sysErrors, deviceStats, folderStats] = await Promise.all([
-            api.get('/rest/system/status', cancellable),
-            api.get('/rest/config', cancellable),
-            api.get('/rest/system/connections', cancellable),
-            api.get('/rest/system/error', cancellable),
-            optional('/rest/stats/device'),
-            optional('/rest/stats/folder'),
-        ]);
+        const [status, config, connections, sysErrors, deviceStats, folderStats, pendingFolders] =
+            await Promise.all([
+                api.get('/rest/system/status', cancellable),
+                api.get('/rest/config', cancellable),
+                api.get('/rest/system/connections', cancellable),
+                api.get('/rest/system/error', cancellable),
+                optional('/rest/stats/device'),
+                optional('/rest/stats/folder'),
+                optional('/rest/cluster/pending/folders'),
+            ]);
 
         const data = emptySnapshot();
         data.myID = status.myID;
@@ -442,6 +448,7 @@ export class SyncthingClient {
             data.lastSeen[id] = st.lastSeen;
         for (const [id, st] of Object.entries(folderStats ?? {}))
             data.lastScan[id] = st.lastScan;
+        data.pendingFolders = pendingFolders ?? {};
         data.systemErrors = (sysErrors.errors ?? []).map(e => e.message ?? String(e));
 
         const folderResults = await Promise.all(data.folders.map(f =>
@@ -560,18 +567,26 @@ export class SyncthingClient {
             if ((d.filenames ?? []).some(isConflictPath))
                 this._onConflictHint?.(d.folder);
             return false;
+        case 'PendingFoldersChanged':
+            this._queue(gen, 'pending', () => this._refetchPendingFolders());
+            return false;
         default:
             return false;
         }
     }
 
-    // Both refetches write into the snapshot object that was current when they
+    // The refetches write into the snapshot object that was current when they
     // started, so a result arriving after a reset cannot leak into the new one.
     async _refetchFolder(folderId) {
         const data = this.data;
         const st = await this._api.get(`/rest/db/status?folder=${encodeURIComponent(folderId)}`,
             this._cancellable);
         data.folderStatus[folderId] = st;
+    }
+
+    async _refetchPendingFolders() {
+        const data = this.data;
+        data.pendingFolders = await this._api.get('/rest/cluster/pending/folders', this._cancellable) ?? {};
     }
 
     async _refetchCompletion(deviceId) {

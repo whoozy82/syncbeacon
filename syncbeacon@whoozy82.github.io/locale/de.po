@@ -568,3 +568,11 @@ msgstr "Gerät pausieren"
 #: ui/infobox.js
 msgid "infobox.device.resume"
 msgstr "Gerät fortsetzen"
+
+#: ui/infobox.js
+msgid "infobox.pending-request"
+msgstr "Neuer Ordner {folder} von {device}"
+
+#: ui/infobox.js
+msgid "infobox.pending-check"
+msgstr "Prüfen"
