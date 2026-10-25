@@ -124,7 +124,8 @@ export class ConflictScanner {
 
         const proc = Gio.Subprocess.new([
             this._find, path,
-            '(', '-name', '.stversions', '-o', '-name', '.stfolder', ')', '-prune',
+            '(', '-name', '.stversions', '-o', '-name', '.stfolder',
+            '-o', '-name', '.Trash', '-o', '-name', '.Trash-*', ')', '-prune',
             '-o', '-type', 'f', '-name', '*.sync-conflict-*', '-print',
         ], Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE);
 

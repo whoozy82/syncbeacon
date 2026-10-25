@@ -3,11 +3,12 @@
 ## Current version
 
 <!-- Current version + date, gets bumped with new changes / fixes -->
-- `v1.3.0` created at _22.10.2026_
+- `v1.3.1` created at _25.10.2026_
 
 ## Changelog
 
 <!-- Each change adds an entry as bullet point with date and short headline, newest first -->
+- [2026-10-25] Conflict copies in the trash bin are ignored — the conflict scan skips `.Trash` and `.Trash-<uid>` directories (like `.stversions` and `.stfolder`), and Syncthing events about conflict files in the trash no longer trigger a rescan
 - [2026-10-22] Pause one folder or device — hovering a folder's name shows a Pause/Resume button (⏸ / ▶) as the second action, between Open Folder and Rescan (`PATCH /rest/config/folders/{id}`); hovering a device's name shows the same framed box with a Pause/Resume button for that device (`POST /rest/system/pause|resume?device={id}`); the info box stays open so the new state shows in place; the space between the folder action icons is 20 % smaller (12 → 10 px)
 - [2026-10-21] Test without systemd — new `tests/test_systemd.js`, run by `tests/run-systemd.sh` on a private D-Bus (no service directories) that serves as session and system bus, so systemd is not reachable: unit detection ends without a unit and calls `onChange` once, Start/Stop fail with `systemd.no-unit`, destroying during detection leaves nothing behind; part of `nix flake check`; the test harness awaits async tests
 - [2026-10-21] Uploaded to extensions.gnome.org — the `dist/` zip from `scripts/pack.sh` passes `scripts/ego-check.sh` and was uploaded by hand with the own account; waiting for the peer review (once published: add the extensions.gnome.org link to the README; Extension Manager's "Show details" page only works then, as it is fetched from extensions.gnome.org by UUID)

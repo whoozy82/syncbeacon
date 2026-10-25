@@ -229,6 +229,9 @@ test('conflict file names', () => {
     assert(isConflictPath('dir/photo.sync-conflict-20250101-120000-Z7ABCDE.jpg'));
     assert(!isConflictPath('notes.sync-conflict.txt'));
     assert(!isConflictPath('plain.txt'));
+    assert(!isConflictPath('.Trash-1000/files/x.sync-conflict-20261017-000000-ABCDEFG.txt'));
+    assert(!isConflictPath('/data/.Trash/1000/files/x.sync-conflict-20261017-000000-ABCDEFG.txt'));
+    assert(isConflictPath('my.Trash-1000/x.sync-conflict-20261017-000000-ABCDEFG.txt'));
 });
 
 test('rate formatting', () => {
