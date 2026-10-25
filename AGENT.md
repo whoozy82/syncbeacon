@@ -25,7 +25,7 @@ This file provides guidance to any AI agent when working with code in this repos
 ### Nix Configuration Update
 This is the common workflow that we will use for changes on nix configuration files:
 1. **Pick** Pick from @PROJECT/BACKLOG.md `Currently working on` and if cleared, first entry under `Backlog`
-2. **Draft** Draft an action plan for implementation, print out to prompt and to @PROJECT/CHANGE.md
+2. **Draft** Draft an action plan for implementation, print out to prompt and to @PROJECT/DRAFT.md
 3. **Approval** Ask for approval via click prompt
 4. **Synchronize** Before every change, synchronize with origin and resolve conflicts when necessary
 5. **Branch** Create new branch
@@ -37,8 +37,9 @@ This is the common workflow that we will use for changes on nix configuration fi
 11. **Document** Update project documentation (History and Backlog) and update main README.md if necessary
 12. **Commit** Stage files, commit change with short commit message
 13. **Push** Push to origin
-14. **Merge** Merge to main, remove CHANGE.md there, tag via `scripts/bump-version.sh --tag` and delete old branch
-15. **Build** Ask if the externsion shall be build on this client via click prompt
+14. **Merge** Merge to main, remove DRAFT.md there, tag via `scripts/bump-version.sh --tag` and delete old branch
+15. **Release** Ask if a release shall be created via click prompt
+16. **Build** Ask if the extension shall be build on this client via click prompt
 
 ### README Changes
 Changes on main README.md follow these steps:
