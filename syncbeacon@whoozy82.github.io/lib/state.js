@@ -283,11 +283,13 @@ export function countsText(status) {
 }
 
 /**
- * Whether a path names a Syncthing conflict copy.
+ * Whether a path names a Syncthing conflict copy outside the trash bin
+ * (`.Trash` or `.Trash-<uid>` on the folder's volume).
  *
  * @param {string} path
  * @returns {boolean}
  */
 export function isConflictPath(path) {
-    return /\.sync-conflict-\d{8}-\d{6}-[A-Z0-9]{7}/.test(path);
+    return /\.sync-conflict-\d{8}-\d{6}-[A-Z0-9]{7}/.test(path) &&
+        !/(^|\/)\.Trash(-\d+)?\//.test(path);
 }

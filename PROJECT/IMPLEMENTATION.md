@@ -87,7 +87,7 @@ A pure function, `snapshot → Status`. It imports nothing from `gi://`, so it c
 ### 3.4 Conflicts: `lib/conflicts.js`
 
 Syncthing has no API for conflicts, so the extension searches the folders itself:
-- **Scan:** for each folder path from `/rest/config`, run `find <path> -name '*.sync-conflict-*' -not -path '*/.stversions/*'` through `Gio.Subprocess` (async). This keeps the file-system work out of the shell process. The scan runs at start-up and every 10 minutes, one folder at a time, and is killed after 30 s.
+- **Scan:** for each folder path from `/rest/config`, run `find <path> -name '*.sync-conflict-*'`, skipping `.stversions`, `.stfolder` and the trash bin (`.Trash`, `.Trash-<uid>`), through `Gio.Subprocess` (async). This keeps the file-system work out of the shell process. The scan runs at start-up and every 10 minutes, one folder at a time, and is killed after 30 s.
 - **Between scans:** an `ItemFinished` event for a name matching `.sync-conflict-` adds it to the set right away. A deletion is noticed at the next scan.
 - **Permissions:** Syncthing runs as the desktop user here, so the folders are readable. If a folder is not readable, its row shows "conflict check unavailable" and the state is not affected.
 
