@@ -14,7 +14,8 @@
 
 <!-- list of features that are not fully refined -->
 
-- If the connection to systemd or the api fails, or the syncthing config was not found, the main info window shall display a quick 'how to' in a black text window ... tbd
+- If the connection to systemd or the api fails, or the syncthing config was not found, the main info
+  window shall display a quick 'how to' in a black text window ... tbd
   @syncbeacon/PROJECT/resourses/no-connection-how-to-handle.png
 - The main info window shall have new feature to display the sync history ... tbd
   GET /rest/events/disk?since=<lastEventId>&limit=<n>&timeout=<seconds>  ??
